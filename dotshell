@@ -1,0 +1,12 @@
+export GOPATH="$HOME/.go"
+export PATH="$PATH:$HOME/dotfiles/path"
+
+if [ -n "$ZSH_VERSION" ]; then
+   # assume Zsh
+  source ~/dotfiles/zsh/prompt.sh
+  source ~/dotfiles/zsh/theme.sh
+elif [ -n "$BASH_VERSION" ]; then
+   # assume Bash
+else
+   # asume something else
+fi
