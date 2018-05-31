@@ -1,0 +1,81 @@
+
+" the `autocmd!` deletes previous bindings if sourced again
+" Pathogen for plugins:
+  execute pathogen#infect()
+  execute pathogen#helptags()
+
+
+" General
+augroup general
+  autocmd!
+
+  set nocompatible
+  filetype plugin on
+  syntax on
+  set encoding=utf-8
+  set formatoptions=tcq
+  
+  " (Not sure about what this does yet) Split open at the bottom and right
+  " set splitbelow
+  " set splitright
+
+  " Autoindent settings for programming. These are set by sleuth plugin
+  " set expandtab
+  " set shiftwidth=2
+  " set softtabstop=2
+
+  " Marker for the ever popular and possibly archaic 80 column width
+  " The colored column is not okay to include
+  set colorcolumn=81
+  highlight ColorColumn ctermbg=2 guibg=lightgrey
+
+  " Toggle relativenumber depending on mode or with <F1>
+  set number
+  set relativenumber 
+  autocmd InsertEnter * :set norelativenumber
+  autocmd InsertLeave * :set relativenumber
+  map <F1> :set relativenumber!<CR>
+
+  " Other misc keybinds
+  " Unbind <F1> in insert mode
+  imap <F1> <C-o>:echo<CR>
+  " Reload settings
+  map <F12> :source $HOME/.vim/vimrc<CR>
+
+augroup END
+
+
+augroup pluginsettings
+  " VimWiki
+  let g:vimwiki_ext2syntax= { '.md': 'markdown' }
+augroup END
+
+augroup customplugin
+  source ~/.vim/custom/tmuxpreview.vim
+  source ~/.vim/custom/buildtools.vim
+augroup END
+
+augroup rustbuild
+  " au BufNewFile,BufRead *.rs set filetype=rust
+  autocmd!
+  autocmd FileType rust noremap <F2> :call BuildAndRun('rustc')<CR>
+  autocmd FileType rust noremap <F3> :call PreviewOpenWindow('urxvt -e')<CR>
+  autocmd FileType rust imap <F2> <C-o><F2>
+  autocmd FileType rust imap <F3> <C-o><F3>
+augroup END
+
+augroup markdownbuild
+  autocmd!
+  " autocmd FileType markdown noremap <F2> :call PreviewSendLine('pandoc | lynx -stdin')<CR>
+  " autocmd FileType markdown noremap <F3> :call PreviewOpenWindow('urxvt -e')<CR>
+  autocmd FileType markdown noremap <F2> :silent<space>w<space>!pandoc<space>-o<space>/tmp/preview.pdf<CR>
+  autocmd FileType markdown noremap <F3> :silent!<space>!evince<space>/tmp/preview.pdf<space>&>/dev/null &<CR>:redraw!<CR>
+  autocmd FileType rust imap <F2> <C-o><F2>
+  autocmd FileType rust imap <F3> <C-o><F3>
+augroup END
+
+
+
+" Snippets
+augroup snippets
+augroup END
