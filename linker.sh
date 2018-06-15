@@ -11,7 +11,9 @@ done
 
 LIST="
   .vim/custom
-  .vim/vimrc .Xresources .tmux.conf .xinitrc .bash_profile .gtkrc-2.0
+  .Xresources .tmux.conf .xinitrc .bash_profile .gtkrc-2.0 .streamlinkrc
+  .vim/vimrc
+
   .config/i3 .config/scripts .config/gtk-3.0
   .config/wallpaper.jpg .config/mps-youtube/config
 "

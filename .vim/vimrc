@@ -17,7 +17,7 @@ augroup general
   
   " (Not sure about what this does yet) Split open at the bottom and right
   " set splitbelow
-  " set splitright
+  " set splitright<F12><F12>
 
   " Autoindent settings for programming. These are set by sleuth plugin
   " set expandtab
@@ -27,11 +27,11 @@ augroup general
   " Marker for the ever popular and possibly archaic 80 column width
   " The colored column is not okay to include
   set colorcolumn=81
-  highlight ColorColumn ctermbg=2 guibg=lightgrey
+  highlight ColorColumn ctermfg=red ctermbg=cyan guibg=cyan
 
   " Toggle relativenumber depending on mode or with <F1>
   set number
-  set relativenumber 
+  set relativenumber
   autocmd InsertEnter * :set norelativenumber
   autocmd InsertLeave * :set relativenumber
   map <F1> :set relativenumber!<CR>
@@ -47,7 +47,8 @@ augroup END
 
 augroup pluginsettings
   " VimWiki
-  let g:vimwiki_ext2syntax= { '.md': 'markdown' }
+  let g:vim_markdown_follow_anchor = 1
+  autocmd FileType markdown set conceallevel=2
 augroup END
 
 augroup customplugin
