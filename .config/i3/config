@@ -6,11 +6,12 @@ for_window [class="^.*"] border pixel 3
 gaps inner 10
 gaps outer 5
 set $mod Mod4
-set $term --no-startup-id urxvt
+set $term urxvt
+set $term_and_run "urxvt -e"
 
 
 # Startup
-exec_always --no-startup-id feh --bg-scale ~/wallpaper.jpg
+exec_always --no-startup-id feh --bg-scale ~/.config/wallpaper.jpg
 exec --no-startup-id compton --xrender-sync-fence
 
 
@@ -33,8 +34,9 @@ font pango:monospace 8
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec $term -e tmux
-bindsym $mod+Shift+Return exec st -e tmux
+bindsym $mod+Return exec --no-startup-id ~/.config/scripts/generic-tmux $term_and_run
+bindsym $mod+Shift+Return exec --no-startup-id $term
+bindsym $mod+Mod1+Return exec --no-startup-id st -e tmux
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -173,16 +175,16 @@ set $main_shortcut Mod4+Mod1
 set $alt1_shortcut Mod4+Control
 set $alt2_shortcut Mod4+Mod1+Control
 
-bindsym $main_shortcut+1 exec "fcitx-remote -s fcitx-keyboard-us"
+bindsym $main_shortcut+1 exec "fcitx-remote -s fcitx-keyboard-us-alt-intl-unicode"
 # International AltGr Unicode combining, alternative
-bindsym $alt1_shortcut+1 exec "fcitx-remote -s fcitx-keyboard-us-alt-intl-unicode"
+bindsym $alt1_shortcut+1 exec "fcitx-remote -s fcitx-keyboard-cn-altgr-pinyin"
 bindsym $alt2_shortcut+1 exec "fcitx-remote -s ipa-x-sampa"
 bindsym $main_shortcut+2 exec "fcitx-remote -s mozc"
 bindsym $alt1_shortcut+2 exec "fcitx-remote -s anthy"
 bindsym $alt2_shortcut+2 exec "fcitx-remote -s kkc"
 bindsym $main_shortcut+3 exec "fcitx-remote -s zhengma-large"
 bindsym $alt1_shortcut+3 exec "fcitx-remote -s pinyin"
-bindsym $alt2_shortcut+3 exec "fcitx-remote -s sunpinyin"
+bindsym $alt2_shortcut+3 exec "fcitx-remote -s wbpy"
 bindsym $main_shortcut+4 exec "fcitx-remote -s jyutping"
 bindsym $alt1_shortcut+4 exec "fcitx-remote -s rime"
 bindsym $alt2_shortcut+4 exec "fcitx-remote -s chewing"

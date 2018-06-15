@@ -10,15 +10,17 @@ function cloneupdate() {
 
 # Prompt with default 
 read -e -p "Default vim config directory? " -i "$HOME/.vim/" VIMCONFIG
-cd "$VIMCONFIG"
 
-mkdir -p autoload && cd "$_"
+mkdir -p "$VIMCONFIG/autoload"
+cd "$VIMCONFIG/autoload"
 [ -f "pathogen.vim" ] || wget 'https://tpo.pe/pathogen.vim'
 
-mkdir -p ../bundle && cd "$_"
+mkdir "$VIMCONFIG/bundle"
+cd "$VIMCONFIG/bundle"
 cloneupdate "vimwiki" "vimwiki"
 cloneupdate "rust-lang" "rust.vim"
 cloneupdate "tpope" "vim-sleuth"
+cloneupdate "mzlogin" "vim-markdown-toc"
 
 
 # https://unix.stackexchange.com/questions/83926/how-to-download-a-file-using-just-bash-and-nothing-else-no-curl-wget-perl-et

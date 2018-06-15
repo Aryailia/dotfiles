@@ -5,8 +5,10 @@
 
 # Test if config files are readable then load settings
 test -r $HOME/.Xresources && xrdb $HOME/.Xresources
-
 #[ -r $HOME/.Xresources] && xrdb -merge $HOME/.Xdefaults
+
+# remove beep
+setterm -blength 0
 
 # Set variables to use fcitx
 export XMODIFIERS="@im=fcitx"
