@@ -23,3 +23,11 @@ function! BuildAndRun(compiler)
     call PreviewSendLine('./' . l:bin . ' ' . l:args)
   endif
 endfunction 
+
+function! ToggleSyntax()
+  if exists("g:syntax_on")
+    syntax off
+  else
+    syntax on
+  endif
+endfunction
