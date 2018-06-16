@@ -1,7 +1,7 @@
 #!/bin/sh
 # Symbolic links for all the config files
-DOTFILES="$HOME/dotfiles"
-scripts="$DOTFILES/.config/scripts/*"
+dotfiles="$HOME/dotfiles"
+scripts="$dotfiles/.config/scripts/*"
 
 for s in $scripts; do
   chmod 744 "$s"
@@ -24,5 +24,5 @@ for target in $list; do
   [ "$target" != "$directory" ] && [ ! -d "$HOME/$directory" ] \
     && mkdir -p "$HOME/$directory"
   [ -n "$target" ] && rm -fr "${HOME:?}/$target"
-  ln -s "$DOTFILES/$target" "$HOME/$target"
+  ln -s "$dotfiles/$target" "$HOME/$target"
 done
