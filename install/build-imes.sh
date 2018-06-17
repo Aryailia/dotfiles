@@ -21,13 +21,13 @@ temp="$HOME/ime"
 # Dependency check
 # Googlepinyin needs ?? (I have not gotten this working yet)
 # Hangul needs libhangul-devel
-'echo' "Note: only need libhangul-devel for installing korean"
+echo "Note: only need libhangul-devel for installing korean"
 has_dependencies=1
 dependents="git base-devel cmake fcitx-devel libhangul-devel"
 
 for package in $dependents; do
   if [ -z "$($package_installed_check "$package")" ]; then
-    'echo' "$package is a dependecy and is not installed"
+    echo "$package is a dependecy and is not installed"
     has_dependencies=0
   fi
 done
@@ -41,15 +41,15 @@ if [ $has_dependencies -eq 1 ]; then
   [ -d "$temp" ] || mkdir -p "$temp"
   for link in $imes_to_add; do
     ime=${link##*/}
-    'cd' "$temp" || exit
+    cd "$temp" || exit
 
     if [ -d "$ime" ]; then
       already="$already $ime"
     else
-      'git' clone "$link.git $temp/$ime"
-      'mkdir' "${ime}/build"
-      'cd' "${ime}/build" || exit
-      'cmake' ..
+      git clone "$link.git $temp/$ime"
+      mkdir "${ime}/build"
+      cd "${ime}/build" || exit
+      cmake ..
 
 
       # Run it again for the errors, should not cause problems
