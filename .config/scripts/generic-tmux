@@ -3,17 +3,17 @@
 # Resumes a defaultly named session if it is unattached
 
 # pass the terminal with its exection
-TERM_AND_RUN=$1
+term_and_run=$1
 
 # Number only sessions that are not attached
-GENERIC_SESSIONS=$(tmux list-sessions \
+generic_sessions=$(tmux list-sessions \
   | grep --invert-match '(attached)$' \
   | grep '^[[:digit:]]*:'
 )
 
-if [ -z "$GENERIC_SESSIONS" ]; then
-  $TERM_AND_RUN tmux
+if [ -z "$generic_sessions" ]; then
+  $term_and_run tmux
 else
-  FIRST_GENERIC_SESSION=$(echo "$GENERIC_SESSIONS" | head -n 1 | sed 's/\:.*//')
-  $TERM_AND_RUN tmux attach-session -t $FIRST_GENERIC_SESSION
+  first_generic_session=$(echo "$generic_sessions" | head -n 1 | sed 's/\:.*//')
+  $term_and_run tmux attach-session -t "$first_generic_session"
 fi
