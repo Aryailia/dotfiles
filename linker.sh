@@ -15,7 +15,7 @@ list="
   .vim/vimrc .gtkrc-2.0 .streamlinkrc
 
   .config/i3 .config/scripts .config/gtk-3.0
-  .config/wallpaper.jpg .config/mps-youtube/config
+  .config/wallpaper.jpg .config/mps-youtube/config .config/ranger/rc.conf
 "
 for target in $list; do
   echo "$target"
