@@ -36,7 +36,9 @@ floating_modifier $mod
 # start a terminal
 bindsym $mod+Return exec --no-startup-id ~/.config/scripts/generic-tmux $term_and_run
 bindsym $mod+Shift+Return exec --no-startup-id $term
-bindsym $mod+Mod1+Return exec --no-startup-id st -e tmux
+bindsym $mod+Mod1+Return exec --no-startup-id kitty -e tmux
+bindsym $mod+Control+Return exec --no-startup-id alacritty -e tmux
+bindsym $mod+Control+Mod1+Return exec --no-startup-id st -e tmux
 
 # kill focused window
 bindsym $mod+Shift+q kill

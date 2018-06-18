@@ -11,11 +11,12 @@ done
 
 list="
   .vim/custom
-  .Xresources .tmux.conf .xinitrc .bash_profile .bashrc
+  .Xresources .tmux.conf .xinitrc .bash_profile .bashrc .inputrc
   .vim/vimrc .gtkrc-2.0 .streamlinkrc
 
   .config/i3 .config/scripts .config/gtk-3.0
   .config/wallpaper.jpg .config/mps-youtube/config .config/ranger/rc.conf
+  .config/alacritty/alacritty.yml
 "
 for target in $list; do
   echo "$target"
