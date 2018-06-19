@@ -17,6 +17,7 @@ if [ -n "$free_generics" ]; then
 # else find a sane number to make the new session
 else
   # two 'arrays', the ids and the futureIds=(0, id[0]+1, ...ids[i]+1)
+  # add 0 to list of considered ids, this is the only reducing mechanism
   genericIds="$(printf '%s\n' "$generics" | sed 's/\:.*//')"
   futureIds="$(printf '%s\n' '-1' "$genericIds" | awk '{$1=$1+1}1')"
   filter="$(printf '%s\n' "$genericIds" | paste -sd '|')"
@@ -26,5 +27,6 @@ else
     | awk "/$filter/{next}1" \
     | awk '!i++{ min = $1 } { min = (min<$1) ? min : $1 } END{ printf min }')"
 
-  $run tmux new-session -s "$next_id"
+  # default to 0 if $filter is empty
+  $run tmux new-session -s "${next_id:-0}"
 fi
