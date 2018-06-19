@@ -44,14 +44,7 @@ augroup general
   set relativenumber
   autocmd InsertEnter * :set norelativenumber
   autocmd InsertLeave * :set relativenumber
-  map <leader>n :set relativenumber!<CR>
-
-  " Other misc keybinds
-  map <F1> :call ToggleSyntax()<CR>
-  imap <F1> <C-o>:call ToggleSyntax()<CR>
-
-  " Reload settings
-  map <F12> :source $HOME/.vim/vimrc<CR>
+  " also have keybind to toggle this
 augroup END
 
 
@@ -67,6 +60,24 @@ augroup END
 augroup customplugin
   source ~/.vim/custom/tmuxpreview.vim
   source ~/.vim/custom/buildtools.vim
+  noremap <leader>n :set relativenumber!<CR>
+  noremap <leader>s :call ToggleSyntax()<CR>
+  noremap <F1> :write<CR>
+  noremap <F12> :source $HOME/.vim/vimrc<CR>
+augroup END
+
+augroup compilable
+  autocmd!
+  imap <F1> <C-o><F1>
+  imap <F2> <C-o><F2>
+  imap <F3> <C-o><F3>
+augroup END
+
+augroup shbuild
+  autocmd!
+  autocmd FileType sh noremap <F2> :silent<space>write!<space>/tmp/preview.sh<bar>call PreviewSendLine('sh /tmp/preview.sh')<CR>
+  autocmd FileType sh noremap <F3> :call PreviewOpenWindow('urxvt -e')<CR>
+  autocmd FileType sh noremap <leader>l :call PreviewSendLine('shellcheck ' . @%)<CR>
 augroup END
 
 augroup rustbuild
@@ -74,8 +85,6 @@ augroup rustbuild
   autocmd!
   autocmd FileType rust noremap <F2> :call BuildAndRun('rustc')<CR>
   autocmd FileType rust noremap <F3> :call PreviewOpenWindow('urxvt -e')<CR>
-  autocmd FileType rust imap <F2> <C-o><F2>
-  autocmd FileType rust imap <F3> <C-o><F3>
 augroup END
 
 augroup markdownbuild
@@ -84,8 +93,6 @@ augroup markdownbuild
   " autocmd FileType markdown noremap <F3> :call PreviewOpenWindow('urxvt -e')<CR>
   autocmd FileType markdown noremap <F2> :silent<space>w<space>!pandoc<space>-o<space>/tmp/preview.pdf<CR>
   autocmd FileType markdown noremap <F3> :silent!<space>!evince<space>/tmp/preview.pdf<space>&>/dev/null &<CR>:redraw!<CR>
-  autocmd FileType markdown imap <F2> <C-o><F2>
-  autocmd FileType markdown imap <F3> <C-o><F3>
 
   " vim-markdown-toc eats lines if ToC is folded
   autocmd BufWritePre *.md normal! zR
