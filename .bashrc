@@ -6,7 +6,8 @@ PROMPT_COMMAND="b"
 
 alias ls='pwd;ls --color=auto '
 alias cd='c '
-alias rf='source ~/.bashrc' # r[e]f[resh] for resourcing quickly
+alias rb='source ~/.bashrc' # r[eload] b[ashrc]
+alias rx='xrdb ~/.Xresources' # r[eload] X[resources]
 npm-exec() { $(printf "%s/%s" "$(npm bin)" "$*"); } # run locally install package
 
 # I like single letter commands since they interefere less with tab completion

@@ -60,10 +60,11 @@ augroup END
 augroup customplugin
   source ~/.vim/custom/tmuxpreview.vim
   source ~/.vim/custom/buildtools.vim
-  noremap <leader>n :set relativenumber!<CR>
-  noremap <leader>s :call ToggleSyntax()<CR>
+  noremap <leader>rn :set relativenumber!<CR>
+  noremap <leader>rc :source $HOME/.vim/vimrc<CR>
+  noremap <leader>ts :call ToggleSyntax()<CR>
   noremap <F1> :write<CR>
-  noremap <F12> :source $HOME/.vim/vimrc<CR>
+  let g:terminal_execute = 'st -e'
 augroup END
 
 augroup compilable
@@ -75,8 +76,9 @@ augroup END
 
 augroup shbuild
   autocmd!
+  " Partly want to ensure sh (usually maps to dash terminal) for better POSIX compliance
   autocmd FileType sh noremap <F2> :silent<space>write!<space>/tmp/preview.sh<bar>call PreviewSendLine('sh /tmp/preview.sh')<CR>
-  autocmd FileType sh noremap <F3> :call PreviewOpenWindow('urxvt -e')<CR>
+  autocmd FileType sh noremap <F3> :call PreviewOpenWindow(g:terminal_execute)<CR>
   autocmd FileType sh noremap <leader>l :call PreviewSendLine('shellcheck ' . @%)<CR>
 augroup END
 
@@ -84,13 +86,13 @@ augroup rustbuild
   " au BufNewFile,BufRead *.rs set filetype=rust
   autocmd!
   autocmd FileType rust noremap <F2> :call BuildAndRun('rustc')<CR>
-  autocmd FileType rust noremap <F3> :call PreviewOpenWindow('urxvt -e')<CR>
+  autocmd FileType rust noremap <F3> :call PreviewOpenWindow(g:terminal_execute)<CR>
 augroup END
 
 augroup markdownbuild
   autocmd!
   " autocmd FileType markdown noremap <F2> :call PreviewSendLine('pandoc | lynx -stdin')<CR>
-  " autocmd FileType markdown noremap <F3> :call PreviewOpenWindow('urxvt -e')<CR>
+  " autocmd FileType markdown noremap <F3> :call PreviewOpenWindow(terminal_execute)<CR>
   autocmd FileType markdown noremap <F2> :silent<space>w<space>!pandoc<space>-o<space>/tmp/preview.pdf<CR>
   autocmd FileType markdown noremap <F3> :silent!<space>!evince<space>/tmp/preview.pdf<space>&>/dev/null &<CR>:redraw!<CR>
 
