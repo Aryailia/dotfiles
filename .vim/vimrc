@@ -39,11 +39,12 @@ augroup general
   set colorcolumn=81
   highlight ColorColumn ctermfg=red ctermbg=cyan guibg=cyan
 
-  " Toggle relativenumber depending on mode, or with shortcut in normal 
+  " Toggle relativenumber depending on mode, or with shortcut in normal...
+  " JK this kills performance
   set number
-  set relativenumber
-  autocmd InsertEnter * :set norelativenumber
-  autocmd InsertLeave * :set relativenumber
+  " set relativenumber
+  " autocmd InsertEnter * :set norelativenumber
+  " autocmd InsertLeave * :set relativenumber
   " also have keybind to toggle this
 augroup END
 
@@ -74,7 +75,7 @@ augroup compilable
   imap <F3> <C-o><F3>
 augroup END
 
-augroup shbuild
+augroup sh_build
   autocmd!
   " Partly want to ensure sh (usually maps to dash terminal) for better POSIX compliance
   autocmd FileType sh noremap <F2> :silent<space>write!<space>/tmp/preview.sh<bar>call PreviewSendLine('sh /tmp/preview.sh')<CR>

@@ -23,11 +23,15 @@ if [ ! -f "$vimconfig/autoload/pathogen.vim" ]; then
 fi
 
 [ ! -d "$vimconfig/bundle" ] && 'mkdir' "$vimconfig/bundle"
-cloneupdate "vimwiki" "vimwiki"
+#cloneupdate "vimwiki" "vimwiki"
 cloneupdate "godlygeek" "tabular"
 #cloneupdate "farmergreg" "vim-lastplace"
 cloneupdate "tpope" "vim-sleuth"
+cloneupdate "tpope" "vim-surround"
+#cloneupdate "tpope" "vim-markdown"
+cloneupdate 'chmp' 'mdnav'
 
 cloneupdate "rust-lang" "rust.vim"
-#cloneupdate "plasticboy" "vim-markdown"
+cloneupdate "plasticboy" "vim-markdown"
+cloneupdate "vim-pandoc" "vim-markdownfootnotes"
 cloneupdate "mzlogin" "vim-markdown-toc"
