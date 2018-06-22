@@ -27,6 +27,11 @@ b() {
   local cyan='\[\033[46m\]'
   local clear='\[\033[0m\]'
 
+  # If I ever wanted to toy with powerline character again
+  #local powerline=$'\uE0B0'
+  #local green2brown='\[\033[32;43m\]'
+  #local brown2black='\[\033[33;40m\]'
+
   PS1="$whitetext"
   
   ###
@@ -41,6 +46,7 @@ b() {
 
   ###
   # Attach hostname to username with no space and trunk hostname to six
+  #PS1="$PS1$brown\$(echo '\\h' | cut -c1-6) $brown2black$powerline$whitetext"
   PS1="$PS1$brown\$(echo '\\h' | cut -c1-6) "
 
   ###
@@ -71,7 +77,8 @@ b() {
 
   ###
   # Only current directory since ls shows rest
-  PS1="$PS1$blue \\W "
+  # Always has / prepended
+  PS1="$PS1$blue \$([ '\\W' = '/' ] && printf '\\W' || printf '/\\W') "
 
   ###
   # Attach branch name and file revision count if in a git active directory
@@ -90,7 +97,7 @@ b() {
   #
   # Look at trap 'timer' DEBUG if I want to skip delay timer, too hacky for me
   # If too much idle time, can just enter to set to 0 again
-  if [ $SECONDS -gt 120 ]; then
+  if [ $SECONDS -gt 180 ]; then
     PS1="$PS1$magenta ${SECONDS}s "
   fi
   SECONDS=0

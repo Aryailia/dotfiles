@@ -1,7 +1,7 @@
 [[ -f ~/.bashrc ]] && . ~/.bashrc
 
 export PATH=$PATH:$HOME/.config/scripts
-export CDPATH=$HOME:$HOME/.named_directories
+export CDPATH=$HOME:$HOME/.named_directories # first $HOME for no args cd
 export EDITOR="vim"
 export TERMINAL="st-256color"
 export TERM="st-256color"
