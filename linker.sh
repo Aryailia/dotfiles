@@ -10,7 +10,7 @@ done
 [ ! -d "$HOME/.vim" ] && mkdir "$HOME/.vim"
 
 list="
-  .vim/custom
+  .vim/custom .named_directories
   .Xresources .tmux.conf .xinitrc .bash_profile .bashrc .inputrc
   .vim/vimrc .gtkrc-2.0 .streamlinkrc
 

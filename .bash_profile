@@ -1,8 +1,10 @@
 [[ -f ~/.bashrc ]] && . ~/.bashrc
 
 export PATH=$PATH:$HOME/.config/scripts
+export CDPATH=$HOME:$HOME/.named_directories
 export EDITOR="vim"
-export TERMINAL="urxvt"
+export TERMINAL="st-256color"
+export TERM="st-256color"
 export BROWSER="midori"
 
 
