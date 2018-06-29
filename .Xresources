@@ -29,11 +29,13 @@
 *color7: #8e8f96
 *color15: #fffefe
 
-URxvt.background:  [80]#FFFFFF
+URxvt.background:  [85]#FFFFFF
 URxvt.depth:       32
 URxvt.font:        xft:monospace:size=9
 URxvt.scrollBar:   false
 URxvt.cursorColor: black
+! need this or urxvt errors on chinese character for you among others
+URxvt.letterSpace: 0
 
 
 ! These are all possible options, presented with default values.
@@ -45,8 +47,8 @@ st.termname: st-256color
 ! if you do not set shell, precedence is: -e arg, utmp option, SHELL env var, /etc/passwd shell
 st.shell:    /bin/bash
 
-! The following options options can be reloaded via USR1 signal.
-st.font:              mono:pixelsize=10:antialias=true:autohint=true;
+! Th following options options can be reloaded via USR1 signal.
+st.font:              mono:size=9:antialias=true:autohint=true;
 st.borderpx:          4
 ! Available cursor values: 2 4 6 7 = █ _ | ☃ ( 1 3 5 are blinking versions)
 !st.cursorshape:       2

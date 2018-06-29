@@ -52,7 +52,7 @@ augroup END
 augroup pluginsettings
   " VimWiki
   let g:vimwiki_ext2syntax = {'.md': 'markdown', '.wiki': 'media'}
-  let g:vimwiki_folding = 'expr'
+  " let g:vimwiki_folding = 'expr'
   let g:vimiwki_list = [{'path': '~/wiki/', 'syntax': 'markdown', 'ext': '.md'},
     \ {'path': '~/blog/test/', 'auto_toc': 1, 'index': 'index.wiki'}]
 
@@ -61,10 +61,15 @@ augroup END
 augroup customplugin
   source ~/.vim/custom/tmuxpreview.vim
   source ~/.vim/custom/buildtools.vim
+  source ~/.vim/custom/interlinks.vim
+  execute 'source ~/.vim/custom/syntax-interlink.vim'
   noremap <leader>rn :set relativenumber!<CR>
   noremap <leader>rc :source $HOME/.vim/vimrc<CR>
   noremap <leader>ts :call ToggleSyntax()<CR>
   noremap <F1> :write<CR>
+  noremap <leader>hg :call PrintHighlightGroup()<CR>
+  noremap <F11> :call FollowCursorLink()<CR>
+  noremap <F12> :call FollowBack()<CR>
   let g:terminal_execute = 'st -e'
 augroup END
 
