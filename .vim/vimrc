@@ -66,8 +66,9 @@ augroup customplugin
   noremap <leader>rn :set relativenumber!<CR>
   noremap <leader>rc :source $HOME/.vim/vimrc<CR>
   noremap <leader>ts :call ToggleSyntax()<CR>
-  noremap <F1> :write<CR>
+  noremap <leader>rs :write!<space>!parsemarkdown.awk<CR>
   noremap <leader>hg :call PrintHighlightGroup()<CR>
+  noremap <F1> :write<CR>
   noremap <F11> :call FollowCursorLink()<CR>
   noremap <F12> :call FollowBack()<CR>
   let g:terminal_execute = 'st -e'

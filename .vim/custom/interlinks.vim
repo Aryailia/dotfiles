@@ -40,15 +40,18 @@ function! s:GetLinkAtIndex(text, targetIndex)
 endfunction
 
 function! s:ParseMarkdownLink(markdownLink)
-  let l:link = substitute(
-    \ matchstr(a:markdownLink, '\m\\\@<!\](.\{-}\\\@<!)'),
-    \ '^\](\(.*\))$', '\1', '')
-  let l:file = substitute(l:link, '^\s*\([^\%(\\\@<!#\)]*\).*', '\1', '')
+  " Should lint
+  " 1) if destination has <>, [^\_S<>]
+  " 2) if destination no <>, no space/no control characters/no unescaped paren
+  " unless parens are nested & balanced/
+  " link titles can multiline but no blank line
+  let l:link = matchstr(a:markdownLink, '\m\\\@<!\](\zs.*\\\@<!\ze)')
+  let l:link = match(l:link, '\m\\\@<!#') == -1 ? l:link . '#' : l:link
+
+  let l:file = matchstr(l:link, '^[^\%(\\\@<!#\)]*')
   let l:file = l:file == '' ? expand('%:t') : l:file
-  let l:anchor = tolower(matchstr(
-    \ substitute(l:link, '^\s*[^\%(\\\@<!#\)]*\(.*\)', '\1', ''),
-    \ '#\@<=.*'))
-  return [l:file, l:anchor]
+  let l:anchor = matchstr(l:link, '\m\\\@<!#\zs.*')
+  return [l:file, tolower(l:anchor)]
 endfunction
 
 function! s:ParseFileAST(filename)
@@ -62,6 +65,7 @@ function! s:ParseFileAST(filename)
     let l:row += 1
   endfor
   return l:ast
+  " return filter(l:file, "v:val =~ '" . '\m^ \{0,3}#\{1,6}\%(\s+.*\)\?' . "'")
 endfunction
 
 " let t:navigation_stack = []
