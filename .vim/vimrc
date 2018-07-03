@@ -84,7 +84,7 @@ augroup END
 augroup sh_build
   autocmd!
   " Partly want to ensure sh (usually maps to dash terminal) for better POSIX compliance
-  autocmd FileType sh noremap <F2> :silent<space>write!<space>/tmp/preview.sh<bar>call PreviewSendLine('sh /tmp/preview.sh')<CR>
+  autocmd FileType sh noremap <F2> :write! /tmp/preview.sh<bar>call PreviewSendLine('chmod 744 /tmp/preview.sh')<bar>call PreviewSendLine('sh /tmp/preview.sh')<CR><CR>
   autocmd FileType sh noremap <F3> :call PreviewOpenWindow(g:terminal_execute)<CR>
   autocmd FileType sh noremap <leader>l :call PreviewSendLine('shellcheck ' . @%)<CR>
 augroup END

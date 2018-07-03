@@ -11,14 +11,20 @@ done
 
 list="
   .vim/custom .named_directories
+  
   .Xresources .tmux.conf .xinitrc .bash_profile .bashrc .inputrc
   .vim/vimrc .gtkrc-2.0 .streamlinkrc
-
-  .config/i3 .config/scripts .config/gtk-3.0
-  .config/wallpaper.jpg .config/mps-youtube/config .config/ranger/rc.conf
-  .config/alacritty/alacritty.yml
 "
-for target in $list; do
+
+inconfig="
+  i3 scripts gtk-3.0 newsboat
+
+  wallpaper.jpg mps-youtube/config ranger/rc.conf
+  alacritty/alacritty.yml
+"
+
+install() {
+  target=$1
   echo "$target"
   directory=${target%/*}
   # Make the parent directory if it does not exist
@@ -26,4 +32,12 @@ for target in $list; do
     && mkdir -p "$HOME/$directory"
   [ -n "$target" ] && rm -fr "${HOME:?}/$target"
   ln -s "$dotfiles/$target" "$HOME/$target"
+}
+
+for target in $list; do
+  install "$target"
+done
+
+for target in $inconfig; do
+  install ".config/$target"
 done

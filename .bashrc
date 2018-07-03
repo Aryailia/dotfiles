@@ -12,7 +12,7 @@ npm-exec() { $(printf "%s/%s" "$(npm bin)" "$*"); } # run locally install packag
 
 # I like single letter commands since they interefere less with tab completion
 # c[d]
-c() { 'cd' "$1" && (ls -a); }  # quote cd and subshell ls cause alliases
+c() { 'cd' "$@" && (ls -a); }  # quote cd and subshell ls cause alliases
 
 # b[ash] - prompt command
 b() {
