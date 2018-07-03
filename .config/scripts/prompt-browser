@@ -1,0 +1,30 @@
+#!/bin/sh
+
+browserchoice="$1"
+targeturl="$2"
+
+# midori will open same urls
+
+browserlist=$(printf '
+  midori:   midori -e TabNew;midori -e TabClose;midori
+  firefox:  firefox
+  epiphany: epiphany
+  elinks
+  lynx
+  w3m
+' | grep ':')
+
+if [ -z "$*" ]; then
+  printf '%s' "$browserlist" | sed 's/^ *\([^:]*\):.*$/\1/' 
+else
+  runbrowser=$(printf '%s' "$browserlist" \
+    | grep "^ *$browserchoice" \
+    | sed 's/^[^:]*: *\(.*\)$/\1/')
+
+  #echo "$runbrowser" "$targeturl" > '/tmp/asdf'
+  #echo "$runbrowser" "$targeturl"
+  if [ -n "$runbrowser" ] && [ -n "$targeturl" ]; then
+    eval "$runbrowser $targeturl"
+    #"$runbrowser" "$targeturl"
+  fi
+fi
