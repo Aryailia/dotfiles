@@ -3,16 +3,26 @@
 browserchoice="$1"
 targeturl="$2"
 
-# midori will open same urls
-
 browserlist=$(printf '
-  midori:   midori -e TabNew;midori -e TabClose;midori
-  firefox:  firefox
+  midori:   run_midori
+  firefox:  firefox -new-tab
   epiphany: epiphany
   elinks
   lynx
   w3m
-' | grep ':')
+' | grep ':') # Remove random spaces and the unimplemented browsers
+
+
+# Create custom functions for running to avoid having to eval
+# Have to be very careful about not blocking IO; rofi will freeze Xserver
+# ===
+# Midori someimtes will not open the url if it is not updated via NewTab etc
+run_midori() {
+  # Have to kill stdout (does not seem like have to kill stderr)
+  midori -e TabNew >/dev/null && \
+    midori -e TabClose >/dev/null && \
+    midori "$*" >/dev/null &
+}
 
 if [ -z "$*" ]; then
   printf '%s' "$browserlist" | sed 's/^ *\([^:]*\):.*$/\1/' 
@@ -21,10 +31,10 @@ else
     | grep "^ *$browserchoice" \
     | sed 's/^[^:]*: *\(.*\)$/\1/')
 
-  #echo "$runbrowser" "$targeturl" > '/tmp/asdf'
-  #echo "$runbrowser" "$targeturl"
   if [ -n "$runbrowser" ] && [ -n "$targeturl" ]; then
-    eval "$runbrowser $targeturl"
-    #"$runbrowser" "$targeturl"
+    #$(eval "$runbrowser $targeturl")
+    "$runbrowser" "$targeturl"
+  else
+    exit 1
   fi
 fi
