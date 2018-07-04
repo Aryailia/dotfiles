@@ -74,6 +74,9 @@ bindsym $mod+Shift+Down move down
 bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
+# my bookmark launcher script
+bindsym $mod+g exec --no-startup-id bookmarks-rofi.sh
+
 # split in horizontal orientation
 bindsym $mod+b split h
 

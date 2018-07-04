@@ -22,21 +22,20 @@
 #    
 # 4) Has browser and 
 
-# TODO: Fix commenting and documentation
-# TODO: Add to i3
 # TODO: Maybe add mozilla/netscape's bookmark.xml parsing?
 # TODO: Need to do something prompt-browser process blocking UI (synchronous)
 #       delete from bottom of file too when completed task
 # TODO: Help file
 
 # Tightly-coupled-to-environment file location dependencies
-subfolder="./helpers"
+directory=${0%/*}
+helperdir="$directory/helpers"
 bookmarks="$HOME/ime/bookmarks.txt"
-promptbrowser="./prompt-browser"
+promptbrowser="$direcotry/prompt-browser"
 
 # Creates the intermediary files for parameter passing for rofi script mode
 create_populator() {
-  filename="$subfolder/bookmark-$1.sh"
+  filename="$helperdir/bookmark-$1.sh"
   content=$(printf '%s\n%s\n%s' \
     "#!/bin/sh" \
     "# please look to the rofi-prompt-bookmarks.sh for more" \
@@ -81,10 +80,10 @@ if [ -z "$*" ]; then
     create_populator url
     create_populator all
 
-    title="TITLE:$subfolder/bookmark-title.sh"
-    tags="TAGS:$subfolder/bookmark-tags.sh"
-    url="URL:$subfolder/bookmark-url.sh"
-    all="/:$subfolder/bookmark-all.sh" # 'all' handled a bit differently 
+    title="TITLE:$helperdir/bookmark-title.sh"
+    tags="TAGS:$helperdir/bookmark-tags.sh"
+    url="URL:$helperdir/bookmark-url.sh"
+    all="/:$helperdir/bookmark-all.sh" # 'all' handled a bit differently 
     rofi -show '/' -modi "$all,$title,$url,$tags" -matching fuzzy
 
   # SEARCH_TYPE=<populator-type> $0
