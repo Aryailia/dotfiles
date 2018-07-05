@@ -28,7 +28,7 @@
 # Tightly-coupled-to-environment file location dependencies
 directory=${0%/*}
 helpers="$directory/helpers"
-bookmarks="$HOME/ime/bookmarks.txt"
+bookmarks="$HOME/privates/bookmarks.txt"
 promptbrowser="$helpers/prompt-browser.sh"
 
 # Creates the intermediary files for parameter passing for rofi script mode
