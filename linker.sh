@@ -2,7 +2,7 @@
 # Symbolic links for all the config files
 dotfiles="$HOME/dotfiles"
 scripts="$dotfiles/.config/scripts/**/* $dotfiles/.config/scripts/*"
-privatefiles="$HOME/privates"
+localfiles="$HOME/locales"
 
 # Chmod all the custom scripts
 for s in $scripts; do
@@ -23,7 +23,7 @@ inconfig='
   wallpaper.jpg mps-youtube/config ranger/rc.conf
   alacritty/alacritty.yml
 '
-privates='
+locales='
   .config/newsboat/urls
 '
 
@@ -51,4 +51,4 @@ for target in $list; do install "$dotfiles" "$target"; done
 printf '\nSave typing for dotfiles/.config\n================================\n'
 for target in $inconfig; do install "$dotfiles" ".config/$target"; done
 printf '\nNot uploading these to github\n=============================\n'
-for target in $privates; do install "$privatefiles" "$target"; done
+for target in $locales; do install "$localfiles" "$target"; done

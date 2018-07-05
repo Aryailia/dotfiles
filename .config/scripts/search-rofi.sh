@@ -4,7 +4,7 @@ directory=${0%/*}
 cd -P scripts
 directory=$(pwd)
 helpers="$directory/helpers"
-websites="$HOME/privates/websearches.txt"
+websites="$HOME/locales/websearches.txt"
 
 browser="$1"
 search="$2"
