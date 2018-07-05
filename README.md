@@ -1,9 +1,23 @@
+# Philosphy and workflow
+Generally I try to preserve the default keybinds when possible as that is one of the most portable ways of moving to a computer owned by someone else and having a hope that one would be able to use their setup.
+
+I choose to run tmux default when launching terminals as it buys resume functionality should I close a terminal prematurely. Just adding shift will run without tmux anyway. As a result, I created a script to combat tmux session number growing in addition to the resume feature.
+
+I choose to use st (simple terminal) simply because of the low latency startups and running with tmux (which buys you scrollback, searching, and psuedo-clipboard) has all the necessary functionality out of the box that I need. While it does go against my philosphy of outof the box, nevertheless, I have patched in certain things which are detailed on the my fork of [st](https://www.github.com/Aryailai/st). Though to note, you can play with the font st uses as a commandline argument.
+
+
+# Specifics
 * linker.sh - Setup so that all my dotfiles are contained in a directory and symlinks all the config files to their appropriate locations
 * namedirs/* - Contains symlinks for directory shortcuts (CDPATH for cd)
 * install/* - Scripts for automating some of the install process
 
-* privates/ - A folder not included in this distribution but has a couple of files that make other things in these dotfiles work. See [linker.sh](linker.sh) for what files are contained
+# privates/
+A folder not included in this distribution but has a couple of files that make other things in these dotfiles work. See [linker.sh](linker.sh) for what files are contained.
+Also contains:
+* bookmarks.txt
+* websearches.txt
 
+# More UI-like scripts
 * bookmarks-rofi.sh - probably going to make an ncurses cli version too
 * search-rofi.sh - probalby going to make an ncourses cli version too
 
@@ -16,3 +30,14 @@ Coming Soon TM
 
 # Tmux
 Coming Sooner TM
+
+# Todo
+* Command line customisation for build command in vim
+* Comment markdown vimscript initial build of parser better (totally going to forget the next actionable items)
+* Make or search for existing script to csv-ify netscape/mozilla bookmarks
+* Make script to kill all detached tmux sessions
+* Eventually figure out if I want to proceed with the leaf block parser for markdown in awk or go back to vimscript. Or both
+* Make an ls to my liking as a bash alias. Then figure out how I want to deal with the tmux one
+* Rofi launcher for different terminals maybe?
+* Rofi launcher for imes
+* Vim to use screen lines rather than file lines
