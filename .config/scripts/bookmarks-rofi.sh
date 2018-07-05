@@ -23,8 +23,6 @@
 # 4) Has browser and 
 
 # TODO: Maybe add mozilla/netscape's bookmark.xml parsing?
-# TODO: Need to do something prompt-browser process blocking UI (synchronous)
-#       delete from bottom of file too when completed task
 # TODO: Help file
 
 # Tightly-coupled-to-environment file location dependencies
@@ -116,6 +114,5 @@ elif printf '%s' "$*" | grep -q '^[0-9]\+ \+.\+$'; then
 else
   browser=$(printf '%s' "$*" | awk '{print $1}')
   url=$(printf '%s' "$*" | awk '{print $2}')
-  # TODO: blocking IO still there
   "$promptbrowser" "$browser" "$url"
 fi
