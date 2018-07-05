@@ -24,7 +24,7 @@ inconfig='
   alacritty/alacritty.yml
 '
 privates='
-  bookmarks.txt websearches.txt .config/newsboat/urls
+  .config/newsboat/urls
 '
 
 # Expects full paths, links everything into $HOME
