@@ -2,32 +2,41 @@
 " For use when wanting to add arguments to any run command
 function! GetVimLine()
   let l:currentbuffer = join(getline(1, '$'), "\n")
-  let l:command = matchlist(l:currentbuffer, '#:vim \(.\{-}\)\n')
-  if len(l:command) > 0
-    return l:command[1]
+  " only use the first, also easier to test for no matches with simplier logic
+  let l:vimline = matchlist(l:currentbuffer, '!:console \(.\{-}\)\n')
+  if len(l:vimline) > 0
+    return l:vimline[1]
   else
     return ""
   endif
 endfunction
 
-function! BuildAndRun(compiler)
-  let l:temp = '/tmp/precompile.txt'
-  " Strip out path and extension; left with just file title
-  let l:bin = expand('%:t:r')
-  execute 'write!' l:temp
-  call PreviewSendLine(a:compiler . ' ' . l:temp . ' -o ' . l:bin)
-  let l:args = GetVimLine()
-  if l:args == ""
-    call PreviewSendLine('./' . l:bin)
+" Should also work for languages without a compile step
+" a:tempfile is the full path, typically resides in the temp directory
+" a:compile usually will reference the same string as a:tempfile
+" a:default is the default run script
+" Printf-esque style %compiledfile and %self in a:compile and a:default
+" If it is a custom script, you also get %self
+function! BuildAndRun(tempfile, compile, default)
+  " Full path without file extension
+  let l:bin = expand('%:p:r')
+  silent execute 'write!' a:tempfile
+  silent call PreviewSendLine(s:ApplyFilename(a:compile, l:bin))
+  let l:vimline = GetVimLine()
+
+  " If special console line exists, then use that instead of a:default
+  if l:vimline == ""
+    silent call PreviewSendLine(s:ApplyFilename(s:ApplySelf(a:default), l:bin))
   else
-    call PreviewSendLine('./' . l:bin . ' ' . l:args)
+    " Allows you to do `run %self` or `run %self -o %compiledfile`
+    silent call PreviewSendLine(s:ApplyFilename(s:ApplySelf(l:vimline), l:bin))
   endif
 endfunction 
 
-function! ToggleSyntax()
-  if exists("g:syntax_on")
-    syntax off
-  else
-    syntax on
-  endif
+function! s:ApplyFilename(format, filename)
+  return substitute(a:format, '%compiledfile', a:filename, 'g')
+endfunction
+
+function! s:ApplySelf(format)
+  return substitute(a:format, '%self', expand('%:p'), 'g')
 endfunction

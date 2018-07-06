@@ -32,7 +32,6 @@ Coming Soon TM
 Coming Sooner TM
 
 # Todo
-* Command line customisation for build command in vim
 * Comment markdown vimscript initial build of parser better (totally going to forget the next actionable items)
 * Make or search for existing script to csv-ify netscape/mozilla bookmarks
 * Make script to kill all detached tmux sessions

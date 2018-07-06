@@ -22,6 +22,8 @@
 #    
 # 4) Has browser and 
 
+# !:console sh %self
+
 # TODO: Maybe add mozilla/netscape's bookmark.xml parsing?
 # TODO: Help file
 
