@@ -34,7 +34,7 @@ font pango:monospace 8
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec --no-startup-id ~/.config/scripts/resume-generic-session.sh $term_and_run
+bindsym $mod+Return exec --no-startup-id ~/.config/scripts/resumerun-generic-session.sh $term_and_run
 bindsym $mod+Shift+Return exec --no-startup-id $term
 bindsym $mod+Control+Return exec --no-startup-id alacritty -e tmux
 
