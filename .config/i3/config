@@ -7,7 +7,7 @@ gaps inner 10
 gaps outer 5
 set $mod Mod4
 set $term st
-set $term_and_run "st -e"
+set $term_and_run st -e
 
 
 # Startup
