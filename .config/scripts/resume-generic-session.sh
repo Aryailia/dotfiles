@@ -36,7 +36,7 @@ else
     '{ min = (min < $1) ? min : $1 }' \
     'END{ print min }'
   )")"
-
+  
   # If running 'st -e' (simple terminal), error errsec 1005 is safe to ignore
   # https://www.mail-archive.com/dev@suckless.org/msg22465.html
   # Default to 0 if $filter is empty (thus skipping everything

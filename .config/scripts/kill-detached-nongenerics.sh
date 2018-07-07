@@ -6,7 +6,7 @@ nongeneric_session_list=$(tmux list-sessions \
   | grep --invert-match '^[0-9]*:\|(attached)$' \
   | sed 's/:.*//'
 )
-
-printf '%s' "$nongeneric_session_list" | while IFS= read -r name; do
+# Add a newline or read might not read it
+printf '%s\n' "$nongeneric_session_list" | while IFS= read -r name; do
   tmux kill-session -t "$name"
 done
