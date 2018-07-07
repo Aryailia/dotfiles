@@ -1,25 +1,25 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # set display size
 # xrandr -s 800x600
 
 # Test if config files are readable then load settings
-test -r $HOME/.Xresources && xrdb $HOME/.Xresources
-#[ -r $HOME/.Xresources] && xrdb -merge $HOME/.Xdefaults
+[ -r "$HOME/.Xresources" ] && xrdb "$HOME/.Xresources"
+#[ -r "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xdefaults"
+[ -r "$HOME/.Xmodmap" ]  && xmodmap "$HOME/.Xmodmap" # swap RCtrl and CapsLock
 
-# remove beep
-setterm -blength 0
+#setterm -blength 0 # remove beep
 
-# Set variables to use fcitx
+# Launch dbus for fcitx and perhaps pulse audio
+# Not sure why this is -n and not -z
+# TODO: Check on fresh install
+#[ -n "$DBUS_SESSION_BUS_ADDRESS" ] && dbus-launch --sh-syntax --exit-with-session
+#[ -n "$DBUS_SESSION_BUS_ADDRESS" ] && eval 'dbus-launch --sh-syntax --exit-with-session'
+
+# Fcitx setup
 export XMODIFIERS="@im=fcitx"
 export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
-
-# Launch dbus for fcitx
-test -z "$DBUS_SESSION_BUS_ADDRESS" || eval "$(dbus-launch --sh-syntax --exit-with-session)"
-
-# Restart it
-killall fcitx
-fcitx
+killall fcitx; fcitx # Restart fcitx
 
 exec i3

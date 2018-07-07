@@ -1,21 +1,19 @@
-#!/bin/sh
-# Enable XON/XOFF, usually C-q and C-s respectively
-stty -ixon
-#PS1='[\u@\h \W]\$ '
+#!/usr/bin/env bash
+# Only included shebang for shellcheck
+stty -ixon # Enable XON/XOFF, usually C-q and C-s respectively
+#PS1='[\u@\h \W]\$ ' # default PS1h
 PROMPT_COMMAND="b"
 
-alias ls='pwd;ls --color=auto '
-alias cd='c '
+alias ls='pwd -P;ls --group-directories-first --color=auto'
+alias cd='c'
 alias rb='source ~/.bashrc' # r[eload] b[ashrc]
 alias rx='xrdb ~/.Xresources' # r[eload] X[resources]
-npm-exec() { $(printf "%s/%s" "$(npm bin)" "$*"); } # run locally install package
+
+npm-exec() { $(printf "%s/%s" "$(npm bin)" "$*"); } # run local package
 
 # I like single letter commands since they interefere less with tab completion
-# c[d]
-c() { 'cd' "$@" && (ls -a); }  # quote cd and subshell ls cause alliases
-
-# b[ash] - prompt command
-b() {
+c() { 'cd' "$@" && ls -A; } # Quote cd to prevent recursion
+b() { # b[ash] - prompt command
   local code="$?" # this must be first
   local whitetext='\[\033[1;37m\]'
   local black='\[\033[40m\]'

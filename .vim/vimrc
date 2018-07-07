@@ -62,7 +62,12 @@ augroup customplugin
   source ~/.vim/custom/tmuxpreview.vim
   source ~/.vim/custom/buildtools.vim
   source ~/.vim/custom/interlinks.vim
+  " Need to execute cause of the dash
   execute 'source ~/.vim/custom/syntax-interlink.vim'
+
+  noremap <C-J> gj
+  noremap <C-K> gk
+
   noremap <leader>rn :set relativenumber!<CR>
   noremap <leader>rc :source $HOME/.vim/vimrc<CR>
   noremap <leader>ts :if exists("g:syntax_on")<bar>syntax off<bar>else<bar>syntax on<bar>endif<CR>
@@ -87,7 +92,7 @@ augroup sh_build
   " Use sh (usually maps to dash terminal) for better POSIX compliance
   autocmd FileType sh noremap <F2> :call BuildAndRun('/tmp/preview.sh', 'chmod 744 /tmp/preview.sh', 'sh /tmp/preview.sh')<CR><CR>
   autocmd FileType sh noremap <F3> :call PreviewOpenWindow(g:terminal_execute)<CR>
-  autocmd FileType sh noremap <leader>l :call PreviewSendLine('shellcheck ' . expand('%:p'))<CR>
+  autocmd FileType sh noremap <leader>l :call PreviewSendLine('shellcheck ' . expand('%:p'))<CR><CR>
 augroup END
 
 augroup rustbuild

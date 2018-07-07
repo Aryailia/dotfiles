@@ -34,9 +34,6 @@ Coming Sooner TM
 # Todo
 * Comment markdown vimscript initial build of parser better (totally going to forget the next actionable items)
 * Make or search for existing script to csv-ify netscape/mozilla bookmarks
-* Make script to kill all detached tmux sessions
 * Eventually figure out if I want to proceed with the leaf block parser for markdown in awk or go back to vimscript. Or both
-* Make an ls to my liking as a bash alias. Then figure out how I want to deal with the tmux one
 * Rofi launcher for different terminals maybe?
 * Rofi launcher for imes
-* Vim to use screen lines rather than file lines
