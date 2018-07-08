@@ -18,17 +18,17 @@ if [ -n "$free_generics" ]; then
 ###
 # else find a sane number to make the new session
 else
-  # two 'arrays', the ids and the futureIds=(0, id[0]+1, ...ids[i]+1)
+  # Generate two 'arrays', the ids and the futureIds=(0, id[0]+1, ...ids[i]+1)
   # add 0 to list of considered ids, this is the only reducing mechanism
   #
   # Get the string of newline seperated session names of the generic sessions
   genericIds="$(session_name "$generics")"
 
-  # Join list with '|' as the deliminter
+  # First array: join genericIds list with '|' as the deliminter
   filter="$(printf '%s' "$genericIds" | paste --serial --delimiters '|')"
 
-  # Prepends "-1\n" to the genericIds list
-  # This '-1' is incremented to 0, so that we consider session 0 as a name
+  # Second array: Prepends "-1\n" to the genericIds list and increments one
+  # This '-1' is so that we consider session 0 as a name (after incrementing)
   next_id="$(printf '%s\n' '-1' "$genericIds" | awk "$(printf '%s\n' \
     '{ $1 = $1 + 1 }    # increment each line'   \
     "/$filter/{ next }  # remove if already the name of an active session" \

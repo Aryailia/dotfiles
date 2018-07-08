@@ -1,15 +1,17 @@
 #!/bin/sh
 
-browserchoice="$1"
-targeturl="$2"
+targeturl="$1"
+browserchoice="$2"
+
+save_to_clipboard() { printf '%s' "$1" | xclip -selection clipboard; }
 
 browserlist=$(grep ':' << EOF
-  clipboard
-  epiphany: run_epiphany
   midori: run_midori
+  epiphany: run_epiphany
   firefox: run_firefox 
   epiphany_incognito: run_epiphany_incognito
   firefox_incognito: run_firefox_incognito
+  clipboard: save_to_clipboard
   elinks
   lynx
   w3m

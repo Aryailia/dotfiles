@@ -1,4 +1,6 @@
 #!/bin/sh
+# :!console sh %self
+
 # A bookmark launcher with rofi with a second rofi menu for which browser
 # - Nearly all logic is viewable from this script file
 # - Only need to make changes here and to the prompt-browser script
@@ -21,8 +23,6 @@
 # 3) Single bookmark: <data> <id>, ID is its line number in the file
 #    
 # 4) Has browser and 
-
-# !:console sh %self
 
 # TODO: Maybe add mozilla/netscape's bookmark.xml parsing?
 # TODO: Help file
@@ -91,7 +91,7 @@ if [ -z "$*" ]; then
   # SEARCH_TYPE=<populator-type> $0
   # 2) Called by rofi 
   else
-    awk <"$bookmarks" '
+    <"$bookmarks" awk '
       {$0=NR$0}           # append row number (to after the table last bar)
       /^[0-9]*\/\//{next} # skip over C-like comments
       !/^[0-9]*$/{print}  # skip blanks lines (awk added row number)
@@ -104,7 +104,7 @@ if [ -z "$*" ]; then
 elif printf '%s' "$*" | grep -q '^[0-9]\+ \+.\+$'; then
   id="$*"
   id="${id%%\ *}"
-  url="$(sed <"$bookmarks" "${id}q;d" | extract_entry_and_id url)"
+  url="$(<"$bookmarks" sed "${id}q;d" | extract_entry_and_id url)"
   url="${url%\ *}"
 
   # Append the url to all the browser_tags to pass both to the fourth step
@@ -116,5 +116,5 @@ elif printf '%s' "$*" | grep -q '^[0-9]\+ \+.\+$'; then
 else
   browser=$(printf '%s' "$*" | awk '{print $1}')
   url=$(printf '%s' "$*" | awk '{print $2}')
-  "$promptbrowser" "$browser" "$url"
+  "$promptbrowser" "$url" "$browser"
 fi

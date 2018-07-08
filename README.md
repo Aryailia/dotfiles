@@ -37,3 +37,5 @@ Coming Sooner TM
 * Eventually figure out if I want to proceed with the leaf block parser for markdown in awk or go back to vimscript. Or both
 * Rofi launcher for different terminals maybe?
 * Rofi launcher for imes
+* Check if dbus launch is necessary in xinitrc on a fresh install for fcitx (runit/pulseaudio may run it, also gtk has it as a dependency)
+

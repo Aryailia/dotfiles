@@ -3,7 +3,7 @@
 function! GetVimLine()
   let l:currentbuffer = join(getline(1, '$'), "\n")
   " only use the first, also easier to test for no matches with simplier logic
-  let l:vimline = matchlist(l:currentbuffer, '!:console \(.\{-}\)\n')
+  let l:vimline = matchlist(l:currentbuffer, ':!console \(.\{-}\)\n')
   if len(l:vimline) > 0
     return l:vimline[1]
   else
