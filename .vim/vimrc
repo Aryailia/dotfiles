@@ -68,6 +68,7 @@ augroup customplugin
   noremap <C-J> gj
   noremap <C-K> gk
 
+  noremap <leader><tab> :Tab /\|<CR>
   noremap <leader>rn :set relativenumber!<CR>
   noremap <leader>rc :source $HOME/.vim/vimrc<CR>
   noremap <leader>ts :if exists("g:syntax_on")<bar>syntax off<bar>else<bar>syntax on<bar>endif<CR>

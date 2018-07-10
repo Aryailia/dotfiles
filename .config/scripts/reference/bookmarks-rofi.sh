@@ -50,12 +50,9 @@ create_populator() {
 # Gets the desired column and the line number (introduced by awk)
 extract_entry_and_id() {
   case "$1" in
-    #title) cat - | sed 's/^| *\(.*\)| *#.*|\([0-9]*\)$/\1 \2/' ;;
-    #tags)  cat - | sed 's/^.*| *\(#.*\)| *http.*| *\([0-9]*\)$/\1 \2/' ;;
-    #url)   cat - | sed 's/^.*| *\(http.*\)|\([0-9]*\)$/\1 \2/' ;;
-    title) cat - | awk 'BEGIN{FS="|"}{$0=$1$2}{print}' ;;
-    tags)  cat - | awk 'BEGIN{FS="|"}{$0=$1$3}{print}' ;;
-    url)   cat - | awk 'BEGIN{FS="|"}{$0=$1$4}{print}' ;;
+    title) </dev/stdin awk 'BEGIN{FS="|"}{$0=$1$2}{print}' ;;
+    tags)  </dev/stdin awk 'BEGIN{FS="|"}{$0=$1$3}{print}' ;;
+    url)   </dev/stdin awk 'BEGIN{FS="|"}{$0=$1$4}{print}' ;;
     *)
       # If using different shell could do {cat - | tee >() >() >()}
       # Storing in variable has problem of maybe running out of memory
