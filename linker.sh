@@ -14,7 +14,7 @@ list='
   .vim/custom .named_directories
   
   .Xresources .tmux.conf .xinitrc .bash_profile .bashrc .inputrc .Xmodmap
-  .vim/vimrc .gtkrc-2.0 .streamlinkrc
+  .vim/vimrc .gtkrc-2.0 .streamlinkrc .urlview
 '
 
 inconfig='

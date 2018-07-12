@@ -28,5 +28,5 @@ bind-key U show-urls
 color info red black bold
 color article black default
 
-# browser linkhandler
-# macro , open-in-browser
+browser open-by-extension
+macro , open-in-browser
