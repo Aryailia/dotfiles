@@ -2,13 +2,14 @@
 # :!console %self
 bookmarks="$HOME/ime/bcde"
 promptbrowser="$(dirname $0)/helpers/prompt-browser.sh" 
+runbrowser="$(dirname $0)/browser-fzf.sh" 
 
 line="$(< "$bookmarks" \
   awk "$(printf '%s\n' \
-    'BEGIN{ FS="|"}' \
-    '{gsub(/^ *| *$/, "", $2)}'\
-    '/^[0-9]*\|$/{next}' \
-    '!/^ *$/{printf("%3s %s%s\n",NR,$1,$2)}' \
+    'BEGIN{ FS="|" }' \
+    '{ gsub(/^ *| *$/, "", $2) }              # trim leading/trailing spaces '\
+    '/^[0-9]*\|$/{ next }                     # skip blank lines' \
+    '!/^ *$/{ printf("%3s %s%s\n",NR,$1,$2) } # less than 1000 bookmarks' \
   )" \
   | fzf --no-sort --layout=reverse-list 
 )"
@@ -24,14 +25,5 @@ url="$(< "$bookmarks" \
   | awk 'BEGIN{FS="|"}{print $3}' \
   | sed 's/^ *\| *$//g'
 )"
-browser="$("$promptbrowser" | fzf --no-sort --layout=reverse-list)"
 
-error=$?
-[ "$error" = "130" ] && exit 130 # If we Ctrl-c, same error code
-[ -z "$line" ] && exit 1 # If a blank (ie. invalid) link is entered
-
-# Cannot background this otherwise it terminates it
-# Not really sure what the best way to approach this is
-# Should also check on promptbrowser script as that does both nohup and setsid
-# but backgrounds (decided that should background as it is run by others)
-nohup setsid "$promptbrowser" "$url" "$browser" >/dev/null 2>&1 # &
+"$runbrowser" "${url}: " "$url"

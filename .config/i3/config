@@ -64,7 +64,7 @@ bindsym $mod+Down focus down
 bindsym $mod+Up focus up
 bindsym $mod+Right focus right
 
-# move focused window, for windows host VM, avoid l bind that locks screen
+# move focused window, for windows host VM, avoid Meta+l as that locks screen
 bindsym $mod+Shift+h move left
 bindsym $mod+Shift+j move down
 bindsym $mod+Shift+k move up
@@ -77,12 +77,16 @@ bindsym $mod+Shift+Down move down
 bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
-# my bookmark launcher script
-for_window [instance="bookmarksfzf"] floating enable
-for_window [instance="bookmarksfzf"] border pixel 5
-for_window [instance="bookmarksfzf"] fullscreen
+# websearch launcher script
+for_window [instance="linkmenu"] floating enable
+for_window [instance="linkmenu"] border pixel 5
+for_window [instance="linkmenu"] fullscreen
+bindsym $mod+Shift+s exec $term -n "linkmenu" -e "websearch-fzf.sh" &
+
+# bookmark launcher script
 #bindsym $mod+g exec --no-startup-id bookmarks-rofi.sh
-bindsym $mod+Shift+g exec --no-startup-id $term -n "bookmarksfzf" -e "bookmarks-fzf.sh" &
+bindsym $mod+Shift+f exec $term -n "linkmenu" -e "bookmarks-fzf.sh" &
+bindsym $mod+Shift+g exec $term -n "linkmenu" -e "browser-fzf.sh" &
 #; [instance="bookmarksfzf"] fullscreen
 
 # split in horizontal orientation
