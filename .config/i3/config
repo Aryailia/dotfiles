@@ -10,6 +10,7 @@ gaps outer 5
 set $mod Mod4
 set $term st
 set $term_and_run st -e
+set $tmux ~/.config/scripts/resumerun-generic-session.sh 
 
 
 # Startup
@@ -37,9 +38,11 @@ font pango:monospace 8
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec --no-startup-id ~/.config/scripts/resumerun-generic-session.sh $term_and_run &
+bindsym $mod+Return exec --no-startup-id $tmux $term_and_run &
 bindsym $mod+Shift+Return exec --no-startup-id $term &
-bindsym $mod+Control+Return exec --no-startup-id alacritty -e tmux &
+bindsym $mod+Mod1+Return exec --no-startup-id $tmux sakura -e &
+bindsym $mod+Control+Return exec --no-startup-id $tmux urxvt -e &
+bindsym $mod+Control+Mod1+Return exec --no-startup-id $tmux alacritty -e &
 
 # kill focused window
 bindsym $mod+Shift+q kill
