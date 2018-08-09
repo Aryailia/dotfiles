@@ -1,22 +1,25 @@
 #!/usr/bin/env sh
   # for setting the indent
 # Depends on sudo and git
+# https://stackoverflow.com/quesionts/24839271 for using \001 and \002
+# https://stackoverflow.com/quesionts/301353 for explanation
 
 exitcode="${1:-"N/A"}" # I should be passed "$?"
    timer="${2:-0}"
+#backgroundpid="${3:-0}"
 
-  black='\033[40m'
-    red='\033[41m'
-  green='\033[42m'
-  brown='\033[43m'
-   blue='\033[44m'
-magenta='\033[45m'
-   cyan='\033[46m'
-  white='\033[47m'
+  black='\001\033[40m\002'
+    red='\001\033[41m\002'
+  green='\001\033[42m\002'
+  brown='\001\033[43m\002'
+   blue='\001\033[44m\002'
+magenta='\001\033[45m\002'
+   cyan='\001\033[46m\002'
+  white='\001\033[47m\002'
 
-  whitetext='\033[1;37m'
-  blacktext='\033[1;30m'
-formatclear='\033[0m'
+  whitetext='\001\033[1;37m\002'
+  blacktext='\001\033[1;30m\002'
+formatclear='\001\033[0m\002'
 # If I ever wanted to toy with powerline character again
 #local powerline=$'\uE0B0'
 #local green2brown=$'\[\033[32;43m\]'
@@ -101,4 +104,7 @@ fi
 [ -n "$!" ] && [ "$!" !=  0 ] && add "$yellow PID:$! "
   
 printf '%b%b' "$text" "$formatclear "
+#printf '%b%b%b' "$text" "$formatclear" "\002"
+#printf '%b' "\001\033[32m\002cheese\001\033[0m\002"
+#echo -e "\[$text$formartclear\033[0m \]"
 

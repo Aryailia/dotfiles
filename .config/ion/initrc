@@ -1,14 +1,17 @@
-source "$HOME/.config/shellrc"
-source "$HOME/.config/shell_profile"
+let xdg_config = "$HOME/.config"
+source "$xdg_config/shellrc"
+source "$xdg_config/shell_profile"
 #export timer = "$(date +%s)"
 
-function c target; cd $(namedpath "$target"); lx .; end
+# Do not `lx` if directory change failed
+fn c target; cd "$(namedpath "$target")" && lx .;  end
 
 fn PROMPT
   let exitcode      = "$?" # this does not work
   let exitcode      = 'N/A'
   let timer         = '0'
   let backgroundpid = '0'
-  "$HOME/NEW/shell-prompt.sh" "$exitcode" "$timer" "$backgroundpid"
+  
+  "$HOME/.config/prompt.sh" "$exitcode" "$timer" "$backgroundpid"
 end
 
