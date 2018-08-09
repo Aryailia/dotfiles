@@ -1,0 +1,13 @@
+export PATH=$PATH:$HOME/.config/scripts:$HOME/.config/aliases
+export PATH=$PATH:/usr/local/go/bin
+
+#export CDPATH=$HOME # first home if want 'cd' to go to home in bash see cd help
+# This is a bash-specific for built-in `cd`. I emulate this behaviour for
+# `namedpath` found in "~/.config/aliases". `lx` depends on `namedpath`.
+export CDPATH=$HOME/.config/named_directories
+
+export EDITOR="vim"
+export TERMINAL="st-256color"
+export TERM="$TERMINAL"
+export BROWSER="midori"
+

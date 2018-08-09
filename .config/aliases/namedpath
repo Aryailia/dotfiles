@@ -1,0 +1,33 @@
+#!/usr/bin/env sh
+  # /dev/stdin is the target directory to change to
+#:!console c ~/named/
+# TODO: Support multiple folders for CDPATH
+
+target="$1"
+
+#CDPATH="$HOME/.config/named_directories"
+directory="$CDPATH" # in case there are several directories in $CDPATH
+
+p() { printf '%s\n' "$@"; }
+# TODO: test if have to escape slashes
+# eg. symlink that has a slash in name  
+named_dirs="$(
+  cd "$directory" || exit "$?";
+  p ./* | awk '{
+     $0=$0"\\/";          # add escaped slash so full directory matched
+     gsub(/^\.\//, "");  # remove prepended ./
+     gsub(/\|/, "\\|");   # escape pipes, may want to escape slashes?
+     print;
+  }' \
+  | tr '\n' '|'
+)"
+named_dirs="${named_dirs%%|}" # remove trailing space (now pipe) added by awk
+
+# Print the path to cd into
+# Conditionally prepend path to appropriate CDPATH directory if starting with
+# one of the named directories in the appropriate CDPATH directory
+p "$target" | awk '
+  !/\/$/{ $0=$0"/" }
+  /^('"$named_dirs"')/{ $0="'"$CDPATH"'/"$0}
+  {print}
+'

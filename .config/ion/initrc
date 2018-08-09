@@ -1,0 +1,14 @@
+source "$HOME/.config/shellrc"
+source "$HOME/.config/shell_profile"
+#export timer = "$(date +%s)"
+
+function c target; cd $(namedpath "$target"); lx .; end
+
+fn PROMPT
+  let exitcode      = "$?" # this does not work
+  let exitcode      = 'N/A'
+  let timer         = '0'
+  let backgroundpid = '0'
+  "$HOME/NEW/shell-prompt.sh" "$exitcode" "$timer" "$backgroundpid"
+end
+

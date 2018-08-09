@@ -1,0 +1,4 @@
+stty -ixon # Enable XON/XOFF, usually C-q and C-s respectively
+alias ls='ls --group-directories-first --color=auto'
+alias rx='xrdb ~/.Xresources' #r[eload] X[resources]
+alias npmexec='printf '%s/%s' "$(npm bin)"'

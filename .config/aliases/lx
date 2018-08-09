@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+  # Deal with processing the arguments of ls ?
+target="$(namedpath "${1:-.}" || exit "$?")"
+
+if   [ -d "$target" ]; then cd "$target" || exit "$?"
+elif [ -f "$target" ]; then cd "$(dirname $target)" || exit "$?"
+else                        exit 1
+fi
+
+[ "$#" -gt 0 ] && shift 1
+pwd -P
+ls --group-directories-first --color=auto -A . $*
