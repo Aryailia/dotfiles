@@ -1,15 +1,9 @@
 #!/usr/bin/env bash
   #:!console bash %self
 
-#file="~/.bashrc";                   test -f "$file" && source "$file"
-file="$HOME/.config/shell_profile"; test -f "$file" && source "$file"
-file="$HOME/.config/shellrc";       test -f "$file" && source "$file"
-
-PROMPT_COMMAND='b'
-alias rrc='source ~/.bash_profile'
-c() { cd "$(namedpath "$1")"; lx .; }
-b() { PS1="$(~/.config/prompt.sh "$?" "$SECONDS")"; SECONDS="0"; }
-
+file="$HOME/.bashrc";               [ -f "$file" ] && source "$file"
+file="$HOME/.config/shell_profile"; [ -f "$file" ] && source "$file"
+file="$HOME/.config/shellrc";       [ -f "$file" ] && source "$file"
 
 # https://gist.github.com/rtfpessoa/811701ed8fa642f60e411aef04b2b64a 
 #

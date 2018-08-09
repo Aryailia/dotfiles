@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
   # TODO: backup bookmarks?
+  # TODO: if folder is a symlink, it will delete the config file in dotfiles
+  # TODO: check for equality?
 # Symbolic links for all the config files
 dotfiles="$HOME/dotfiles"
 scripts="$dotfiles/.config/scripts/**/* $dotfiles/.config/scripts/*"
@@ -15,7 +17,7 @@ done
 list='
   .vim/custom
   
-  .Xresources .tmux.conf .xinitrc .bash_profile .inputrc .Xmodmap
+  .Xresources .tmux.conf .xinitrc .bash_profile .bashrc .inputrc .Xmodmap
   .vim/vimrc .gtkrc-2.0 .streamlinkrc .urlview
 '
 
@@ -23,8 +25,8 @@ inconfig='
   aliases i3 scripts gtk-3.0 
 
   prompt.sh shellrc shell_profile
-  wallpaper.jpg newsboat/config ranger/rc.conf mps-youtube/config 
-  alacritty/alacritty.yml 
+  wallpaper.jpg alacritty/alacritty.yml ion/initrc
+  newsboat/config ranger/rc.conf mps-youtube/config 
 '
 locales='
   .config/newsboat/urls
@@ -70,12 +72,10 @@ p 'Directly in dotfiles' '===================='
 for target in $list; do install "$dotfiles" "$target"; done
 p '' 'Save typing for dotfiles/.config' '================================'
 for target in $inconfig; do install "$dotfiles" ".config/$target"; done
-p '' 'Not uploading these to github' '============================='
-for target in $locales; do install "$localfiles" "$target"; done
 
 # Symlinks for named directories
 mkdir -p "$named_directories"
-p '' 'Linking' '======='
+p '' 'Building named directory symlinks' '================================='
 for keyvalue in $symlink_hash; do
   source="${keyvalue##*=}"
   target="$named_directories/${keyvalue%=*}"
@@ -84,3 +84,7 @@ for keyvalue in $symlink_hash; do
   rm --force "$target"
   ln --symbolic "$source" "$target" 
 done
+
+# Requires presence of locales folder
+p '' 'Not uploading these to github' '============================='
+for target in $locales; do install "$localfiles" "$target"; done

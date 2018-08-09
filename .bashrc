@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
-# Only included shebang for shellcheck
-stty -ixon # Enable XON/XOFF, usually C-q and C-s respectively
-#PS1='[\u@\h \W]\$ ' # default PS1h
-PROMPT_COMMAND="b"
+  # Only included shebang for shellcheck
+  # Indent for autodetect indent
+# May
 
-alias ls='pwd -P;ls --group-directories-first --color=auto'
-alias cd='c'
-alias rb='source ~/.bashrc' # r[eload] b[ashrc]
-alias rx='xrdb ~/.Xresources' # r[eload] X[resources]
+#PS1='[\u@\h \W]\$ ' # default PS1
+PROMPT_COMMAND='b'
 
-npm-exec() { $(printf "%s/%s" "$(npm bin)" "$*"); } # run local package
+alias rrc='source ~/.bash_profile'
+
+# Do not execute `lx` if `cd` errors
+c() { cd "$(namedpath "$1")" && lx .; }
+b() {
+  errorcode="$?"
+  # history keeps command history sync
+  history -a
+  history -n
+  PS1="$(~/.config/prompt.sh "$errorcode" "$SECONDS")";
+  SECONDS="0"
+}
+
 
 # I like single letter commands since they interefere less with tab completion
 c() { 'cd' "$@" && ls -A; } # Quote cd to prevent recursion
