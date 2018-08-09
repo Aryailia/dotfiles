@@ -1,8 +1,10 @@
 #!/usr/bin/env sh
+  # TODO: backup bookmarks?
 # Symbolic links for all the config files
 dotfiles="$HOME/dotfiles"
 scripts="$dotfiles/.config/scripts/**/* $dotfiles/.config/scripts/*"
 localfiles="$HOME/locales"
+named_directories="$HOME/.config/named_directories"
 
 # Chmod all the custom scripts
 for s in $scripts; do
@@ -11,44 +13,74 @@ done
 
 # The files to link over
 list='
-  .vim/custom .named_directories
+  .vim/custom
   
-  .Xresources .tmux.conf .xinitrc .bash_profile .bashrc .inputrc .Xmodmap
+  .Xresources .tmux.conf .xinitrc .bash_profile .inputrc .Xmodmap
   .vim/vimrc .gtkrc-2.0 .streamlinkrc .urlview
 '
 
 inconfig='
-  i3 scripts gtk-3.0 newsboat
+  aliases i3 scripts gtk-3.0 
 
-  wallpaper.jpg mps-youtube/config ranger/rc.conf
-  alacritty/alacritty.yml
+  prompt.sh shellrc shell_profile
+  wallpaper.jpg newsboat/config ranger/rc.conf mps-youtube/config 
+  alacritty/alacritty.yml 
 '
 locales='
   .config/newsboat/urls
 '
+symlink_hash="
+  alias=$HOME/dotfiles/.config/aliases
+  dfconf=$HOME/dotfiles/.config
+  conf=$HOME/.config
+  named=$HOME/.config/named_directories
+  scripts=$HOME/dotfiles/.config/scripts
 
+  dl=$HOME/Downloads
+  projects=$HOME/projects
+  wiki=$HOME/wiki
+"
+
+
+
+################################################################################
+# Code
+
+p() { printf '%s\n' "$@"; }
 # Expects full paths, links everything into $HOME
 install() {
   oldbase="$1"
   targetfrombase="$2"
-  targetdirectory="$(dirname "$1/$2")"
+  targetdirectory="$(dirname "$HOME/$2")"
  
   # consider permission validation checks
   if [ -e "$oldbase/$targetfrombase" ]; then # If file/directory exists
-    printf '%s\n' "$targetfrombase"
+    p "$targetfrombase"
   else
-    printf '%s\n' "FAIL: $targetfrombase does not exist"
+    p "FAIL: $targetfrombase does not exist"
     exit 1 # design choice to not use return
   fi
 
-  mkdir -p "$HOME/$targetdirectory"  # Make the any directories if missing
+  mkdir -p "$targetdirectory"  # Make the any directories if missing
   rm -fr "${HOME:?}/$targetfrombase" # :? prevents evaluation to '/'
   ln -s "$oldbase/$targetfrombase" "$HOME/$targetfrombase"
 }
 
-printf 'Directly in dotfiles\n====================\n'
+p 'Directly in dotfiles' '===================='
 for target in $list; do install "$dotfiles" "$target"; done
-printf '\nSave typing for dotfiles/.config\n================================\n'
+p '' 'Save typing for dotfiles/.config' '================================'
 for target in $inconfig; do install "$dotfiles" ".config/$target"; done
-printf '\nNot uploading these to github\n=============================\n'
+p '' 'Not uploading these to github' '============================='
 for target in $locales; do install "$localfiles" "$target"; done
+
+# Symlinks for named directories
+mkdir -p "$named_directories"
+p '' 'Linking' '======='
+for keyvalue in $symlink_hash; do
+  source="${keyvalue##*=}"
+  target="$named_directories/${keyvalue%=*}"
+  p "$source"
+  mkdir -p "$source" # in case they do not already exist
+  rm --force "$target"
+  ln --symbolic "$source" "$target" 
+done

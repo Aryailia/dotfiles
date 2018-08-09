@@ -1,12 +1,14 @@
-[[ -f ~/.bashrc ]] && . ~/.bashrc
+#!/usr/bin/env bash
+  #:!console bash %self
 
-export PATH=$PATH:$HOME/.config/scripts
-export PATH=$PATH:/usr/local/go/bin
-export CDPATH=$HOME:$HOME/.named_directories # first $HOME for no args cd
-export EDITOR="vim"
-export TERMINAL="st-256color"
-export TERM="st-256color"
-export BROWSER="midori"
+#file="~/.bashrc";                   test -f "$file" && source "$file"
+file="$HOME/.config/shell_profile"; test -f "$file" && source "$file"
+file="$HOME/.config/shellrc";       test -f "$file" && source "$file"
+
+PROMPT_COMMAND='b'
+alias rrc='source ~/.bash_profile'
+c() { cd "$(namedpath "$1")"; lx .; }
+b() { PS1="$(~/.config/prompt.sh "$?" "$SECONDS")"; SECONDS="0"; }
 
 
 # https://gist.github.com/rtfpessoa/811701ed8fa642f60e411aef04b2b64a 
