@@ -85,7 +85,7 @@ add "$blue $workingdir "
 ###
 # Attach branch name and file revision count if in a git active directory
 # Source: Parth - https://github.com/Parth/dotfiles
-if git rev-parse --is-inside-work-tree 2>/dev/null | grep --quiet 'true'; then
+if git rev-parse --is-inside-work-tree 2>/dev/null | grep -q 'true'; then
   add "$cyan $(git rev-parse --abbrev-ref HEAD 2>/dev/null) "
   change_count=$(git status --short | wc -l)
   [ "$change_count" -gt 0 ] && add "$red+$change_count "
