@@ -1,4 +1,9 @@
-stty -ixon # Enable XON/XOFF, usually C-q and C-s respectively
-alias ls='ls --group-directories-first --color=auto'
+# https://stackoverflow.com/questions/6429515
+stty -ixon -ixoff # Archaic with modern CPU/modem speeds. Reclaims C-q and C-s
+
+alias l='ls --group-directories-first --color=auto'
 alias rx='xrdb ~/.Xresources' #r[eload] X[resources]
-alias npmexec='printf '%s/%s' "$(npm bin)"'
+alias xcaps='xdotool key Caps_Lock'
+alias npmexec='printf "%s/%s" "$(npm bin)"'
+
+alias rimeinstall='rime_frontend=fcitx-rime bash $HOME/ime/rime-plum/rime-install'

@@ -5,9 +5,9 @@ export PATH=$PATH:/usr/local/go/bin
 # This is a bash-specific for built-in `cd`. I emulate this behaviour for
 # `namedpath` found in "~/.config/aliases". `lx` depends on `namedpath`.
 export CDPATH=$HOME/.config/named_directories
+export DOTENVIRONMENT=$HOME/.environment/
 
-export EDITOR="vim"
-export TERMINAL="st-256color"
-export TERM="$TERMINAL"
-export BROWSER="midori"
-
+which vim 2>&1 >/dev/null    && export EDITOR="vim"
+which st 2>&1 >/dev/null     && export TERMINAL="st-256color"
+which st 2>&1 >/dev/null     && export TERM="$TERMINAL"
+which midori 2>&1 >/dev/null && export BROWSER="midori"
