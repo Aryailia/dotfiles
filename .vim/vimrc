@@ -1,16 +1,16 @@
 " the `autocmd!` deletes previous bindings if sourced again
 " Pathogen for plugins:
+  mapclear
+  mapclear!
   execute pathogen#infect()
   execute pathogen#helptags()
 
-
 " General
 augroup general
-  autocmd!
-
   set nocompatible
-  filetype plugin on
   syntax on
+  filetype plugin on
+
   set foldmethod=manual
   set encoding=utf-8
   " set ruler
@@ -18,14 +18,12 @@ augroup general
   set wildmenu
   " set formatoptions=tcq
 
-
   " improve syntax performance
   syntax sync minlines=256
   set nocursorcolumn
   set nocursorline
 
-
-  " Opens new vertical and horizontal splits to bottom and right respectively
+  " New vertical and horizontal splits open down and right respectively by default
   set splitbelow
   set splitright
 
@@ -38,47 +36,95 @@ augroup general
   " The colored column is not okay to include
   set colorcolumn=81
   highlight ColorColumn ctermfg=red ctermbg=cyan guibg=cyan
-
-  " Toggle relativenumber depending on mode, or with shortcut in normal...
-  " JK this kills performance
-  set number
-  " set relativenumber
-  " autocmd InsertEnter * :set norelativenumber
-  " autocmd InsertLeave * :set relativenumber
-  " also have keybind to toggle this
+  
+  set number " setting relativenumber was kiling performance
 augroup END
 
 
-augroup pluginsettings
-  " VimWiki
-  let g:vimwiki_ext2syntax = {'.md': 'markdown', '.wiki': 'media'}
-  " let g:vimwiki_folding = 'expr'
+augroup external_plugins
+  " # VimWiki
+  let g:vimwiki_ext2syntax = { '.md': 'markdown', '.wiki': 'media' }
+  " let g:vimwiki_folding = 'expr' " Folding does not play well with markdown-toc
   let g:vimiwki_list = [{'path': '~/wiki/', 'syntax': 'markdown', 'ext': '.md'},
     \ {'path': '~/blog/test/', 'auto_toc': 1, 'index': 'index.wiki'}]
 
 augroup END
 
-augroup customplugin
+augroup vimrc
+  " reset any autocommands
+  autocmd! 
+
+  function! SaveWindowPosition()
+    let b:WindowPosition = line('w0')
+  endfunction
+
+  function! RestoreWindowPosition()
+    " 123G jumps to line 123
+    " zt sets the current line as the positional top line of the window
+    execute('normal! ' . b:WindowPosition . 'Gzt')
+  endfunction
+
+  let g:terminal_execute = 'st -e'
   source ~/.vim/custom/tmuxpreview.vim
   source ~/.vim/custom/buildtools.vim
   source ~/.vim/custom/interlinks.vim
   " Need to execute cause of the dash
-  execute 'source ~/.vim/custom/syntax-interlink.vim'
+  " execute 'source ~/.vim/custom/syntax-interlink.vim'
 
-  noremap <C-J> gj
-  noremap <C-K> gk
+  " ! means ignore remaps
+  autocmd! BufWritePost $MYVIMRC normal \rc
 
-  noremap <leader><tab> :Tab /\|<CR>
+  " Key rebindings `:help index`
+  " http://vimdoc.sourceforge.net/htmldoc/vimindex.html
+
+
+  " Movement
+  nnoremap j         gj
+  nnoremap k         gk
+  nnoremap <C-j>     j
+  nnoremap <C-k>     k
+
+
+  nnoremap <leader>s :write<CR>
+
+  
+  " #Clipboard stuff
+  " Sync Clipboard, not sure why it needs double newline
+  nnoremap <leader>qc :if has('clipboard') \| let @* = @" \| let @+ = @" \| endif<CR><CR>
+  
+  vmap <leader>c y:call system('clipboard.sh --write', @")<CR>\qc
+  nmap <leader>c :silent call system("clipboard.sh --write", @")<CR>\qc
+  nnoremap <leader>v :let @" = system('clipboard.sh --read')<CR>p
+  nnoremap <leader>V :let @" = system('clipboard.sh --read')<CR>P
+
+  vnoremap <leader>y "*y :let @+ = @*<CR>
+  nnoremap <leader>p "*p
+  nnoremap <leader>P "*P
+
+  " Select the same selection again after doing an indent
+  vnoremap > >gv
+  vnoremap < <gv
+
   noremap <leader>rn :set relativenumber!<CR>
-  noremap <leader>rc :source $HOME/.vim/vimrc<CR>
+  noremap <leader>rc :call SaveWindowPosition()<CR>mm<Esc>:source $MYVIMRC<CR>:echom 'Reload' . $MYVIMRC<CR>:redraw<CR>:call RestoreWindowPosition()<CR>`m
   noremap <leader>ts :if exists("g:syntax_on")<bar>syntax off<bar>else<bar>syntax on<bar>endif<CR>
   noremap <leader>rs :write! !parsemarkdown.awk<CR>
   noremap <leader>hg :call PrintHighlightGroup()<CR>
-  noremap <F1> :write<CR>
-  noremap <F11> :call FollowCursorLink()<CR>
-  noremap <F12> :call FollowBack()<CR>
-  let g:terminal_execute = 'st -e'
+
+  " Likely to change very soon
+  noremap <leader><tab> :Tab /\|<CR>
+  nnoremap <F11> :call FollowCursorLink()<CR>
+  nnoremap <F12> :call FollowBack()<CR>
+
+  " Mirrors
+  nmap <F1> \s
+  nmap <C-s> \s
+  imap <F1> <C-o>\s
+  imap <C-s> <C-o>\s
+  vmap <C-c> \c
+  nmap <C-p> \v
 augroup END
+
 
 augroup compilable
   autocmd!
@@ -88,7 +134,7 @@ augroup compilable
   imap <F3> <C-o><F3>
 augroup END
 
-augroup sh_build
+augroup shellbuild
   autocmd!
   " Use sh (usually maps to dash terminal) for better POSIX compliance
   autocmd FileType sh noremap <F2> :call BuildAndRun('/tmp/preview.sh', 'chmod 744 /tmp/preview.sh', 'sh /tmp/preview.sh')<CR><CR>
@@ -113,8 +159,6 @@ augroup markdownbuild
   " vim-markdown-toc eats lines if ToC is folded
   autocmd BufWritePre *.md normal! zR
 augroup END
-
-
 
 " Snippets
 augroup snippets
