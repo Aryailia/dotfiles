@@ -46,7 +46,7 @@ main() {
     # Files
     .Xresources .tmux.conf .xinitrc .bash_profile .bashrc .inputrc .Xmodmap
     .vim/vimrc .gtkrc-2.0 .streamlinkrc .urlview
-  ' | grep -v '^\s*#\|^$')"  # remove comments and blank lines
+  ' | remove_hash_comments)"
   
   # Files and subfolders in "$dotfiles/.config/"
   # These will be prefixed with ".config/": subdirectories, then files
@@ -56,12 +56,12 @@ main() {
     prompt.sh shellrc shell_profile
     wallpaper.jpg alacritty/alacritty.yml ion/initrc
     newsboat/config ranger/rc.conf mps-youtube/config 
-  ' | grep -v '^\s*#\|^$')"  # remove comments and blank lines
+  ' | remove_hash_comments)"
   
   # Same concept but from $dotenv
   locales="$(p '
     .config/newsboat/urls
-  ' | grep -v '^\s*#\|^$')"  # remove comments and blank lines
+  ' | remove_hash_comments)"
   
   # Will remove any symlinks contained in $namedir that are not in this hash
   symlink_hash="$(p "
@@ -75,7 +75,7 @@ main() {
     dl=$HOME/Downloads
     projects=$HOME/projects
     wiki=$HOME/wiki
-  " | grep -v '^\s*#\|^$')"  # remove comments and blank lines
+  " | remove_hash_comments)"
 
   ##############################################################################
   # Code
@@ -124,6 +124,7 @@ main() {
 ################################################################################
 # Helpers
 p() { printf '%s\n' "$@"; }
+remove_hash_comments() { <&0 grep -v -e '^[ \t]*#' -e '^$'; }
 
 # Expects full paths, links everything into $HOME
 install() {
