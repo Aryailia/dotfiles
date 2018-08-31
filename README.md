@@ -1,4 +1,17 @@
 # Philosphy and workflow
+## Target
+- Linux VMs
+- Window 7 with Git. Curious how far I can get without Cygwin or Putty.
+- Raspberry Pi 3
+- Android (Termux). Writing on the go with a keyboard.
+- MacOS (Currently do not have)
+
+Cannot use this on iOS (iPad/iPhone) since Apple's term of service prohibits downloading 3rd party code to run unless it is Safari (citation needed). According to Mozila, [Firefox does support the native iOS extension ecosystem](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox_for_iOS), which I am not exactly sure is what. Unsure of other browsers do something similar. [OpenTerm for iOS](https://github.com/louisdh/openterm) is something to look into (only available for iOS 11). OpenTerm uses its own made script called Cub instead Bashscript.
+
+Not sure if I will ever be interested in getting the Windows Subsystem for Linux (WSL) working on Win10.
+
+## ?
+
 Generally I try to preserve the default keybinds when possible as that is one of the most portable ways of moving to a computer owned by someone else and having a hope that one would be able to use their setup.
 
 I choose to run tmux default when launching terminals as it buys resume functionality should I close a terminal prematurely. Just adding shift will run without tmux anyway. As a result, I created a script to combat tmux session number growing in addition to the resume feature.
