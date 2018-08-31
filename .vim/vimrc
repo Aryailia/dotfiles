@@ -137,9 +137,9 @@ augroup END
 augroup shellbuild
   autocmd!
   " Use sh (usually maps to dash terminal) for better POSIX compliance
-  autocmd FileType sh noremap <F2> :call BuildAndRun('/tmp/preview.sh', 'chmod 744 /tmp/preview.sh', 'sh /tmp/preview.sh')<CR><CR>
-  autocmd FileType sh noremap <F3> :call PreviewOpenWindow(g:terminal_execute)<CR>
-  autocmd FileType sh noremap <leader>l :call PreviewSendLine('shellcheck ' . expand('%:p'))<CR><CR>
+  autocmd FileType sh noremap <leader>2 :call BuildAndRun('/tmp/preview.sh', 'chmod 744 /tmp/preview.sh', 'sh /tmp/preview.sh')<CR><CR>
+  autocmd FileType sh noremap <leader>3 :call PreviewOpen(g:terminal_execute)<CR>
+  autocmd FileType sh noremap <leader>l :call PreviewSendLine2('shellcheck ' . expand('%:p'))<CR><CR>
 augroup END
 
 augroup rustbuild

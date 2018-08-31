@@ -11,7 +11,7 @@ main() {
 
   # Unlike the plugins, do not update pathogen, discrepancy cause no reason...
   if [ ! -f "$vimconfig/autoload/pathogen.vim" ]; then
-    wget 'https://tpo.pe/pathogen.vim' -P "$vimconfig/autoload"
+    curl -Lo "$vimconfig/autoload/pathogen.vim" 'https://tpo.pe/pathogen.vim' 
   fi
 
   [ ! -d "$vimconfig/bundle" ] && 'mkdir' "$vimconfig/bundle"
