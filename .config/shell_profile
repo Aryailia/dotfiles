@@ -7,7 +7,10 @@ export PATH=$PATH:/usr/local/go/bin
 export CDPATH=$HOME/.config/named_directories
 export DOTENVIRONMENT=$HOME/.environment/
 
-command -v vim >/dev/null    && export EDITOR="vim"
-command -v st >/dev/null     && export TERMINAL="st-256color"
-command -v st >/dev/null     && export TERM="$TERMINAL"
-command -v midori >/dev/null && export BROWSER="midori"
+command -v urxvt >/dev/null 2>&1  && export TERMINAL_EXECUTE="urxvt -e"
+command -v st >/dev/null 2>&1     && export TERMINAL_EXECUTE="st -e"
+
+command -v vim >/dev/null 2>&1    && export EDITOR="vim"
+command -v st >/dev/null 2>&1     && export TERMINAL="st-256color"
+command -v st >/dev/null 2>&1     && export TERM="$TERMINAL"
+command -v midori >/dev/null 2>&1 && export BROWSER="midori"

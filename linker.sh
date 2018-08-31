@@ -110,7 +110,7 @@ main() {
   for keyvalue in $symlink_hash; do
     source="${keyvalue##*=}"
     target="$namedir/${keyvalue%=*}"
-    p "$source → $(basename $target)"
+    p "$source → $(basename "$target")"
     mkdir -p "$source" # in case they do not already exist
     ln -s "$source" "$target" || { p "✗ ln error"; exit "$?"; }
   done
