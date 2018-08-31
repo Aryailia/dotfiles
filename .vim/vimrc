@@ -108,11 +108,11 @@ augroup vimrc
   noremap <leader>rn :set relativenumber!<CR>
   noremap <leader>rc :call SaveWindowPosition()<CR>mm<Esc>:source $MYVIMRC<CR>:echom 'Reload' . $MYVIMRC<CR>:redraw<CR>:call RestoreWindowPosition()<CR>`m
   noremap <leader>ts :if exists("g:syntax_on")<bar>syntax off<bar>else<bar>syntax on<bar>endif<CR>
-  noremap <leader>rs :write! !parsemarkdown.awk<CR>
   noremap <leader>hg :call PrintHighlightGroup()<CR>
 
   " Likely to change very soon
   noremap <leader><tab> :Tab /\|<CR>
+  noremap <leader>rs :write! !parsemarkdown.awk<CR>
   nnoremap <F11> :call FollowCursorLink()<CR>
   nnoremap <F12> :call FollowBack()<CR>
 
@@ -128,25 +128,27 @@ augroup END
 
 augroup compilable
   autocmd!
-  imap <F1> <C-o><F1>
+  imap <F1> <C-o>\s
   " Not really sure how to fix non-silent other than using two enters
-  imap <F2> <C-o><F2>
-  imap <F3> <C-o><F3>
+  imap <F2> <C-o>\2
+  imap <F3> <C-o>\3
 augroup END
 
 augroup shellbuild
   autocmd!
   " Use sh (usually maps to dash terminal) for better POSIX compliance
-  autocmd FileType sh noremap <leader>2 :call BuildAndRun('/tmp/preview.sh', 'chmod 744 /tmp/preview.sh', 'sh /tmp/preview.sh')<CR><CR>
-  autocmd FileType sh noremap <leader>3 :call PreviewOpen(g:terminal_execute)<CR>
-  autocmd FileType sh noremap <leader>l :call PreviewSendLine2('shellcheck ' . expand('%:p'))<CR><CR>
+  autocmd FileType sh noremap <silent> <leader>2 :call BuildAndRun($TMPDIR . '/preview', 'chmod 755 ' . $TMPDIR . '/preview', $TMPDIR . '/preview')<CR>
+  autocmd FileType sh noremap <silent> <leader>3 :call PreviewOpen($TERMINAL_EXECUTE)<CR>
+  autocmd FileType sh noremap <silent> <leader>4 :call PreviewClose()<CR>
+  autocmd FileType sh noremap <silent> <leader>l :call PreviewSendLine('shellcheck ' . expand('%:p'))<CR>
 augroup END
 
 augroup rustbuild
   " au BufNewFile,BufRead *.rs set filetype=rust
   autocmd!
-  autocmd FileType rust noremap <F2> :call BuildAndRun('/tmp/script.txt', 'rustc /tmp/script.txt -o %compiledfile', '%compiledfile')<CR><CR>
-  autocmd FileType rust noremap <F3> :call PreviewOpenWindow(g:terminal_execute)<CR>
+  autocmd FileType rust noremap <silent> <leader>2 :call BuildAndRun($TEMP . '/script.txt', 'rustc ' . $TMPDIR . '/script.txt -o %compiledfile', '%compiledfile')<CR>
+  autocmd FileType rust noremap <silent> <leader>3 :call PreviewOpenWindow($TERMINAL_EXECUTE)<CR>
+  autocmd FileType rust noremap <silent> <leader>4 :call PreviewClose()<CR>
 augroup END
 
 augroup markdownbuild

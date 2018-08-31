@@ -4,13 +4,23 @@ export PATH=$PATH:/usr/local/go/bin
 #export CDPATH=$HOME # first home if want 'cd' to go to home in bash see cd help
 # This is a bash-specific for built-in `cd`. I emulate this behaviour for
 # `namedpath` found in "~/.config/aliases". `lx` depends on `namedpath`.
-export CDPATH=$HOME/.config/named_directories
-export DOTENVIRONMENT=$HOME/.environment/
+export CDPATH="$HOME/.config/named_directories"
+export DOTENVIRONMENT="$HOME/.environment"
 
-command -v urxvt >/dev/null 2>&1  && export TERMINAL_EXECUTE="urxvt -e"
-command -v st >/dev/null 2>&1     && export TERMINAL_EXECUTE="st -e"
+# `$TMPDIR` set in Android and MacOS
+test -z "$TMPDIR" && printf '%s' "$(uname)" | grep -q 'Linux' \
+  && export TMPDIR='/tmp'
+# Windows Vista+ 
+test -z "$TMPDIR" && printf '%s' "$(uname)" | grep -q 'MSYS' \
+  && export TMPDIR="$HOME/AppData/Local/Temp"
 
-command -v vim >/dev/null 2>&1    && export EDITOR="vim"
-command -v st >/dev/null 2>&1     && export TERMINAL="st-256color"
-command -v st >/dev/null 2>&1     && export TERM="$TERMINAL"
-command -v midori >/dev/null 2>&1 && export BROWSER="midori"
+
+command -v st >/dev/null 2>&1     && export TERMINAL_EXECUTE='st -e'
+
+command -v urxvt >/dev/null 2>&1  && export TERMINAL_EXECUTE='urxvt -e'
+command -v st >/dev/null 2>&1     && export TERMINAL_EXECUTE='st -e'
+
+command -v vim >/dev/null 2>&1    && export EDITOR='vim'
+command -v st >/dev/null 2>&1     && export TERMINAL='st-256color'
+command -v st >/dev/null 2>&1     && export TERM='$TERMINAL'
+command -v midori >/dev/null 2>&1 && export BROWSER='midori'
