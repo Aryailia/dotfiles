@@ -68,8 +68,10 @@ augroup vimrc
   source ~/.vim/custom/tmuxpreview.vim
   source ~/.vim/custom/buildtools.vim
   source ~/.vim/custom/interlinks.vim
+  source ~/.vim/custom/markdown-footnotes.vim
   " Need to execute cause of the dash
   " execute 'source ~/.vim/custom/syntax-interlink.vim'
+  nnoremap <leader>zx :call FootnoteViewToggle()<CR>
 
   " ! means ignore remaps
   autocmd! BufWritePost $MYVIMRC normal \rc
