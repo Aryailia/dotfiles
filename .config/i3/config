@@ -10,7 +10,7 @@ gaps outer 5
 set $mod Mod4
 set $term st
 set $term_and_run st -e
-set $tmux ~/.config/scripts/resumerun-generic-session.sh 
+set $tmux ~/.config/scripts/tmux-open-in-free-generic.sh 
 
 
 # Startup
