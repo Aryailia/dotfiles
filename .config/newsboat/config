@@ -1,32 +1,34 @@
+# Reload on startup and default reloads every 60 minutes
 #auto-reload yes
+#reload-time 60
 
-external-url-viewer "urlview"
+external-url-viewer "urlscan"
 
 bind-key j down
 bind-key k up
-# bind-key j next articlelist
-# bind-key k prev articlelist
-# bind-key J next-feed articlelist
-# bind-key K prev-feed articlelist
+bind-key J next-feed articlelist
+bind-key K prev-feed articlelist
 bind-key G end
 bind-key g home
 bind-key d pagedown
 bind-key u pageup
-# bind-key l open
-# bind-key h quit
-# bind-key a toggle-article-read
+bind-key l open
+bind-key h quit
+bind-key m toggle-article-read
 bind-key n next-unread
 bind-key N prev-unread
-# bind-key D pb-download
 bind-key U show-urls
-# bind-key x pb-delete
 
 # color listnormal cyan default
 # color listfocus black yellow standout bold
 # color listnormal_unread blue default
 # color listfocus_unread yellow default bold
 color info red black bold
-color article black default
+color article white default
 
-browser open-by-extension
-macro , open-in-browser
+# Must use prefix macros with single quote to use
+browser linkhandler.sh
+#macro , open-in-browser
+macro v set browser "queue-ytdl.sh --video"; open-in-browser ; set browser linkhandler.sh
+macro a set browser "queue-ytdl.sh --audio"; open-in-browser ; set browser linkhandler.sh
+macro c set browser "clipboard.sh --write <<<"; open-in-browser ; set browser linkhandler.sh

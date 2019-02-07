@@ -9,36 +9,35 @@ type="$1"
 url="$2"
 
 show_help() {
-  printf '%s\n' \
-    "Usage: $(basename $0) <type> <url>\n" \
-    "" \
-    "Prefers reasonable quality video (to save data) and libre formats" \
-    "" \
-    "Options:" \
-    "<type> can be audio/a/video/v" \
-    "<url> is the url that will be fed to youtube-dl" \
-  ''
+  name="$(basename $0)"
+  puts "${name} [OPTIONS]"
+  puts ""
+  puts "SYNOPSIS"
+  puts "  Queues downloads with youtube-dl on to a task-spooler queue"
+  puts "  Prefers reasonable quality video (to save data) and libre formats"
+  puts ""
+  puts "OPTIONS"
+  puts "  -a, --audio URL"
+  puts "  -v, --video URL"
 }
 
 
 
 # Helper
+puts() { printf '%s\n' "$@"; }
 fatal() { printf '%s\n' "$@"; exit 1; }
 
 
 
-# Dependency check
+# Dependency checks
 constants="${SCRIPTS}/constants.sh"
-[ -x "${constants}" ] || { fatal "ERROR: '${constants}' not found"; }
+[ -x "${constants}" ] || fatal "FATAL: '${constants}' not found"
 destination="$(${constants} downloads)"
-[ -w "${destination}" ] || { fatal "ERROR: ${destination} not found"; }
+[ -w "${destination}" ] || fatal "FATAL: ${destination} not found"
 tsp_queue="${SCRIPTS}/queue-tsp.sh"
-[ -x "${tsp_queue}" ] || { fatal "ERROR: '${tsp_queue}' not found"; }
+[ -x "${tsp_queue}" ] || fatal "FATAL: '${tsp_queue}' not found"
 
-command -v 'youtube-dl' >/dev/null 2>&1 || {
-  echo 'Error: Requires `youtube-dl`. Aborting'
-  exit 1
-}
+command -v 'youtube-dl' >/dev/null 2>&1 || fatal 'FATAL: `youtube-dl` not found'
 
 
 
@@ -53,7 +52,7 @@ format=""
 options="--add-metadata --ignore-errors --continue"
 case "${type}" in
   -h) show_help; exit 0;;
-  v|video)
+  -v|--video)
     format="${webm360p}+${bestfreeaudio}"
     format="${format}/${webm360p}+bestaudio"
     format="${format}/${freelimit480p}+bestaudio"
@@ -61,7 +60,7 @@ case "${type}" in
     format="${format}/${limit480p}+${bestfreeaudio}"
     format="${format}/best"
     ;;
-  a|audio)
+  -a|--audio)
     format="${bestfreeaudio}/bestaudio/best"
     options="$options --extract-audio"
     ;;
