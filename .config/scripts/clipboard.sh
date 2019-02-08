@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
   # >/dev/stdin $0 <type> <?content1> <?content2> ...
 # Intended to be a portable clipboard interface
 
@@ -8,9 +8,10 @@ option="$1"
 
 show_help() {
   name="$(basename "$0")" 
-  puts "${name} [OPTIONS]"
-  puts ""
   puts "SYNOPSIS"
+  puts "  ${name} OPTIONS"
+  puts ""
+  puts "DESCRIPTION"
   puts "  Wrapper for the clipboard across different environments"
   puts ""
   puts "OPTIONS"
@@ -25,12 +26,11 @@ show_help() {
   puts "    Specifying <inputs> will ignore STDIN"
   puts ""
   puts ""
-  puts "Examples"
-  puts "========"
-  puts "\$ ${name} --write 'hello' 'world'       # helloworld"
-  puts "\$ echo 'hello world' | ${name} --write  # hello world\n"
-  puts "\$ ${name} --read"
-  puts "\$ ${name} --help"
+  puts "EXAMPLES"
+  puts "  \$ ${name} --write 'hello' 'world'       # helloworld"
+  puts "  \$ echo 'hello world' | ${name} --write  # hello world\n"
+  puts "  \$ ${name} --read"
+  puts "  \$ ${name} --help"
 }
 
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
   # $0 <cmd...>
 # Opens a new horizontal split and types <cmd...> ($*) and enters
 # If not attached to a tmux session, then types <cmd...> into a new session

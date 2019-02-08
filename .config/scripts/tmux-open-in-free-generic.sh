@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
   # $0 <cmd_to_run_arg1> <cmd_to_run_arg2> ...
 # The execution portion of tmux-get-free-generic.sh
 # Sends the command all as keyboard events, so will be displayed twice

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
   # No arguments
 # Kills all the sessions that are not named just numbers that are detached
 # 'Named' is used to refer to non-generics

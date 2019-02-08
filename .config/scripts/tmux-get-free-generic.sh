@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
   # No parameters
 # Resumes a defaultly named session if it is unattached, creates a new session
 # with the lowest possible non-negative number. Manages number creep.

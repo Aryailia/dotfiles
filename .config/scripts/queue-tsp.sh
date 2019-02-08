@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
   # $0 <queue as set in constants> <tsp-arg1> <tsp-arg2> ...
 # Just a wrapper for tsp
 
@@ -11,9 +11,9 @@ fatal() { printf '%s\n' "$@" >&2; exit 1; }
 # Dependency checks
 tsp=''
 if command -v 'ts' >/dev/null 2>&1; then
-  tsp='/bin/ts'
+  tsp='ts'
 elif command -v 'tsp' >/dev/null 2>&1; then
-  tsp='/bin/tsp'
+  tsp='tsp'
 else
   fatal 'FATAL: Requires task spooler (ts/tsp)'
 fi

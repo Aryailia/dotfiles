@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
   # $0 <type> <url>
 # Downloads to the download folder set in `constants.sh`
 # Uses task spooler to queue to a specific queue, using `youtube-dl`
@@ -10,14 +10,16 @@ url="$2"
 
 show_help() {
   name="$(basename $0)"
-  puts "${name} [OPTIONS]"
-  puts ""
   puts "SYNOPSIS"
+  puts "  ${name} OPTIONS"
+  puts ""
+  puts "DESCRIPTION"
   puts "  Queues downloads with youtube-dl on to a task-spooler queue"
   puts "  Prefers reasonable quality video (to save data) and libre formats"
   puts ""
   puts "OPTIONS"
   puts "  -a, --audio URL"
+  puts "  -h, --help"
   puts "  -v, --video URL"
 }
 
@@ -44,14 +46,14 @@ command -v 'youtube-dl' >/dev/null 2>&1 || fatal 'FATAL: `youtube-dl` not found'
 # Branching based on first argumnt, build the options for youtube-dl
 webm360p='243'
 bestfreevideo='bestvideo[ext=webm]'
-bestfreeaudio='bestaudio[ext=opus]'
+bestfreeaudio='bestaudio[ext=webm]'
 limit480p='bestvideo[height<=480]'
 freelimit480p='bestvideo[height<=480][ext=webm]'
 
 format=""
 options="--add-metadata --ignore-errors --continue"
 case "${type}" in
-  -h) show_help; exit 0;;
+  -h|--help)  show_help; exit 0;;
   -v|--video)
     format="${webm360p}+${bestfreeaudio}"
     format="${format}/${webm360p}+bestaudio"
@@ -62,11 +64,11 @@ case "${type}" in
     ;;
   -a|--audio)
     format="${bestfreeaudio}/bestaudio/best"
-    options="$options --extract-audio"
+    options="${options} --extract-audio"
     ;;
-  *) show_help; exit 1;;
+  *)  show_help; exit 1;;
 esac
 
 # Queue the download
-"${tsp_queue}" download-queue /bin/youtube-dl ${options} -f "$format" \
+"${tsp_queue}" download-queue youtube-dl ${options} -f "${format}" \
   -o "${destination}/%(uploader)s - %(title)s.%(ext)s" "${url}"

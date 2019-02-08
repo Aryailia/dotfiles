@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # could #!/usr/bin/awk -f
 # https://gist.github.com/XVilka/8346728
