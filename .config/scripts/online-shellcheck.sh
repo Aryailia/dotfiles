@@ -28,22 +28,11 @@ show_help() {
 
 
 # Helpers
-require() { [ "$1" "$2"] || die "FATAL: $2 not found"; }
 die() { printf '%s\n' "$@" >&2; exit 1; }
 puts() { printf '%s\n' "$@"; }
 
-
-
-#[ -h ]
-#if command -v curl >/dev/null; then
-#  curl
-
 # Main
 main() {
-  #for var in "$@"; do
-  #  echo "${var}"
-  #done
-  #exit
   case "$1" in
     -h|--help) show_help;;
     *)         check "$@"
