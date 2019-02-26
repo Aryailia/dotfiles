@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
-  #
+  # [<STDIN] $0 [OPTIONS] [PATH1] [PATH2] ...
 # TODO: Add coloring depending on warn level
+# TODO: Deal with fixes
 # 
 # sample output (all one line)
 #   [{"file":"-","line":1,"endLine":1,"column":1,"endColumn":8,"level":"error",
