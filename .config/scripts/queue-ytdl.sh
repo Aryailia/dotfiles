@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
   # $0 <type> <url>
-# Downloads to the download folder set in `constants.sh`
+# Downloads to the download folder set in `c.sh` (constants)
 # Uses task spooler to queue to a specific queue, using `youtube-dl`
 # To see preferences (libre and medium) check `queue-ytdl.sh`
 
@@ -9,7 +9,7 @@ type="$1"
 url="$2"
 
 show_help() {
-  name="$(basename $0)"
+  name="$(basename "$0")"
   puts "SYNOPSIS"
   puts "  ${name} OPTIONS"
   puts ""
@@ -32,14 +32,14 @@ fatal() { printf '%s\n' "$@"; exit 1; }
 
 
 # Dependency checks
-constants="${SCRIPTS}/constants.sh"
+constants="${SCRIPTS}/c.sh"
 [ -x "${constants}" ] || fatal "FATAL: '${constants}' not found"
 destination="$(${constants} downloads)"
-[ -w "${destination}" ] || fatal "FATAL: ${destination} not found"
+[ -w "${destination}" ] || fatal "FATAL: '${destination}' not found"
 tsp_queue="${SCRIPTS}/queue-tsp.sh"
 [ -x "${tsp_queue}" ] || fatal "FATAL: '${tsp_queue}' not found"
 
-command -v 'youtube-dl' >/dev/null 2>&1 || fatal 'FATAL: `youtube-dl` not found'
+command -v 'youtube-dl' >/dev/null 2>&1 || fatal "FATAL: 'youtube-dl' not found"
 
 
 

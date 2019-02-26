@@ -4,20 +4,24 @@
 
 external-url-viewer "urlscan"
 
-bind-key j down
-bind-key k up
-bind-key J next-feed articlelist
-bind-key K prev-feed articlelist
+bind-key Y pb-download
+bind-key U show-urls
+bind-key u pageup
+bind-key d pagedown
+bind-key D delete-article
 bind-key G end
 bind-key g home
-bind-key d pagedown
-bind-key u pageup
 bind-key l open
+bind-key J next-feed articlelist
+bind-key K prev-feed articlelist
+bind-key j down
+bind-key k up
 bind-key h quit
-bind-key m toggle-article-read
+bind-key x pb-delete
 bind-key n next-unread
+bind-key m toggle-article-read
 bind-key N prev-unread
-bind-key U show-urls
+
 
 # color listnormal cyan default
 # color listfocus black yellow standout bold
@@ -27,8 +31,9 @@ color info red black bold
 color article white default
 
 # Must use prefix macros with single quote to use
-browser linkhandler.sh
+browser "linkhandler.sh -t"
 #macro , open-in-browser
-macro v set browser "queue-ytdl.sh --video"; open-in-browser ; set browser linkhandler.sh
-macro a set browser "queue-ytdl.sh --audio"; open-in-browser ; set browser linkhandler.sh
-macro c set browser "clipboard.sh --write <<<"; open-in-browser ; set browser linkhandler.sh
+macro n next-feed article-list ; next-unread
+macro v set browser "queue-ytdl.sh --video"; open-in-browser ; set browser "linkhandler.sh -t"
+macro a set browser "queue-ytdl.sh --audio"; open-in-browser ; set browser "linkhandler.sh -t"
+macro c set browser "clipboard.sh --write <<<"; open-in-browser ; set browser "linkhandler.sh -t"

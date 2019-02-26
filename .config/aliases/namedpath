@@ -5,15 +5,17 @@
 
 target="$1"
 
-#CDPATH="$HOME/.config/named_directories"
-directory="$CDPATH" # in case there are several directories in $CDPATH
+# in case there are several directories in $CDPATH
+directory="$("${SCRIPTS}/c.sh" cdpath)"
 
-p() { printf '%s\n' "$@"; }
+puts() { printf '%s\n' "$@"; }
+quote() { printf '%s\n' "$1" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
+
 # TODO: test if have to escape slashes
 # eg. symlink that has a slash in name  
 named_dirs="$(
   cd "$directory" || exit "$?";
-  p ./* | awk '{
+  puts ./* | awk '{
      $0=$0"\\/";          # add escaped slash so full directory matched
      gsub(/^\.\//, "");  # remove prepended ./
      gsub(/\|/, "\\|");   # escape pipes, may want to escape slashes?
@@ -26,7 +28,7 @@ named_dirs="${named_dirs%%|}" # remove trailing space (now pipe) added by awk
 # Print the path to cd into
 # Conditionally prepend path to appropriate CDPATH directory if starting with
 # one of the named directories in the appropriate CDPATH directory
-p "$target" | awk '
+puts "$target" | awk '
   !/\/$/{ $0=$0"/" }
   /^('"$named_dirs"')/{ $0="'"$CDPATH"'/"$0}
   {print}

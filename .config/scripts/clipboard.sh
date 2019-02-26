@@ -52,9 +52,6 @@ case "$option" in
       else p "$@"
     fi)"
     has xclip && { p "${content}" | xclip -in -selection clipboard; } && exit 0
-    echo ''
-    echo 'asdfklkjasdf'
-    echo ''
     has termux-clipboard-set \
       && { p "${content}" | termux-clipboard-set; } \
       && exit 0

@@ -6,7 +6,7 @@
 queue="$1"; shift 1
 
 # Helper
-fatal() { printf '%s\n' "$@" >&2; exit 1; }
+die() { printf '%s\n' "$@" >&2; exit 1; }
 
 # Dependency checks
 tsp=''
@@ -15,12 +15,12 @@ if command -v 'ts' >/dev/null 2>&1; then
 elif command -v 'tsp' >/dev/null 2>&1; then
   tsp='tsp'
 else
-  fatal 'FATAL: Requires task spooler (ts/tsp)'
+  die 'FATAL: Requires task spooler (ts/tsp)'
 fi
 
-constants="${SCRIPTS}/constants.sh" 
-[ -x "${constants}" ] || { fatal 'FATAL: `constants.sh` not found'; }
+constants="${SCRIPTS}/c.sh" 
+[ -x "${constants}" ] || die "FATAL: '${constants}' not found"
 
 # Main
-socket="$(${constants} "${queue}")" || { fatal 'FATAL: Invalid queue'; }
+socket="$(${constants} "${queue}")" || die 'FATAL: Invalid queue specified'
 TS_SOCKET="${socket}" ${tsp} "$@"

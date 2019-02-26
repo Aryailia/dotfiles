@@ -140,7 +140,7 @@ augroup shellbuild
   autocmd!
   " Use sh (usually maps to dash terminal) for better POSIX compliance
   autocmd FileType sh noremap <silent> <leader>2 :call BuildAndRun($TMPDIR . '/preview', 'chmod 755 ' . $TMPDIR . '/preview', $TMPDIR . '/preview')<CR>
-  autocmd FileType sh noremap <silent> <leader>3 :call PreviewOpen($TERMINAL_EXECUTE)<CR>
+  autocmd FileType sh noremap <silent> <leader>3 :call PreviewOpen($TERMINAL . ' -e')<CR>
   autocmd FileType sh noremap <silent> <leader>4 :call PreviewClose()<CR>
   autocmd FileType sh noremap <silent> <leader>l :call PreviewSendLine('shellcheck ' . expand('%:p'))<CR>
 augroup END
@@ -149,7 +149,7 @@ augroup rustbuild
   " au BufNewFile,BufRead *.rs set filetype=rust
   autocmd!
   autocmd FileType rust noremap <silent> <leader>2 :call BuildAndRun($TEMP . '/script.txt', 'rustc ' . $TMPDIR . '/script.txt -o %compiledfile', '%compiledfile')<CR>
-  autocmd FileType rust noremap <silent> <leader>3 :call PreviewOpenWindow($TERMINAL_EXECUTE)<CR>
+  autocmd FileType rust noremap <silent> <leader>3 :call PreviewOpenWindow($TERMINAL . ' -e')<CR>
   autocmd FileType rust noremap <silent> <leader>4 :call PreviewClose()<CR>
 augroup END
 
