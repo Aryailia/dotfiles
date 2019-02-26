@@ -7,8 +7,12 @@
 #   "code":2148,"message":"Tips depend on target shell and yours is unknown. Add
 #    a shebang.","fix":null}]
 
+
+
 # Constants
 shellcheck_url="https://www.shellcheck.net/shellcheck.php"
+
+
 
 # Parameter
 show_help() {
@@ -22,41 +26,87 @@ show_help() {
   puts "  website and prints that out."
   puts ""
   puts "OPTIONS"
-  puts "  -h,help"
+  puts "  -d, --dump"
+  puts "    Just prints out the JSON output of online shellcheck. Useful in"
+  puts "    case 'jq' outputs an error (Especially since this does not handle"
+  puts "    interpreting fixes suggested)"
+  puts ""
+  puts "  -h, --help"
   puts "    Display this help menu"
+  puts ""
+  puts "  -i, --ignore-fixes"
+  puts "    Ignores fixes since this does not support them yet"
 }
+
+
+
+# Main
+do_dump="false"
+do_ignore="false"
+do_stdin="true"
+flag_silent=""
+
+main() {
+  output=""
+
+  # Dependencies
+  command -v jq >/dev/null 2>&1 || die "FATAL: Requires 'jq' to work"
+
+  # Prune for options, also do validation checks
+  if [ "$#" -gt 0 ]; then
+    for arg in "$@"; do
+      case "${arg}" in
+        -h|--help)          show_help; exit 1;;
+        -d|--dump)          do_dump="true"; flag_silent="--silent";;
+        -i|--ignore-fixes)  do_ignore="true";;
+        *)                  do_stdin="false"
+                            [ -r "${arg}" ] || die "FATAL: Cannot read '${arg}'"
+                            output="${output} $(quote "${arg}")"
+      esac
+    done
+  else
+    show_help; exit 1
+  fi
+
+  eval "set -- ${output}"
+
+  # Execute on non-option arguments
+  if ${do_stdin}; then
+    file="$(<&0 cat -)"
+    post_shellcheck "script=${file}" "var" "${file}"
+  else
+    for arg in "$@"; do
+      post_shellcheck "script@${arg}" "path" "${arg}"
+    done
+  fi
+
+  exit 0
+}
+
 
 
 # Helpers
-die() { printf '%s\n' "$@" >&2; exit 1; }
-puts() { printf '%s\n' "$@"; }
+die() { printf %s\\n "$@" >&2; exit 1; }
+puts() { printf %s\\n "$@"; }
+quote() { printf %s\\n "$1" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/" ; }
 
-# Main
-main() {
-  case "$1" in
-    -h|--help) show_help;;
-    *)         check "$@"
-  esac
+post_shellcheck() {
+  data="$1"
+  type="$2"
+  target="$3"
+
+  # ${flag_silent} negates --progress-bar
+  curl --progress-bar --data-urlencode "${data}" \
+      ${flag_silent} "${shellcheck_url}" \
+    | { if ${do_ignore}
+      then  <&0 jq 'map(.fix = null)'
+      else  <&0 cat -
+    fi; } | { if ${do_dump}
+      then  <&0 jq '.'
+      else  puts "${arg}"; <&0 json2tty "${type}" "${target}"
+    fi; }
 }
 
-check() {
-  if [ $# -gt 0 ]; then
-    for filepathname in "$@"; do
-      [ -r "${filepathname}" ] || die "FATAL: '${filepathname}' does not exist"
-    done
-
-    for filepathname in "$@"; do
-      puts "${filepathname}"
-      curl "${shellcheck_url}" --progress-bar  \
-          --data-urlencode "script=$(cat "${filepathname}")" \
-        | json2tty path "${filepathname}"
-    done
-  else
-    file="$(cat <&0 -)"
-    curl "${shellcheck_url}" --progress-bar --data-urlencode "script=${file}" \
-      | json2tty var "${file}"
-  fi
-}
 
 json2tty() {
   # switch should be 'path' or 'var'
