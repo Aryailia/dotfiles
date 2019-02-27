@@ -1,35 +1,128 @@
 #!/usr/bin/env sh
-  # /dev/stdin is the target directory to change to
+  # $0 <relative_or_absolute_path>
+#  
+# TODO: Add rigorous portability to ${CDPATH}/'c.sh cdpath' parsing?
+#       I am not even sure what ${PATH} parsing requirements are
+# TODO: Check if examples are correct
 #:!console c ~/named/
-# TODO: Support multiple folders for CDPATH
+# ${PWD} vs `pwd` depends on how you want remembering symlinks followed handled
 
-target="$1"
 
-# in case there are several directories in $CDPATH
-directory="$("${SCRIPTS}/c.sh" cdpath)"
+show_help() {
+  name="${0##*/}"
+  err 'SYNOPSIS'
+  err "  ${name} PATH"
+  err ''
+  err 'DESCRIPTION'
+  err '  Inspired by the folder aliases of zsh. And by the CDPATH of bash'
+  err ''
+  err '  Prints the full path of PATH, if the relative link begins with an'
+  err '  alias, then replace it with to what it aliases. Shortcuts are'
+  err "  specified by 'c.sh cdpath'. "
+  err ''
+  err '  Prioritises the files in the ${PWD}'
+  err ''
+  err "  NOTE: Does not add a newline like 'pwd' does"
+  err ''
+  err 'NOTES'
+  err '  Supports both relative and absolute links.'
+  err ''
+  err '  Setup to have shortcuts setup as symlinks in the folder.'
+  err ''
+  err '  This shortcut is evaluated to his physical link, but the any'
+  err '  subdirectories after will be evaluated normally (for instance, bash'
+  err '  perserves symlinks in its ${PWD}). In other words, the CDPATH'
+  err '  will not be a constant part of the ${PWD} while still perserving'
+  err '  other symlink history.'
+  err ''
+  err '  ${CDPATH}/'\''c.sh cdpath'\'' follows the same format as ${PATH}:'
+  err '  Colon separates directories, so yes, multiple directories supported.'
+  err '  However, this probably cannot handle to many strange characters in'
+  err '  the cdpath.'
+  err ''
+  err 'EXAMPLES (Not sure these are even correct)'
+  err '  Suppose '\''c.sh cdpath'\'' is "~/.config/alias"'
+  err ''
+  err '  If "ln -s ~/.config/alias/scripts ~/.scripts/" then:'
+  err "    \$ cd \$(${name} script/lib); pwd"
+  err '    /home/.scripts/lib'
+  err ''
+  err '  If  "ln -s ~/.config/alias/scripts ~/.scripts/"'
+  err '  and "ln -s ~/.scripts/lib ~/.config/shared"'
+  err "    \$ cd \$(${name} script/lib); pwd"
+  err '    /home/.scripts/shared'
+}
 
-puts() { printf '%s\n' "$@"; }
-quote() { printf '%s\n' "$1" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 
-# TODO: test if have to escape slashes
-# eg. symlink that has a slash in name  
-named_dirs="$(
-  cd "$directory" || exit "$?";
-  puts ./* | awk '{
-     $0=$0"\\/";          # add escaped slash so full directory matched
-     gsub(/^\.\//, "");  # remove prepended ./
-     gsub(/\|/, "\\|");   # escape pipes, may want to escape slashes?
-     print;
-  }' \
-  | tr '\n' '|'
-)"
-named_dirs="${named_dirs%%|}" # remove trailing space (now pipe) added by awk
 
-# Print the path to cd into
-# Conditionally prepend path to appropriate CDPATH directory if starting with
-# one of the named directories in the appropriate CDPATH directory
-puts "$target" | awk '
-  !/\/$/{ $0=$0"/" }
-  /^('"$named_dirs"')/{ $0="'"$CDPATH"'/"$0}
-  {print}
-'
+# Main
+main() {
+  target="$1"
+
+  root="${target%%/*}"  # For checking if ${target} starts with an alias
+  constants="${SCRIPTS}/c.sh"
+
+  [ -z "$target" ] && { show_help; exit 1; }
+  [ -x "${constants}" ] || { err "FATAL: Requires \"${constants}\""; exit 1; }
+  directory="$("${constants}" cdpath)"
+
+  # Case 1: Found in the present working directory
+  for node in ./*; do
+    [ "./${root}" = "${node}" ] && { p "$(pwd)/${target}"; exit 0; }
+  done
+
+  # Rather than rigorous portability, assumes no non-separting colons in CDPATH
+  # NOTE: xargs is newline-separated on busybox (android)
+  #       but not on other POSIX systems without GNU
+  #       This is if doing awk split&quote | xargs reduce to stream
+  eval set -- $(puts '' \ | awk -v dir="${directory}" 'END{
+    len = split(dir, yo, ":");
+    # Shell-safe quote each filepath and put on separate line
+    # Prepares for use by xargs
+    for (i = 1; i <= len; ++i) {
+      # Prepare for use by eval
+      # single quote -> single quote, backslash, single quote, single quote
+      gsub(/'\''/, "'\''\\\\'\''", yo[i]);  # Escape single quotes
+      print("'\''" yo[i] "'\''");           # and surround in quotes
+    }
+  }')
+
+  # Loop through all the directories found in cdpath
+  found=""
+  for dir in "$@"; do
+    if [ ! $(is_dir_empty "${dir}") ]; then
+      for path in "${dir}"/*; do
+        [ "${path##*/}" = "${root}" ] && found="${path}" && break
+      done
+    fi
+    [ -n "${found}" ] && break  # break completely out of the loop
+  done
+
+  # Case 2: Matches with an alias
+  if [ -n "${found}" ]; then
+    cd "${found}" || exit 1
+    # 'pwd' adds a newline to strip while still maintaining trailing newlines
+    sensitive_pwd="$(pwd -P; echo 'x')"; sensitive_pwd="${sensitive_pwd%??}"
+    p "${sensitive_pwd}/${target#${root}}"
+
+  # Case 3: Not associated with any alias
+  else
+    p "${target}"
+  fi
+}
+
+
+
+# Helpers
+p() { printf %s "$@"; }
+puts() { printf %s\\n "$@"; }
+err() { printf %s\\n "$@" >&2; }
+is_dir_empty() (
+  cd "$1" || return 0
+  set -- .[!.]* ; test -f "$1" && return 1
+  set -- ..?* ; test -f "$1" && return 1
+  set -- * ; test -f "$1" && return 1
+  return 0
+)
+
+main "$@"
