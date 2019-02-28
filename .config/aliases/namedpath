@@ -84,7 +84,7 @@ main() {
   for arg in "$@"; do
     case "${arg}" in
       -h|--help)          show_help; exit 1 ;;
-      -l|--list-aliases)  list_aliases "${cdpath}"; exit 1 ;;
+      -l|--list-aliases)  list_aliases "${cdpath}"; exit 0 ;;
       *)                  [ -z "${target}" ] && target="${arg}" ;;
     esac
   done

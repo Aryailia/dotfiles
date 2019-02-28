@@ -14,9 +14,13 @@ alias rrc='source ~/.bash_profile'
 
 # Do not execute `lx` if `cd` errors
 c() {
-  [ -z "$1" ] && namedpath --list-aliases
-  path="$(namedpath "$1"; printf 'x')"; path="${path%?}"
-  cd "${path}" && lx .
+  if [ -z "$1" ]; then
+    namedpath --list-aliases
+    return 1
+  else
+    path="$(namedpath "$1"; printf 'x')"; path="${path%?}"
+    cd "${path}" && lx .
+  fi
 }
 b() {
   errorcode="$?"
