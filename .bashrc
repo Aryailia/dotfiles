@@ -13,14 +13,20 @@ PROMPT_COMMAND='b'
 alias rrc='source ~/.bash_profile'
 
 # Do not execute `lx` if `cd` errors
-c() { path="$(namedpath "$1"; echo 'x')"; cd "${path%?}" && lx .; }
+c() {
+  [ -z "$1" ] && namedpath --list-aliases
+  path="$(namedpath "$1"; printf 'x')"; path="${path%?}"
+  cd "${path}" && lx .
+}
 b() {
   errorcode="$?"
   # More history syncing hackery (bash saves history once session closes)
   # TODO: Test history lines don't change with this (!51 to execute 51 command)
   # TODO: See https://unix.stackexchange.com/questions/1288/
   # TODO: BUG: when ${PWD} contains a newline (colors entire line)
+  history -a  # Append command immediately to history
   history -c  # Clear current history for session
+  history -r  # Read history back into memory
   PS1="$(~/.config/prompt.sh "$errorcode" "$SECONDS")";
   SECONDS="0"
 }
