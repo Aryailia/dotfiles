@@ -28,121 +28,198 @@
 # TODO: backup bookmarks?
 # TODO: if folder is a symlink, it will delete the config file in dotfiles
 # TODO: check for equality?
+# TODO: Check if foward-slash is reserved character on MSYGIT (windows)
+
+
+show_help_and_exit() {
+  name="$(basename "$0"; printf a)"; name="${name%?}"
+  <<EOF cat >&2
+SYNOPSIS
+  ${name} [OPTION]
+  # ${name} [OPTION] DESTINATION (Not supported yet)
+  # ${name} STATE_NUMBER (not meant for external use)
+
+DESCRIPTION
+  This deploys the dotfiles out. Designed so that the dotfiles can be directly
+  cloned and all the configs as neded by programs can follow symlinks to the
+  dotfiles folder and used regularly. Currently only reads the first parameter
+
+  Symlinks everything form \${dotfiles} to \${destination} (default \${HOME}).
+
+  Scripts are treated specially (may want to treat vim's folder specially too)
+  because when creating new scripts, want them to be immediately useable and
+  not require the user to run linker to have them show up.
+
+  You can choose how to handle replacing files that already exist with the flags
+
+  A custom \${destination} is not supported yet (just change it manually)
+
+  The third form is not meant for use externally
+
+OPTIONS
+  -c, --catious
+    Only replaces symlinks if the destination files are they themselves
+    symlinks. Useful if directory changes occured and don't want to destroy
+    existing customisations. (This is not supported as of yet, due to there
+    not being a way to scan for symlinks because 'file' is not found on
+    termux (android) setups by default and have not decided on the solution)
+
+  -f, --force
+    Deletes the destination forcefully and symlinks. Useful if 
+
+  [-i], [--ignore]
+    Does not delete the 
+
+  -h, --help
+    Display this help menu
+
+EOF
+  exit 1
+}
+
+
+################################################################################
+# Constants
+ow_do_not="0"
+ow_symlinks="1"
+ow_force="2"
+
+
 
 ################################################################################
 # Environment variables (customise to your environment)
-dotfiles="$HOME/dotfiles"
-scripts="$dotfiles/.config/scripts/**/* $dotfiles/.config/scripts/*"
-dotenv="$DOTENVIRONMENT"
-namedir="$HOME/.config/named_directories"
+dotfiles="${HOME}/dotfiles"
+destination="${HOME}"
+scripts_relative_path=".config/scripts"
+#dotenv="${DOTENVIRONMENT}"
+#namedir="${HOME}/.config/named_directories"
+ignore="${dotfiles}/.linkerignore.sh"
+
+
 
 main() {
-  ##############################################################################
-  # Settings, the files to link over
-  list="$(p '
-    # Subdirecotires
-    .vim/custom
-    
-    # Files
-    .Xresources .tmux.conf .xinitrc .bash_profile .bashrc .inputrc .Xmodmap
-    .vim/vimrc .gtkrc-2.0 .streamlinkrc .urlview
-  ' | remove_hash_comments)"
+  fsm_state="${1}"; [ "$#" -gt 0 ] && shift 1
   
-  # Files and subfolders in "$dotfiles/.config/"
-  # These will be prefixed with ".config/": subdirectories, then files
-  inconfig="$(p '
-    aliases i3 scripts gtk-3.0 
-  
-    prompt.sh shellrc shell_profile
-    wallpaper.jpg alacritty/alacritty.yml ion/initrc
-    newsboat/config ranger/rc.conf mps-youtube/config 
-  ' | remove_hash_comments)"
-  
-  # Same concept but from $dotenv
-  locales="$(p '
-    .config/newsboat/urls
-  ' | remove_hash_comments)"
-  
-  # Will remove any symlinks contained in $namedir that are not in this hash
-  symlink_hash="$(p "
-    alias=$HOME/dotfiles/.config/aliases
-    conf=$HOME/.config
-    dfconf=$HOME/dotfiles/.config
-    env=$HOME/.environment
-    named=$HOME/.config/named_directories
-    scripts=$HOME/dotfiles/.config/scripts
-  
-    dl=$HOME/Downloads
-    projects=$HOME/projects
-    wiki=$HOME/wiki
-  " | remove_hash_comments)"
+  case "${fsm_state}" in
+    -h|--help)     show_help_and_exit ;;
 
-  ##############################################################################
-  # Code
 
-  # Chmod all the custom scripts (and ones in subfolders for script helpers)
-  for s in $scripts; do chmod 755 "$s"; done
+    -c|--catious) # OVERWRITE="${ow_symlinks}" process_ignores 2 ;;
+                   die 'Currently not supported' ;;
+    -f|--force)    OVERWRITE="${ow_force}"    process_ignores 2 "${ignores}" ;;
+    -i|--ignore)   OVERWRITE="${ow_do_not}"   process_ignores 2 "${ignores}" ;;
 
-  # Symlink all files and subfiles in $list directory into $HOME
-  # ".config" treated differently to shorten $inconfig definition
-  # Manual approach since the ".config" directory itself should not be symlinked
-  # or else installing programs that put files into .config will put those files
-  # into $dotfiles as well.
-  p 'Directly in dotfiles' '===================='
-  for target in $list; do install "$dotfiles" "$target"; done
-  p '' 'Save typing for dotfiles/.config' '================================'
-  for target in $inconfig; do install "$dotfiles" ".config/$target"; done
+    2)  link_to_dotfiles_from_home 3 "$@" ;;
+       #process_ignores 2 "${}";;
+    3)  extras  ;;
+    4)  echo "${OVERWRITE}" ;;
 
-  # Symlinks for named directories, same logic as `install` but spread out
-  # TODO: Just need to wrap this block in a loop to handle mutiple $namedir
-  mkdir -p "$namedir" || { p "✗ mkdir \"$namedir\" error"; exit "$?"; }
-  p '' 'Building named directory symlinks' '================================='
-  # Remove any existing symlinks in the $namedir
-  for name in "$namedir"/.[!.]* "$namedir"/* "$namedir"/..?*; do
-    if file --mime-type "$name" | grep -q 'inode/symlink$'; then
-      rm "$name" || { p "✗ rm \"$name\""; exit "$?"; }
-      #p "← Removed $(basename "$name")"
-    elif [ -e "$name"  ]; then
-      p "✗ Not removing $name"
-    fi
-  done
-  # Symlink as designated by $symlink_hash
-  for keyvalue in $symlink_hash; do
-    source="${keyvalue##*=}"
-    target="$namedir/${keyvalue%=*}"
-    p "$source → $(basename "$target")"
-    mkdir -p "$source" # in case they do not already exist
-    ln -s "$source" "$target" || { p "✗ ln error"; exit "$?"; }
-  done
-
-  # Symlink all files and subfiles in $locales directory into $HOME
-  p '' 'Not uploading these to github' '============================='
-  for target in $locales; do install "$dotenv" "$target"; done
+    *)             OVERWRITE="${ow_do_not}"   process_ignores 2 "${ignores}" ;;
+  esac
 }
+
+extras() {
+  symlink "${dotfiles}/${scripts_relative_path}" \
+    "${destination}/${scripts_relative_path}" "${scripts_relative_path}"
+  find "${dotfiles}/${scripts_relative_path}" -exec chmod 755 '{}' +
+}
+
+process_ignores() {
+  ctrl="OVERWRITE='${OVERWRITE}'"
+  next_fsm="$1"
+
+  [ -x "$ignore" ] \
+    || die "FATAL: Requires the shell script \"${ignore}\"." \
+    "This just has to output a shell-quoted string (which can be blank)." \
+    "Relative links and no unquoted newlines please"
+  eval "set -- $(${ignore})"
+
+  condtions=""
+  for arg in "$@"; do
+    conditions="${conditions} ! -path '${arg}'"
+  done
+  conditions="${conditions} \\( -type f -o -type l \\)"  # link or file
+
+  eval "${ctrl} find ./ ${conditions} -exec '$0' '${next_fsm}' '{}' +"
+
+  # Some debugging stuff
+  #eval "find ./ ${conditions}" | awk '(1){print $0;} END{print NR;}'
+  #puts "${conditions}"
+}
+
+link_to_dotfiles_from_home() {
+  #ctrl="OVERWRITE='${OVERWRITE}'"
+  next_fsm="$1"; shift 1
+  [ -d "${destination}" ] || die "FATAL: ${destination} is invalid"
+  
+  # Some debugging stuff
+  #puts "$@" | awk '(1){print $0;} END{print NR;}'
+  #exit
+
+  for relative_path in "$@"; do
+    rel="${relative_path#./}"
+    symlink "${dotfiles}/${rel}" "${destination}/${rel}" "${rel}"
+  done
+   
+  OVERWRITE="${OVERWRITE}" "$0" "${next_fsm}"
+}
+
+symlink() {
+  #OVERWRITE="${OVERWRITE}"
+  source="$1"
+  target="$2"
+  name="${3:-${target}}"
+  
+  [ ! -e "${source}" ] && die "✗ FAIL: \"${source}\" does not exist"
+
+  if [ "${OVERWRITE}" = "${ow_force}" ] \
+    #|| [ "${OVERWRITE}" = "${ow_symlinks}" ] \
+    #&& { file --mime-type "${target}" | grep -q 'inode/symlink$' } 
+  then
+    rm -f "${target}"
+  fi
+
+  if [ -e "${target}" ]; then
+    puts "! WARN: skipping without flags \"${name}\""
+  else
+    mkdir -p "${target%/*}"  # '/' is reserved on UNIX but not windows
+    ln -s "${source}" "${target}" || die "✗ FATAL: Unable to link \"${name}\""
+    puts "✓ SUCCESS: \"${name}\""
+  fi
+}
+
+#blah() {
+#  # Same concept but from $dotenv
+#  locales="$(puts '
+#    .config/newsboat/urls
+#  ' | remove_hash_comments)"
+#  
+#  # Will remove any symlinks contained in $namedir that are not in this hash
+#  symlink_hash="$(puts "
+#    alias=$HOME/dotfiles/.config/aliases
+#    conf=$HOME/.config
+#    dfconf=$HOME/dotfiles/.config
+#    env=$HOME/.environment
+#    named=$HOME/.config/named_directories
+#    scripts=$HOME/dotfiles/.config/scripts
+#  
+#    dl=$HOME/Downloads
+#    projects=$HOME/projects
+#    wiki=$HOME/wiki
+#  " | remove_hash_comments)"
+#
+#  ##############################################################################
+#  # Code
+#
+#  # Chmod all the custom scripts (and ones in subfolders for script helpers)
+#}
 
 
 ################################################################################
 # Helpers
-p() { printf '%s\n' "$@"; }
-remove_hash_comments() { <&0 grep -v -e '^[ \t]*#' -e '^$'; }
+puts() { printf '%s\n' "$@"; }
+die() { printf %s\\n "$@" >&2; exit 1; }
+#remove_hash_comments() { <&0 grep -v -e '^[ \t]*#' -e '^$'; }
 
-# Expects full paths, links everything into $HOME
-install() {
-  oldbase="$1"
-  targetfrombase="$2"
-  targetdirectory="$(dirname "$HOME/$2")"
- 
-  # consider permission validation checks
-  if [ -e "$oldbase/$targetfrombase" ]; then # If file/directory exists
-    p "$targetfrombase"
-  else
-    p "✗ FAIL: $targetfrombase does not exist"
-    exit 1 # design choice to not use return
-  fi
 
-  mkdir -p "$targetdirectory"  # Make the any directories if missing
-  rm -fr "${HOME:?}/$targetfrombase" # :? prevents evaluation to '/'
-  ln -s "$oldbase/$targetfrombase" "$HOME/$targetfrombase"
-}
-
-main
+main "$@"

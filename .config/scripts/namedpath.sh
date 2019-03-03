@@ -74,10 +74,7 @@ main() {
 
   # Depenendency check
   [ -x "${globals}" ] || die "FATAL: Requires \"${globals}\""
-  cdpath="$("${globals}" cdpath):${HOME}/ime/hacking/a
-"
-
-
+  cdpath="$("${globals}" cdpath)"
 
   # Process parameters (only accept the first non-flag)
   target="" 

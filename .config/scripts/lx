@@ -6,7 +6,7 @@
 # Default to '.' if argument is provided
 input="${1:-.}"
 
-target="$(namedpath "${input}"; printf 'x')"; target="${target%?}"
+target="$("${SCRIPTS}/namedpath.sh" "${input}"; printf x)"; target="${target%?}"
 
 if   [ -d "${target}" ]; then
   cd "${target}" || exit "$?"
