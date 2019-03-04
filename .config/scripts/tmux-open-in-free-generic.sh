@@ -7,9 +7,9 @@
 # https://www.mail-archive.com/dev@suckless.org/msg22465.html
 
 # Dependencies
-script="${SCRIPTS}/tmux-get-free-generic.sh"
-[ -x "${script}" ] || { "${script} must exit and be executable"; exit 1; }
-session_name="$(${script})" || exit 1
+getid="${SCRIPTS}/wrappers/tmux-get-free-generic.sh"
+[ -x "${getid}" ] || { "${getid} must exit and be executable"; exit 1; }
+session_name="$(${getid})" || exit 1
 
 # Main
 # Open and run the command specified by the argument

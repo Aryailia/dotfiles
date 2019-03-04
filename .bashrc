@@ -12,6 +12,14 @@ PROMPT_COMMAND='b'
 file="${HOME}/.config/aliasrc"; [ -f "${file}" ] && source "${file}"
 alias rrc='source ~/.bash_profile'
 
+c() {
+  if [ -z "$1" ]; then
+    "${SCRIPTS}/namedpath.sh" --list-aliases
+  else
+    path="$("${SCRIPTS}/namedpath.sh" "$1"; printf x)"; path="${path%?}"
+    cd "${path}" && "${SCRIPTS}/wrappers/lx" .
+  fi
+}
 b() {
   errorcode="$?"
   # More history syncing hackery (bash saves history once session closes)

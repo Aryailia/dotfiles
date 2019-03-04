@@ -34,7 +34,7 @@ fatal() { printf '%s\n' "$@"; exit 1; }
 # Dependency checks
 constants="${SCRIPTS}/c.sh"
 [ -x "${constants}" ] || fatal "FATAL: '${constants}' not found"
-destination="$(${constants} downloads)"
+destination="$(${constants} downloads)/queue"
 [ -w "${destination}" ] || fatal "FATAL: '${destination}' not found"
 tsp_queue="${SCRIPTS}/queue-tsp.sh"
 [ -x "${tsp_queue}" ] || fatal "FATAL: '${tsp_queue}' not found"

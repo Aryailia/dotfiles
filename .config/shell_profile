@@ -1,14 +1,12 @@
 #export PATH="$PATH:$(du "$HOME/.scripts/" | cut -f2 | tr '\n' ':' | sed 's/:*$//')"
-export PATH="${PATH}:${HOME}/.config/scripts:${HOME}/.config/aliases"
-export PATH="${PATH}:/usr/local/go/bin"
-
-asdfasdf() {
-echo 'the fuck'
-}
+SCRIPTS="${HOME}/.config/scripts"
+PATH="${PATH}:$(find "${SCRIPTS}/" -type d | tr '\n' ':' | sed 's/:*$//')"
+PATH="${PATH}:/usr/local/go/bin"
+export PATH
 
 # Folders
 export DOTENVIRONMENT="${HOME}/.environment"
-export SCRIPTS="${HOME}/.config/scripts"
+export SCRIPTS
 # `${TMPDIR}` set in Android and MacOS
 test -z "${TMPDIR}" && { printf '%s' "$(uname)" | grep -q 'Linux'; } \
   && export TMPDIR='/tmp'
