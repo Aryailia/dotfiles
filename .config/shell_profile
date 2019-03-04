@@ -1,9 +1,14 @@
+#export PATH="$PATH:$(du "$HOME/.scripts/" | cut -f2 | tr '\n' ':' | sed 's/:*$//')"
 export PATH="${PATH}:${HOME}/.config/scripts:${HOME}/.config/aliases"
 export PATH="${PATH}:/usr/local/go/bin"
 
+asdfasdf() {
+echo 'the fuck'
+}
+
+# Folders
 export DOTENVIRONMENT="${HOME}/.environment"
 export SCRIPTS="${HOME}/.config/scripts"
-
 # `${TMPDIR}` set in Android and MacOS
 test -z "${TMPDIR}" && { printf '%s' "$(uname)" | grep -q 'Linux'; } \
   && export TMPDIR='/tmp'
@@ -16,3 +21,13 @@ command -v st >/dev/null 2>&1     && { export TERMINAL='st'; export TERM='st'; }
 command -v w3m >/dev/null 2>&1    && export BROWSER='w3m'
 command -v midori >/dev/null 2>&1 && export BROWSER='midori'
 command -v surf >/dev/null 2>&1   && export BROWSER='surf'
+
+# Less/manpages colors
+export LESS=-R
+export LESS_TERMCAP_mb="$(printf '%b' '[1;31m')"; a="${a%_}"
+export LESS_TERMCAP_md="$(printf '%b' '[1;36m')"; a="${a%_}"
+export LESS_TERMCAP_me="$(printf '%b' '[0m')"; a="${a%_}"
+export LESS_TERMCAP_so="$(printf '%b' '[01;44;33m')"; a="${a%_}"
+export LESS_TERMCAP_se="$(printf '%b' '[0m')"; a="${a%_}"
+export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"; a="${a%_}"
+export LESS_TERMCAP_ue="$(printf '%b' '[0m')"; a="${a%_}"

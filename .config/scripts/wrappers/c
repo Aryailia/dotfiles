@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+if [ -z "$1" ]; then
+  "${SCRIPTS}/wrappers/namedpath.sh" --list-aliases
+  return 1
+else
+  path="$("${SCRIPTS}/wrappers/namedpath.sh" "$1"; printf 'x')"; path="${path%?}"
+  cd "${path}" && "${SCRIPTS}/wrappers/lx" .
+fi
