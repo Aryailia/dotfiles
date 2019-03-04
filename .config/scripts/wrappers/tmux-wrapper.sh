@@ -19,6 +19,10 @@ COMMANDS
  
   g, get
     Primarly for use by open
+     
+  i, insert PARAMETER
+    Inserts the output of PARAMETER into the current pane by creating a
+    temporary new window which executes
     
   o, open
     Replacement running \`tmux\` to enter a tmux session. Has a keep the session
@@ -50,12 +54,24 @@ main() {
   [ "$#" -gt "0" ] && shift 1
   case "${cmd}" in
     h|-h|help|--help)  show_help_and_exit ;;
-    g|get)    get_reasonable_generic_session_number; exit 0 ;;
-    o|open)   run_in_generic "$@"; exit 0 ;;
-    p|prune)  prune_nongenerics; exit 0 ;;
-    s|split)  split_into_tmux_and_run "$@"; exit 0 ;;
+    g|get)     get_reasonable_generic_session_number; exit 0 ;;
+    i|insert)  insert_into_current_pane "$@"; exit 0 ;;
+    o|open)    run_in_generic "$@"; exit 0 ;;
+    p|prune)   prune_nongenerics; exit 0 ;;
+    s|split)   split_into_tmux_and_run "$@"; exit 0 ;;
   esac
   show_help_and_exit
+}
+
+is_inside_tmux() {
+  # Test if inside tmux session. Tmux sets ${TMUX}
+  test -z "${TMUX}"
+}
+
+insert_into_current_pane() {
+  id="$(tmux run-shell "printf %s #{window_id}")"
+  to_run='"$('"$@"')"'
+  tmux new-window "tmux send-keys -t '${id}' \"${to_run}\""
 }
 
 # $0 <cmd_to_run_arg1> <cmd_to_run_arg2> ...
@@ -75,9 +91,8 @@ run_in_generic() {
 # Opens a new horizontal split and types <cmd...> ($*) and enters
 # If not attached to a tmux session, then types <cmd...> into a new session
 split_into_tmux_and_run() {
-  # Test if inside tmux session. Tmux sets ${TMUX}
   pane_id=""
-  if [ -z "${TMUX}" ]; then
+  if is_inside_tmux; then
     pane_id="$(tmux new-session -dP -F '#{pane_id}')"
   else
     # -d does not change which pane is active, -P print, -h horizontal
