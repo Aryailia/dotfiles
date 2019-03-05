@@ -72,7 +72,7 @@ main() {
 # Have to be careful of how quoting is done because it will essentialy eval
 # The code at least once
 insert_into_current_pane() {
-  id="$(tmux run-shell "printf %s #{window_id}")"
+  id="$(tmux display-message -p "#{window_id}")"
   to_run="\"\$($*)\""
   tmux new-window "tmux send-keys -t '${id}' \"${to_run}\""
 }
