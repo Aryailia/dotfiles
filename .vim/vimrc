@@ -9,39 +9,17 @@ filetype plugin indent on
 
 " Automatically executes `filetype plugin indent on` and `syntax enable`
 call plug#begin('~/.vim/plugged')
-Plug 'vimwiki/vimwiki', { 'branch': 'dev' } " , 'for': 'markdown' }
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-scriptease'
-Plug 'rust-lang/rust.vim'
-Plug 'godlygeek/tabular'
+  Plug 'vimwiki/vimwiki', { 'branch': 'dev' } " , 'for': 'markdown' }
+  Plug 'tpope/vim-surround'
+  Plug 'tpope/vim-scriptease'
+  Plug 'rust-lang/rust.vim'
+  Plug 'godlygeek/tabular'
 call plug#end()
 
 " autocmd BufNewFile,BufRead *.md set filetype=markdown
 
-let g:ywvim_ims=[ 
-          \['py', '拼音', 'pinyin.ywvim'], 
-          \['zm', '郑码', 'zhengma.ywvim'], 
-          \['zy', '注音', 'zhuyin.ywvim'], 
-          \] 
-
-let g:ywvim_py = { 'helpim':'py', 'gb':0 } 
-
-let g:ywvim_zhpunc = 1 
-let g:ywvim_listmax = 5 
-let g:ywvim_esc_autoff = 0 
-let g:ywvim_autoinput = 0 
-let g:ywvim_intelligent_punc=1 
-let g:ywvim_circlecandidates = 1 
-let g:ywvim_helpim_on = 0 
-let g:ywvim_matchexact = 0 
-let g:ywvim_chinesecode = 1 
-let g:ywvim_gb = 0 
-let g:ywvim_preconv = 'g2b' 
-let g:ywvim_conv = '' 
-let g:ywvim_lockb = 1 
 
 " General
-augroup general
   set nocompatible
   set foldmethod=manual
 
@@ -50,15 +28,16 @@ augroup general
     set encoding=utf-8
   endif
 
-  " set ruler
-  set nrformats-=octal
+  set nrformats-=octal  " Leading 0s are not recognised as octals
   set formatoptions-=c  " Do not auto add comments
   set formatoptions+=j  " Delete comment leaders when joining lines
-
-  " improve syntax performance
-  syntax sync minlines=256
+  
+  set number " setting relativenumber was kiling performance
+  syntax sync minlines=256  " improve syntax performance
   set nocursorcolumn
   set nocursorline
+  set colorcolumn=81  " Archaic 80-character width, keep to before the line
+  highlight ColorColumn ctermfg=red ctermbg=cyan guibg=cyan
 
   " New vertical and horizontal splits open down and right respectively by default
   set splitbelow
@@ -75,23 +54,38 @@ augroup general
   set wildmode=list:longest   " Tab press completes and lists
   silent! set wildignorecase  " Case insensitive, if supported
 
-  " Marker for the ever popular and possibly archaic 80 column width
-  " The colored column is not okay to include
-  set colorcolumn=81
-  highlight ColorColumn ctermfg=red ctermbg=cyan guibg=cyan
-  
-  set number " setting relativenumber was kiling performance
-augroup END
 
+" Plugin Settings
+  " yuvim, CYK input
+  let g:ywvim_ims=[ 
+    \['py', '拼音', 'pinyin.ywvim'], 
+    \['zm', '郑码', 'zhengma.ywvim'], 
+    \['zy', '注音', 'zhuyin.ywvim'], 
+  \] 
 
-augroup external_plugins
-  " # VimWiki
-  let g:vimwiki_ext2syntax = { '.md': 'markdown', '.wiki': 'media' }
-  " let g:vimwiki_folding = 'expr' " Folding does not play well with markdown-toc
-  let g:vimiwki_list = [{'path': '~/wiki/', 'syntax': 'markdown', 'ext': '.md'},
-    \ {'path': '~/blog/test/', 'auto_toc': 1, 'index': 'index.wiki'}]
+  let g:ywvim_py = { 'helpim':'py', 'gb':0 } 
 
-augroup END
+  let g:ywvim_zhpunc = 1 
+  let g:ywvim_listmax = 5 
+  let g:ywvim_esc_autoff = 0 
+  let g:ywvim_autoinput = 0 
+  let g:ywvim_intelligent_punc=1 
+  let g:ywvim_circlecandidates = 1 
+  let g:ywvim_helpim_on = 0 
+  let g:ywvim_matchexact = 0 
+  let g:ywvim_chinesecode = 1 
+  let g:ywvim_gb = 0 
+  let g:ywvim_preconv = 'g2b' 
+  let g:ywvim_conv = '' 
+  let g:ywvim_lockb = 1 
+
+  " Vimwiki
+    let g:vimwiki_ext2syntax = { '.md': 'markdown', '.wiki': 'media' }
+    " TODO: Have not really figured this out
+    let g:vimiwki_list = [
+      \ {'path': '~/wiki/', 'syntax': 'markdown', 'ext': '.md'},
+      \ {'path': '~/blog/test/', 'auto_toc': 1, 'index': 'index.wiki'}
+    \]
 
 augroup vimrc
   " reset any autocommands
@@ -118,17 +112,13 @@ augroup vimrc
 
   " Key rebindings `:help index`
   " http://vimdoc.sourceforge.net/htmldoc/vimindex.html
-
-
   " Movement
   nnoremap j         gj
   nnoremap k         gk
   nnoremap <C-j>     j
   nnoremap <C-k>     k
 
-
   nnoremap <leader>s :write<CR>
-
   
   " #Clipboard stuff
   " Sync Clipboard, not sure why it needs double newline
