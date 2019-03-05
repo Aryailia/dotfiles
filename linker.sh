@@ -32,7 +32,7 @@
 
 
 show_help_and_exit() {
-  name="$(basename "$0"; printf a)"; name="${name%?}"
+  name="${me}"
   <<EOF cat >&2
 SYNOPSIS
   ${name} [OPTION]
@@ -89,6 +89,7 @@ ow_force="2"
 ################################################################################
 # Environment variables (customise to your environment)
 dotfiles="${HOME}/dotfiles"
+me="${dotfiles}/$(basename "$0"; printf a)"; me="${me%??}"
 destination="${HOME}"
 scripts_relative_path=".config/scripts"
 #dotenv="${DOTENVIRONMENT}"
@@ -111,17 +112,32 @@ main() {
 
     2)  link_to_dotfiles_from_home 3 "$@" ;;
        #process_ignores 2 "${}";;
-    3)  extras  ;;
-    4)  echo "${OVERWRITE}" ;;
+    3)  extras 4 ;;
+    4)  link_to_dotfiles_from_home 5 "$@" ;;
+    5)  ;;
 
-    *)             OVERWRITE="${ow_do_not}"   process_ignores 2 "${ignores}" ;;
+    *)              OVERWRITE="${ow_do_not}"   process_ignores 2 "${ignores}" ;;
   esac
 }
 
 extras() {
+  ctrl="OVERWRITE='${OVERWRITE}'"
+  next_fsm="$1"
+
+  puts "" "Special Case" "============"
   symlink "${dotfiles}/${scripts_relative_path}" \
     "${destination}/${scripts_relative_path}" "${scripts_relative_path}"
   find "${dotfiles}/${scripts_relative_path}" -exec chmod 755 '{}' +
+
+  vim_plug="${HOME}/.vim/autoload/plug.vim"
+  [ -f "${vim_plug}" ] || curl -fLo "${vim_plug}" --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  p=".vim/vimrc";   symlink "${dotfiles}/${p}" "${destination}/${p}" "${p}"
+
+  # Include all the folders in ${p}, excluding ${p} itself
+  cd "${dotfiles}" || die "FATAL: dotfiles specified does not exist"
+  p="./.vim/plugin"
+  find "${p}" ! -path "${p}" -type d -exec "${me}" "${next_fsm}" '{}' +
 }
 
 process_ignores() {
@@ -140,7 +156,8 @@ process_ignores() {
   done
   conditions="${conditions} \\( -type f -o -type l \\)"  # link or file
 
-  eval "${ctrl} find ./ ${conditions} -exec '$0' '${next_fsm}' '{}' +"
+  cd "${dotfiles}" || die "FATAL: dotfiles specified does not exist"
+  eval "${ctrl} find ./ ${conditions} -exec '${me}' '${next_fsm}' '{}' +"
 
   # Some debugging stuff
   #eval "find ./ ${conditions}" | awk '(1){print $0;} END{print NR;}'
@@ -161,7 +178,7 @@ link_to_dotfiles_from_home() {
     symlink "${dotfiles}/${rel}" "${destination}/${rel}" "${rel}"
   done
    
-  OVERWRITE="${OVERWRITE}" "$0" "${next_fsm}"
+  OVERWRITE="${OVERWRITE}" "${me}" "${next_fsm}"
 }
 
 symlink() {

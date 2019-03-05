@@ -29,7 +29,6 @@ EXAMPLES
   \$ ${name} --read
   \$ ${name} --help
 EOF
-  exit 1
 }
 
 
@@ -47,7 +46,7 @@ option="$1"
 
 # Main
 case "$option" in
-  -h|--help)  show_help_and_exit ;;
+  -h|--help)  show_help; exit 0 ;;
 
   -w|--write)
     content="$(if [ "$#" -eq 0 ]
@@ -68,7 +67,7 @@ case "$option" in
     has termux-clipboard-get && termux-clipboard-get && exit 0
     ;;
 
-  *)  show_help_and_exit ;;
+  *)  show_help; exit 1 ;;
 esac
 
 echo 'ERROR: Cannot find clipboard program'

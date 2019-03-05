@@ -3,27 +3,29 @@
 # Decide what program to open with. Defaults to browser
 
 show_help() {
-  name="$(basename "$0")"
-  puts "SYNOPSIS"
-  puts "  ${name} OPTIONS"
-  puts ""
-  puts "DESCRIPTION"
-  puts "  Accepts <url> and determines what behaviour to run depending on the"
-  puts "  behaviour specified by <option>"
-  puts ""
-  puts "OPTIONS"
-  puts "  -d, --download"
-  puts "    Download the folder specified in c.sh (constants)"
-  puts "    queue-ytdl.sh by defaults will download to the 'queue' subfolder"
-  puts ""
-  puts "  -g, --gui"
-  puts "    Opens an X window outside of the terminal"
-  puts ""
-  puts "  -h, --help"
-  puts "    Displays this help"
-  puts ""
-  puts "  -t, --terminal"
-  puts "    Opens a new tmux pane/session a TUI/CLI program"
+  name="$(basename "$0"; printf a)"; name="${name%??}"
+  <<EOF cat - >&2
+SYNOPSIS
+  ${name} OPTIONS
+
+DESCRIPTION
+  Accepts <url> and determines what behaviour to run depending on the
+  behaviour specified by <option>
+
+OPTIONS
+  -d, --download
+    Download the folder specified in c.sh (constants)
+    queue-ytdl.sh by defaults will download to the 'queue' subfolder
+
+  -g, --gui
+    Opens an X window outside of the terminal
+
+  -h, --help
+    Displays this help
+
+  -t, --terminal
+    Opens a new tmux pane/session a TUI/CLI program
+EOF
 }
 
 # Constants
@@ -51,11 +53,11 @@ main() {
 
   # Option parsing
   case "${type}" in
-    -h|--help)  show_help; exit 1;;
+    -h|--help)  show_help; exit 0 ;;
     -d|--download)  is_download="true" ;;
     -t|--terminal)  is_local="true" ;;
     -g|--gui)       is_external="true" ;;
-    *)  show_help; exit 1;;
+    *)  show_help; exit 1 ;;
   esac
 
   # Handle the link

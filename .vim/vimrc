@@ -1,18 +1,54 @@
 " the `autocmd!` deletes previous bindings if sourced again
-" Pathogen for plugins:
-  mapclear
-  mapclear!
-  execute pathogen#infect()
-  execute pathogen#helptags()
+" Not sure if this even helps but to help when sourcing for editing 
+mapclear
+mapclear!
+
+"execute pathogen#infect()
+syntax on
+filetype plugin indent on
+
+" Automatically executes `filetype plugin indent on` and `syntax enable`
+"call plug#begin('~/.vim/plugged')
+"Plug 'vimwiki/vimwiki', { 'branch': 'dev' } " , 'for': 'markdown' }
+"Plug 'tpope/vim-surround'
+"Plug 'rust-lang/rust.vim'
+"Plug 'godlygeek/tabular'
+"call plug#end()
+
+" autocmd BufNewFile,BufRead *.md set filetype=markdown
+
+let g:ywvim_ims=[ 
+          \['py', '拼音', 'pinyin.ywvim'], 
+          \['zm', '郑码', 'zhengma.ywvim'], 
+          \['zy', '注音', 'zhuyin.ywvim'], 
+          \] 
+
+let g:ywvim_py = { 'helpim':'py', 'gb':0 } 
+
+let g:ywvim_zhpunc = 1 
+let g:ywvim_listmax = 5 
+let g:ywvim_esc_autoff = 0 
+let g:ywvim_autoinput = 0 
+let g:ywvim_intelligent_punc=1 
+let g:ywvim_circlecandidates = 1 
+let g:ywvim_helpim_on = 0 
+let g:ywvim_matchexact = 0 
+let g:ywvim_chinesecode = 1 
+let g:ywvim_gb = 0 
+let g:ywvim_preconv = 'g2b' 
+let g:ywvim_conv = '' 
+let g:ywvim_lockb = 1 
 
 " General
 augroup general
   set nocompatible
-  syntax on
-  filetype plugin on
-
   set foldmethod=manual
-  set encoding=utf-8
+
+  " Use UTF-8 if we can and env LANG didn't tell us not to
+  if has('multi_byte') && !exists('$LANG') && &encoding ==# 'latin1'
+    set encoding=utf-8
+  endif
+
   " set ruler
   set nrformats-=octal
   set wildmenu
@@ -27,10 +63,11 @@ augroup general
   set splitbelow
   set splitright
 
-  " Autoindent settings for programming. These are set by sleuth plugin
-  " set expandtab
-  " set shiftwidth=2
-  " set softtabstop=2
+  " The all-important default indent settings; filetypes to tweak
+  set autoindent     " Use indent of previous line on new lines
+  "set expandtab      " Use spaces instead of tabs
+  set shiftwidth=2   " Indent with two spaces
+  "set softtabstop=2  " Insert two spaces with tab key
 
   " Marker for the ever popular and possibly archaic 80 column width
   " The colored column is not okay to include
@@ -64,11 +101,8 @@ augroup vimrc
     execute('normal! ' . b:WindowPosition . 'Gzt')
   endfunction
 
+  " For build tools (needs to be refactored)
   let g:terminal_execute = 'st -e'
-  source ~/.vim/custom/tmuxpreview.vim
-  source ~/.vim/custom/buildtools.vim
-  source ~/.vim/custom/interlinks.vim
-  source ~/.vim/custom/markdown-footnotes.vim
   " Need to execute cause of the dash
   " execute 'source ~/.vim/custom/syntax-interlink.vim'
   nnoremap <leader>zx :call FootnoteViewToggle()<CR>
