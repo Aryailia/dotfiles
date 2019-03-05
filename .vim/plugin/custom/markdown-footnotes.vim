@@ -46,7 +46,7 @@ function! FootnoteViewToggle()
   " 'exists' for first run
   " 'winnr' in case closed main window so only one left
   " '!= -1 && win_gotoid' if opened a window and it's still openable
-  if !exists('b:MarkdownFootnote_WinId') || l:window_count == 1 ||
+  if !exists('b:MarkdownFootnote_WinId') ||
       \ (b:MarkdownFootnote_WinId != -1 && win_gotoid(b:MarkdownFootnote_WinId))
     if l:window_count > 1
       " Already called 'win_gotoid()'
@@ -116,7 +116,7 @@ function! s:MutateSortTagsAfterCursor(value, type)
   while 1
     let [l:row, l:col] = searchpos(s:CITE_REGEXP, 'W')
     if l:row == 0 && l:col == 0 | break | endif
-    let [l:a, l:cite] = s:GetRegexpAtIndex(getline(l:row), s:CITE_REGEXP, l:col)
+    let [l:_, l:cite] = s:GetRegexpAtIndex(getline(l:row), s:CITE_REGEXP, l:col)
     let l:cite_tag = s:ExtractCiteTag(l:cite)
     let l:def_row = s:FindRowOfDefFromCite(l:cite)
 
@@ -189,8 +189,8 @@ endfunction
 function! s:GetSurroundingCiteTagsAtCursor()
   " Move cursor to avoid finding the citation cursor is already on
   " Only necessary for the back search
-  let [l:index, l:match] = s:FindCiteAtCursor()
   let [l:row, l:col] = [line('.'), col('.')]
+  let [l:index, l:_] = s:GetRegexpAtIndex(getline(l:row), s:CITE_REGEXP, l:col)
   if l:index != -1 | call cursor(l:row, l:index + 1) | endif
 
   " Restore cursor, necessary if citation was under original cursor position
