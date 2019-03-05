@@ -47,11 +47,13 @@ Recommendation, reason(s), and example if pertinent
   + `{ echo 'a'; }`
 
 # Compact form examples
-`if grep -q 'a'; then echo 'a'; else echo 'b'; fi`
-`if grep -q 'a'; then echo 'a' & else echo 'b' & fi`
-`[ -r 't.txt' ] || { echo 'a'; exit 1; }`
-`case "${a}" in a) echo 'a';; *) echo 'default';; esac`
-`</dev/null awk 'END{ print("No input awkscript"); }'`
+Single-line if        | `if grep -q 'a'; then echo 'a'; else echo 'b'; fi`
+Single-line if        | `if grep -q 'a'; then echo 'a' & else echo 'b' & fi`
+Alternative if        | `[ -r 't.txt' ] || { echo 'a'; exit 1; }`
+Single-line case      | `case "${a}" in a) echo 'a';; *) echo 'default';; esac`
+Inputless awk         | `</dev/null awk 'END{ print("No input awkscript"); }'`
+Piped comments        | `piped_comment() { print %s "$1" >/dev/null 2>&1; <&0 cat -; }`
+Piped comment usage   | `printf %s\\n "${input}" | piped_comment A comment | sed 11q`
 
 # Functional-programming structuring
 - Ternary operator (see clipboard.sh)
