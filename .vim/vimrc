@@ -8,12 +8,13 @@ syntax on
 filetype plugin indent on
 
 " Automatically executes `filetype plugin indent on` and `syntax enable`
-"call plug#begin('~/.vim/plugged')
-"Plug 'vimwiki/vimwiki', { 'branch': 'dev' } " , 'for': 'markdown' }
-"Plug 'tpope/vim-surround'
-"Plug 'rust-lang/rust.vim'
-"Plug 'godlygeek/tabular'
-"call plug#end()
+call plug#begin('~/.vim/plugged')
+Plug 'vimwiki/vimwiki', { 'branch': 'dev' } " , 'for': 'markdown' }
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-scriptease'
+Plug 'rust-lang/rust.vim'
+Plug 'godlygeek/tabular'
+call plug#end()
 
 " autocmd BufNewFile,BufRead *.md set filetype=markdown
 
@@ -51,8 +52,8 @@ augroup general
 
   " set ruler
   set nrformats-=octal
-  set wildmenu
-  " set formatoptions=tcq
+  set formatoptions-=c  " Do not auto add comments
+  set formatoptions+=j  " Delete comment leaders when joining lines
 
   " improve syntax performance
   syntax sync minlines=256
@@ -68,6 +69,11 @@ augroup general
   "set expandtab      " Use spaces instead of tabs
   set shiftwidth=2   " Indent with two spaces
   "set softtabstop=2  " Insert two spaces with tab key
+
+  " Wildmenu settings; see also plugin/wildignore.vim
+  set wildmenu                " Use wildmenu
+  set wildmode=list:longest   " Tab press completes and lists
+  silent! set wildignorecase  " Case insensitive, if supported
 
   " Marker for the ever popular and possibly archaic 80 column width
   " The colored column is not okay to include
@@ -168,15 +174,6 @@ augroup compilable
   " Not really sure how to fix non-silent other than using two enters
   imap <F2> <C-o>\2
   imap <F3> <C-o>\3
-augroup END
-
-augroup shellbuild
-  autocmd!
-  " Use sh (usually maps to dash terminal) for better POSIX compliance
-  autocmd FileType sh noremap <silent> <leader>2 :call BuildAndRun($TMPDIR . '/preview', 'chmod 755 ' . $TMPDIR . '/preview', $TMPDIR . '/preview')<CR>
-  autocmd FileType sh noremap <silent> <leader>3 :call PreviewOpen($TERMINAL . ' -e')<CR>
-  autocmd FileType sh noremap <silent> <leader>4 :call PreviewClose()<CR>
-  autocmd FileType sh noremap <silent> <leader>l :call PreviewSendLine('shellcheck ' . expand('%:p'))<CR>
 augroup END
 
 augroup rustbuild

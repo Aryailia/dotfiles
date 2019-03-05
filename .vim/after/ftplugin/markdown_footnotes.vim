@@ -46,7 +46,7 @@ function! FootnoteViewToggle()
   " 'exists' for first run
   " 'winnr' in case closed main window so only one left
   " '!= -1 && win_gotoid' if opened a window and it's still openable
-  if !exists('b:MarkdownFootnote_WinId') ||
+  if exists('b:MarkdownFootnote_WinId') &&
       \ (b:MarkdownFootnote_WinId != -1 && win_gotoid(b:MarkdownFootnote_WinId))
     if l:window_count > 1
       " Already called 'win_gotoid()'

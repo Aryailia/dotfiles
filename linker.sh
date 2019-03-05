@@ -134,10 +134,13 @@ extras() {
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   p=".vim/vimrc";   symlink "${dotfiles}/${p}" "${destination}/${p}" "${p}"
 
+  symlink "${dotfiles}/.vim/after" \
+    "${destination}/.vim/after" "./.vim/after"
+
   # Include all the folders in ${p}, excluding ${p} itself
-  cd "${dotfiles}" || die "FATAL: dotfiles specified does not exist"
-  p="./.vim/plugin"
-  find "${p}" ! -path "${p}" -type d -exec "${me}" "${next_fsm}" '{}' +
+  #cd "${dotfiles}" || die "FATAL: dotfiles specified does not exist"
+  #p="./.vim/plugin"
+  #find "${p}" ! -path "${p}" -type d -exec "${me}" "${next_fsm}" '{}' +
 }
 
 process_ignores() {
