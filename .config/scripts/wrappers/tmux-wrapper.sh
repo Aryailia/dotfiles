@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-  # 
+  # $0 <cmd> [<PARAMETER1> [<PARAMETER2> ...]]
 # Aggregate of various useful things things to do with tmux
 
-show_help_and_exit() {
+show_help() {
   name="$(basename "$0"; printf a)"; name="${name%??}"
   <<EOF cat - >&2
 SYNOPSIS
@@ -40,7 +40,6 @@ COMMANDS
     that are not even visible. \`tmux send-keys\` all the PARAMETERS and enters.
   
 EOF
-  exit 1
 }
 
 # Helpers
@@ -49,21 +48,21 @@ die() { printf %s\\n "$@" >&2; exit 1; }
 is_inside_tmux() { test -z "${TMUX}"; }  # Tmux sets ${TMUX}
 
 # Dependencies
-command -v 'tmux' >/dev/null 2>&1 || die 'FATAL: Requires `tmux`'
+command -v 'tmux' >/dev/null 2>&1 || die "FATAL: Requires \`tmux\`"
 
 main() {
   cmd="$1"
   [ "$#" -gt "0" ] && shift 1
   done="false"
   case "${cmd}" in
-    h|-h|help|--help)  show_help_and_exit ;;
+    h|-h|help|--help)  show_help; exit 0 ;;
     g|get)     get_reasonable_generic_session_number; done="true" ;;
     i|insert)  insert_into_current_pane "$@"; done="true" ;;
     o|open)    run_in_generic "$@"; done="true" ;;
     p|prune)   prune_nongenerics; done="true" ;;
     s|split)   split_into_tmux_and_run "$@"; done="true" ;;
   esac
-  "${done}" || show_help_and_exit
+  "${done}" || { show_help; exit 1; }
 }
 
 
@@ -74,7 +73,7 @@ main() {
 # The code at least once
 insert_into_current_pane() {
   id="$(tmux run-shell "printf %s #{window_id}")"
-  to_run='"$('"$@"')"'
+  to_run="\"\$($*)\""
   tmux new-window "tmux send-keys -t '${id}' \"${to_run}\""
 }
 
@@ -94,7 +93,7 @@ run_in_generic() {
 # Usage: $0
 # Kills all the sessions that are not named just numbers that are detached
 # 'Named' is used to refer to non-generics
-# 'Prune' means kill anything not attached
+# 'Prune' means close anything not attached
 #
 # My vim+i3 setup creates a lot of <name><timestamp> tmux sessions that I might
 # close without exiting, eg. {filename-sh1509934}
@@ -104,13 +103,10 @@ prune_nongenerics() {
   tmux list-sessions \
       -F "#{?session_attached,${attached},${detached}}#{session_name}" \
       2>/dev/null \
-    | awk '/'"${attached}"'[^0-9]/ { print($2); }'
-
-  exit
-  # Add a newline or read might not read it
-  printf '%s\n' "$nongeneric_session_list" | while IFS= read -r name; do
-    tmux kill-session -t "$name"
-  done
+    | awk '/^'"${detached}"'[^0-9]+$/{ print($2); }' \
+    | while IFS= read -r name; do
+      tmux kill-session -t "${name}"
+    done
 }
 
 
