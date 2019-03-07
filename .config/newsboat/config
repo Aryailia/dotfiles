@@ -37,5 +37,5 @@ macro p prev-feed article-list ; next-unread
 macro v set browser "queue.sh youtube-dl --video"; open-in-browser ; set browser "linkhandler.sh -t"
 macro a set browser "queue.sh youtube-dl --audio"; open-in-browser ; set browser "linkhandler.sh -t"
 macro s set browser "queue.sh youtube-dl --video --subtitles"; open-in-browser ; set browser "linkhandler.sh -t"
-macro d set browser "queue.sh direct"; open-in-browser ; set browser "linkhandler.sh -t"
+macro y set browser "queue.sh direct"; open-in-browser ; set browser "linkhandler.sh -t"
 macro c set browser "clipboard.sh --write <<<"; open-in-browser ; set browser "linkhandler.sh -t"

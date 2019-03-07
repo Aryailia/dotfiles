@@ -57,6 +57,11 @@ fi
 constants="${SCRIPTS}/c.sh" 
 [ -x "${constants}" ] || die "$?" "FATAL: '${constants}' not found"
 
+# Queue does not need this checked, but it oh well
+downloads="$("${constants}" downloads)" \
+  || die "$?" "FATAL: \"downloads\" not defined in '${constants}'"
+[ -d "${downloads}" ] || die "$?" "FATAL: '${downloads}' does not exist"
+
 
 
 main() {
@@ -117,10 +122,10 @@ EOF
   }
 
   # Dependency checks
-  destination="$(${constants} downloads)/queue"
+  destination="${downloads}/queue"
   [ -w "${destination}" ] || die 1 "FATAL: '${destination}' not found"
   require 'youtube-dl' || die 1 "FATAL: \`youtube-dl\` not found"
-  require 'jq' || die 1 "FATAL: \`jq\` not found"
+  #require 'jq' || die 1 "FATAL: \`jq\` not found"
 
   # Branching based on first argumnt, build the options for youtube-dl
   webm360p='243'
@@ -164,21 +169,23 @@ EOF
       *)
 	# Confirmation when downloading a playlist or channel (save bandwith)
 	# Sometimes accidentally trigger this in newsboat
-        if [ "${arg}" != "${arg#*youtu*}" ]; then
+        if [ "${arg}" != "${arg#*youtu}" ]; then
 	  msg=""
 	  [ "${arg}" != "${arg#*/channel/*}" ] && msg="channel"
 	  [ "${arg}" != "${arg#*list=}" ] &&      msg="playlist"
-	  if [ -n "${msg}" ]; then
+	  if [ -n "${msg}" ]; then  # If flag triggered (is a message), then
 	    puts "" "'${arg}'"
-	    prints "Are you sure you want to download this ${msg}? (y/n) "
+	    prints "Are you sure you the MANY videos from ${msg}? (y/n) "
 	    read answer
-	    if [ "${answer}" != "${answer#[Yy]}" ]; then
-	      url="${url} ${arg}"
-	    else
-	      puts "" "Skipping"
+	    if [ "${answer}" = "${answer#[Yy]}" ]; then  # Anything but 'y' 'Y'
+	      puts "" "Skipping..."
+	      break
 	    fi
 	  fi
 	fi
+
+	url="${url} ${arg}"
+
 	#info="$(youtube-dl  --dump-single-json --flat-playlist "${arg}")"
 	#[ "$?" != "0" ] && puts "ERROR: with '${arg}'" ""
 	#count="$(puts "${info}" | jq '.entries | length')"
@@ -198,8 +205,7 @@ EOF
     esac
   done
 
-  exit
-  # Validation checks
+  # More validation checks
   [ -z "${format}" ] && die 1 'Please specify a format (-a or -v)'
   if [ -z "${url}" ]; then
     puterr 'ERROR: No valid urls'
@@ -218,13 +224,21 @@ EOF
 
 
 direct() {
-  if   require 'curl'; then
-    cd "$(${constants} downloads)" \
-      || die 1 "FATAL: download directory not found"
-    queue download-queue curl -LO "$1"
+  url="$1"
+
+  cd "${downloads}" || die '$?' "This should have already been checked"
+  if require 'curl'; then
+    if [ "${url}" != "${url%/}" ]; then
+      # -p . = current directory as base, -u = only print name to STDOUT
+      file="$(mktemp -p . -u directdownload.XXXXXX)"
+      queue download-queue curl -L "$1" -o "${file}"
+    else 
+      queue download-queue curl -LO "$1"
+    fi
   #elif require 'wget'; then downloader='wget'
   #elif require 'aria2c'; then downloader='aria2c'
-  else                 die 1 "FATAL: \`curl\` or \`wget\` not found"
+  else
+    die 1 "FATAL: \`curl\` or \`wget\` not found"
   fi
 }
 
