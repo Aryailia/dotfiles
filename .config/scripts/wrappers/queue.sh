@@ -115,7 +115,7 @@ OPTIONS
   -v, --video
     Makes all links download as videos
   -s, --subtitles
-    Check ISO 638 for codes, currently harded coded to English, Japanese,
+    Check IEFT language tags, currently harded coded to English, Japanese,
     Traditional Mandarin Chinese. (You should add -v as well. Not sure how this
     interacts with -a)
 EOF
