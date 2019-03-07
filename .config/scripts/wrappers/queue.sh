@@ -179,7 +179,7 @@ EOF
 	    read answer
 	    if [ "${answer}" = "${answer#[Yy]}" ]; then  # Anything but 'y' 'Y'
 	      puts "" "Skipping..."
-	      break
+	      continue
 	    fi
 	  fi
 	fi
