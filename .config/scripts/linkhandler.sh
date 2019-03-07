@@ -46,7 +46,7 @@ main() {
 
   # Dependencies
   constants="${SCRIPTS}/c.sh"
-  queuer="${SCRIPTS}/queue-tsp.sh"
+  queuer="${SCRIPTS}/queue.sh"
   require "${constants}" || die "FATAL: Requires '${constants}'"
   require "${queuer}" || die "FATAL: Requires '${queuer}'"
   [ -z "${url}" ] && { show_help; exit 1; }
