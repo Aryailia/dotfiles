@@ -22,6 +22,8 @@ endfunction
 inoremap <buffer> <LocalLeader>die
   \ die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2
   \; exit "${exitcode}"; }<CR>
+inoremap <buffer> <LocalLeader>req
+  \ require() { command -v "$1" >/dev/null 2>&1; }<CR>
 
 " Naming modeled after the print commands in ruby
 inoremap <buffer> <LocalLeader>puts
