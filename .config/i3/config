@@ -10,7 +10,7 @@ gaps outer 5
 set $mod Mod4
 set $term st
 set $term_and_run st -e
-set $tmux ~/.config/scripts/wrappers/tmux-wrapper.sh open
+set $tmux ~/.config/scripts/wrappers/tmux.sh open
 
 
 # Startup

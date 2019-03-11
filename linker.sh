@@ -125,17 +125,15 @@ extras() {
   next_fsm="$1"
 
   puts "" "Special Case" "============"
-  symlink "${dotfiles}/${scripts_relative_path}" \
-    "${destination}/${scripts_relative_path}" "${scripts_relative_path}"
+  symlink_relative_path "${scripts_relative_path}"
   find "${dotfiles}/${scripts_relative_path}" -exec chmod 755 '{}' +
 
+  # Download it
   vim_plug="${HOME}/.vim/autoload/plug.vim"
   [ -f "${vim_plug}" ] || curl -fLo "${vim_plug}" --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  p=".vim/vimrc";   symlink "${dotfiles}/${p}" "${destination}/${p}" "${p}"
-
-  symlink "${dotfiles}/.vim/after" \
-    "${destination}/.vim/after" "./.vim/after"
+  symlink_relative_path ".vim/vimrc"
+  symlink_relative_path ".vim/after"
 
   # Include all the folders in ${p}, excluding ${p} itself
   #cd "${dotfiles}" || die "FATAL: dotfiles specified does not exist"
@@ -182,6 +180,11 @@ link_to_dotfiles_from_home() {
   done
    
   OVERWRITE="${OVERWRITE}" "${me}" "${next_fsm}"
+}
+
+symlink_relative_path() {
+  #OVERWITE="${OVERWRITE}"
+  symlink "${dotfiles}/$1" "${destination}/$1" "$1" 
 }
 
 symlink() {
