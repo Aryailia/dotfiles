@@ -53,8 +53,7 @@ youtube() {
 	"$(curl -L -s "${url}" | get_list_id_from_canonical)"
       ;;
     *)
-      exit
-      printf '%s%s%s' "${rss_base}" 'chanenl_id=' \
+      printf '%s%s%s' "${rss_base}" 'channel_id=' \
 	"$(curl -L -s "${url}" | get_channel_id_from_meta)"
       ;;
   esac
@@ -62,9 +61,10 @@ youtube() {
 
 get_channel_id_from_meta() {
   <&0 awk '/itemprop="channelId"/ {
-    #gsub(/^.*content="/, "");
-    #gsub(/".*$/, "");
+    gsub(/^.*content="/, "");
+    gsub(/".*$/, "");
     print($0);
+    exit 0;  # Only print the first one
   }'
 }
 
@@ -78,6 +78,7 @@ get_list_id_from_canonical() {
     gsub(/^.*list=/, "");
     gsub(/".*$/, "");
     print($0);
+    exit 0;  # Only print the first one
   }'
 }
 
