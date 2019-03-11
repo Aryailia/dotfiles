@@ -17,26 +17,28 @@ shellcheck_url="https://www.shellcheck.net/shellcheck.php"
 
 # Parameter
 show_help() {
-  name="$(basename "$0")"
-  puts "SYNOPSIS"
-  puts "  ${name} [OPTIONS] [FILE1] [FILE2] ..."
-  puts ""
-  puts "DESCRIPTION"
-  puts "  Similar to cat/grep/etc., ignores STDIN if a file is specified"
-  puts "  Sends either the STDIN or sends each file to the online shellcheck"
-  puts "  website and prints that out."
-  puts ""
-  puts "OPTIONS"
-  puts "  -d, --dump"
-  puts "    Just prints out the JSON output of online shellcheck. Useful in"
-  puts "    case 'jq' outputs an error (Especially since this does not handle"
-  puts "    interpreting fixes suggested)"
-  puts ""
-  puts "  -h, --help"
-  puts "    Display this help menu"
-  puts ""
-  puts "  -i, --ignore-fixes"
-  puts "    Ignores fixes since this does not support them yet"
+  name="$(basename "$0"; print a)"; name="${name%??}"
+  <<EOF cat - >&1
+SYNOPSIS
+  ${name} [OPTIONS] [FILE1] [FILE2] ...
+
+DESCRIPTION
+  Similar to cat/grep/etc., ignores STDIN if a file is specified
+  Sends either the STDIN or sends each file to the online shellcheck
+  website and prints that out.
+
+OPTIONS
+  -d, --dump
+    Just prints out the JSON output of online shellcheck. Useful in
+    case 'jq' outputs an error (Especially since this does not handle
+    interpreting fixes suggested)
+
+  -h, --help
+    Display this help menu
+
+  -i, --ignore-fixes
+    Ignores fixes since this does not support them yet
+EOF
 }
 
 
@@ -73,10 +75,10 @@ main() {
 
   # Execute on non-option arguments
   if ${do_stdin}; then
-    file="$(<&0 cat -)"
+    file="$(<&0 cat -)"  # '=' is 
     post_shellcheck "script=${file}" "var" "${file}"
   else
-    for arg in "$@"; do
+    for arg in "$@"; do  # '@' is for files
       post_shellcheck "script@${arg}" "path" "${arg}"
     done
   fi
