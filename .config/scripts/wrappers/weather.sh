@@ -90,7 +90,7 @@ get_weather() {
     # -s do print progress, -L follow redirects
     curl -s -L "${weather_url}/${city}" \
       | sed "8i-------------- AQI: $(get_aqi "${location}")" \
-      >"${report}" || die "$?" "FATAL: Cannot write to tprintf %s\\n "$1" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/" ; }he cached '${report}'"
+      >"${report}" || die "$?" "FATAL: Cannot write to the cached '${report}'"
   fi
   cat "${report}"
 }
