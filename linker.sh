@@ -31,7 +31,7 @@
 # TODO: Check if foward-slash is reserved character on MSYGIT (windows)
 
 
-show_help_and_exit() {
+show_help() {
   name="${me}"
   <<EOF cat >&2
 SYNOPSIS
@@ -65,16 +65,25 @@ OPTIONS
     termux (android) setups by default and have not decided on the solution)
 
   -f, --force
-    Deletes the destination forcefully and symlinks. Useful if 
+    Deletes the destination forcefully and symlinks. In particular, this is
+    Useful if programs are run and the config files are already created in
+    order to replace them with the dotfiles
 
   [-i], [--ignore]
-    Does not delete the 
+    Does not replace with the symlink if the destination file already exists.
+    The default behaviour and useful if you want to keep your current config
 
   -h, --help
     Display this help menu
 
+  -o, --output DIRECTORY
+    Changes the destination to which all the config files are symlinked
+    Default is '${HOME}'
+
+  -v, --verbose
+    Mutes any warnings (ie. when symlinks are left alone because they already
+    exist)
 EOF
-  exit 1
 }
 
 
@@ -86,45 +95,45 @@ ow_force="2"
 
 
 
-################################################################################
-# Environment variables (customise to your environment)
-dotfiles="${HOME}/dotfiles"
-me="${dotfiles}/$(basename "$0"; printf a)"; me="${me%??}"
-destination="${HOME}"
-scripts_relative_path=".config/scripts"
-#dotenv="${DOTENVIRONMENT}"
-#namedir="${HOME}/.config/named_directories"
-ignore="${dotfiles}/.linkerignore.sh"
-
-
 
 main() {
-  fsm_state="${1}"; [ "$#" -gt 0 ] && shift 1
-  
+  # Global variables that are appropriate from the shell environment
+  dotenv="${DOTENVIRONMENT}"
+
+  # Global variables static to project (assume linker is ran in base directory)
+  me="$(realpath "$0"; printf a)"; me="${me%??}"
+  dotfiles="$(dirname "${me}"; printf a)"; dotfiles="${dotfiles%??}"
+  ignore="${dotfiles}/.linkerignore.sh"
+  scripts_relative_path=".config/scripts"
+  # NOTE: Also see `wrap` for more global variables
+
+  # Parameters processing
+  # Help check
+  for arg in "$@"; do case "${arg}" in
+    -h|--help)  show_help; exit 0 ;;
+    --)         break ;;
+  esac done
+
+  # Finite State Machine, all branches will exit
+  fsm_state="$1"
   case "${fsm_state}" in
-    -h|--help)     show_help_and_exit ;;
-
-
-    -c|--catious) # OVERWRITE="${ow_symlinks}" process_ignores 2 ;;
-                   die 'Currently not supported' ;;
-    -f|--force)    OVERWRITE="${ow_force}"    process_ignores 2 "${ignores}" ;;
-    -i|--ignore)   OVERWRITE="${ow_do_not}"   process_ignores 2 "${ignores}" ;;
-
-    2)  link_to_dotfiles_from_home 3 "$@" ;;
-       #process_ignores 2 "${}";;
-    3)  extras 4 ;;
-    4)  link_to_dotfiles_from_home 5 "$@" ;;
-    5)  ;;
-
-    *)              OVERWRITE="${ow_do_not}"   process_ignores 2 "${ignores}" ;;
+    1)  shift 1; filter_for_ignore 2 "${dotfiles}" "${ignore}"; exit "$?" ;;
+    2)  shift 1; link_to_target    3 "${dotfiles}" "$@";        exit "$?" ;;
+    3)  shift 1; filter_for_ignore 4 "${dotenv}"   "${ignore}"; exit "$?" ;;
+    4)  shift 1; link_to_target    5 "${dotenv}"   "$@";        exit "$?" ;;
+    5)  shift 1; extras; exit ;;
   esac
+  # Default case (initial run), does the options preprocessing
+  set_options "$@"
 }
 
+################################################################################
+# Branches of FSM
 extras() {
   ctrl="OVERWRITE='${OVERWRITE}'"
   next_fsm="$1"
 
-  puts "" "Special Case" "============"
+  puts "Special Case" "============"
   symlink_relative_path "${scripts_relative_path}"
   find "${dotfiles}/${scripts_relative_path}" -exec chmod 755 '{}' +
 
@@ -134,16 +143,30 @@ extras() {
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   symlink_relative_path ".vim/vimrc"
   symlink_relative_path ".vim/after"
-
-  # Include all the folders in ${p}, excluding ${p} itself
-  #cd "${dotfiles}" || die "FATAL: dotfiles specified does not exist"
-  #p="./.vim/plugin"
-  #find "${p}" ! -path "${p}" -type d -exec "${me}" "${next_fsm}" '{}' +
 }
 
-process_ignores() {
-  ctrl="OVERWRITE='${OVERWRITE}'"
+link_to_target() {
   next_fsm="$1"
+  origin="$2"   # BUG: Using 'source' as variable name + symlink using 'source'
+  shift 2       #      does an append rather than an assignment
+
+  [ -d "${origin}" ] || die "FATAL: The source '${origin}' is invalid"
+  [ -d "${TARGET}" ] || die "FATAL: The destination '${TARGET}' is invalid"
+  
+  puts "${origin}" "===="
+  for relative_path in "$@"; do
+    rel="${relative_path#./}"
+    symlink "${origin}/${rel}" "${TARGET}/${rel}" "${rel}"
+  done
+  puts "$# files processed"  ""
+   
+  wrap "${me} ${next_fsm}"
+}
+
+filter_for_ignore() {
+  next_fsm="$1"
+  files="$2"
+  ignore="$3"
 
   [ -x "$ignore" ] \
     || die "FATAL: Requires the shell script \"${ignore}\"." \
@@ -157,43 +180,65 @@ process_ignores() {
   done
   conditions="${conditions} \\( -type f -o -type l \\)"  # link or file
 
-  cd "${dotfiles}" || die "FATAL: dotfiles specified does not exist"
-  eval "${ctrl} find ./ ${conditions} -exec '${me}' '${next_fsm}' '{}' +"
+  cd "${files}" || die 1 "FATAL: dotfiles specified does not exist"
+  wrap "find ./ ${conditions} -exec '${me}' '${next_fsm}' '{}' +"
 
   # Some debugging stuff
   #eval "find ./ ${conditions}" | awk '(1){print $0;} END{print NR;}'
   #puts "${conditions}"
 }
 
-link_to_dotfiles_from_home() {
-  #ctrl="OVERWRITE='${OVERWRITE}'"
-  next_fsm="$1"; shift 1
-  [ -d "${destination}" ] || die "FATAL: ${destination} is invalid"
-  
-  # Some debugging stuff
-  #puts "$@" | awk '(1){print $0;} END{print NR;}'
-  #exit
-
-  for relative_path in "$@"; do
-    rel="${relative_path#./}"
-    symlink "${dotfiles}/${rel}" "${destination}/${rel}" "${rel}"
+# Sets the environment variables to be used by `withenv`
+set_options() {
+  # In case set by environment for some reason
+  TARGET=""
+  OVERWRITE=""
+  VERBOSE=""
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      -c|--catious) # OVERWRITE="${ow_symlinks}" ;;
+                     die 1 'Currently not supported' ;;
+      -f|--force)    OVERWRITE="${ow_force}" ;;
+      -i|--ignore)   OVERWRITE="${ow_do_not}" ;;
+      -o|--output)   TARGET="$2"; shift 1 ;;
+      -v|--verbose)  VERBOSE="true" ;;
+      --)            break ;;
+    esac
+    shift 1
   done
-   
-  OVERWRITE="${OVERWRITE}" "${me}" "${next_fsm}"
+
+  # Set the defaults
+  TARGET="${TARGET:-${HOME}}"
+  OVERWRITE="${OVERWRITE:-0}"
+  VERBOSE="${VERBOSE:-false}"
+
+  [ -d "${TARGET}" ] || die 1 "FATAL: Invalid output directory '${TARGET}'"
+  wrap "${me} 1"
+}
+
+################################################################################
+# Helpers
+puts() { printf %s\\n "$@"; }
+die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
+
+wrap() {
+  exec env \
+    TARGET="${TARGET}" \
+    OVERWRITE="${OVERWRITE}" \
+    VERBOSE="${VERBOSE}" \
+    sh -c "$*";
 }
 
 symlink_relative_path() {
-  #OVERWITE="${OVERWRITE}"
-  symlink "${dotfiles}/$1" "${destination}/$1" "$1" 
+  symlink "${dotfiles}/$1" "${TARGET}/$1" "$1" 
 }
 
 symlink() {
-  #OVERWRITE="${OVERWRITE}"
   source="$1"
   target="$2"
-  name="${3:-${target}}"
+  name="$3"
   
-  [ ! -e "${source}" ] && die "✗ FAIL: \"${source}\" does not exist"
+  [ -e "${source}" ] || die 1 "✗ FAIL: \"${source}\" does not exist"
 
   if [ "${OVERWRITE}" = "${ow_force}" ] \
     #|| [ "${OVERWRITE}" = "${ow_symlinks}" ] \
@@ -203,13 +248,15 @@ symlink() {
   fi
 
   if [ -e "${target}" ]; then
-    puts "! WARN: skipping without flags \"${name}\""
+    # If is more safe than without (${VERBOSE} could be set by environment)
+    if "${VERBOSE}"; then puts "! WARN: skipping without flags '${name}'"; fi
   else
     mkdir -p "${target%/*}"  # '/' is reserved on UNIX but not windows
-    ln -s "${source}" "${target}" || die "✗ FATAL: Unable to link \"${name}\""
-    puts "✓ SUCCESS: \"${name}\""
+    ln -s "${source}" "${target}" || die "✗ FATAL: Unable to link '${name}'"
+    puts "✓ SUCCESS: '${name}'"
   fi
 }
+
 
 #blah() {
 #  # Same concept but from $dotenv
@@ -240,8 +287,6 @@ symlink() {
 
 ################################################################################
 # Helpers
-puts() { printf '%s\n' "$@"; }
-die() { printf %s\\n "$@" >&2; exit 1; }
 #remove_hash_comments() { <&0 grep -v -e '^[ \t]*#' -e '^$'; }
 
 
