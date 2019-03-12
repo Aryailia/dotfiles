@@ -6,7 +6,9 @@ alias diff='diff --color=auto'
 alias   ep='editpipe.sh'
 alias grep='grep --color=auto'
 alias    l='ls -h --group-directories-first --color=auto'
-alias   tw='tmux.sh'
+alias    t='tmux.sh'
+alias    w='weather.sh'
+alias    v='nvim'
 
 
 alias    rx='xrdb ~/.Xresources'

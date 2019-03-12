@@ -60,9 +60,7 @@ OPTIONS
   -c, --catious
     Only replaces symlinks if the destination files are they themselves
     symlinks. Useful if directory changes occured and don't want to destroy
-    existing customisations. (This is not supported as of yet, due to there
-    not being a way to scan for symlinks because 'file' is not found on
-    termux (android) setups by default and have not decided on the solution)
+    existing customisations.
 
   -f, --force
     Deletes the destination forcefully and symlinks. In particular, this is
@@ -105,7 +103,7 @@ main() {
   dotfiles="$(dirname "${me}"; printf a)"; dotfiles="${dotfiles%??}"
   ignore="${dotfiles}/.linkerignore.sh"
   scripts_relative_path=".config/scripts"
-  # NOTE: Also see `wrap` for more global variables
+  # NOTE: Also see `run_with_env` for more global variables
 
   # Parameters processing
   # Help check
@@ -129,66 +127,8 @@ main() {
 
 ################################################################################
 # Branches of FSM
-extras() {
-  ctrl="OVERWRITE='${OVERWRITE}'"
-  next_fsm="$1"
 
-  puts "Special Case" "============"
-  symlink_relative_path "${scripts_relative_path}"
-  find "${dotfiles}/${scripts_relative_path}" -exec chmod 755 '{}' +
-
-  # Download it
-  vim_plug="${HOME}/.vim/autoload/plug.vim"
-  [ -f "${vim_plug}" ] || curl -fLo "${vim_plug}" --create-dirs \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  symlink_relative_path ".vim/vimrc"
-  symlink_relative_path ".vim/after"
-}
-
-link_to_target() {
-  next_fsm="$1"
-  origin="$2"   # BUG: Using 'source' as variable name + symlink using 'source'
-  shift 2       #      does an append rather than an assignment
-
-  [ -d "${origin}" ] || die "FATAL: The source '${origin}' is invalid"
-  [ -d "${TARGET}" ] || die "FATAL: The destination '${TARGET}' is invalid"
-  
-  puts "${origin}" "===="
-  for relative_path in "$@"; do
-    rel="${relative_path#./}"
-    symlink "${origin}/${rel}" "${TARGET}/${rel}" "${rel}"
-  done
-  puts "$# files processed"  ""
-   
-  wrap "${me} ${next_fsm}"
-}
-
-filter_for_ignore() {
-  next_fsm="$1"
-  files="$2"
-  ignore="$3"
-
-  [ -x "$ignore" ] \
-    || die "FATAL: Requires the shell script \"${ignore}\"." \
-    "This just has to output a shell-quoted string (which can be blank)." \
-    "Relative links and no unquoted newlines please"
-  eval "set -- $(${ignore})"
-
-  condtions=""
-  for arg in "$@"; do
-    conditions="${conditions} ! -path '${arg}'"
-  done
-  conditions="${conditions} \\( -type f -o -type l \\)"  # link or file
-
-  cd "${files}" || die 1 "FATAL: dotfiles specified does not exist"
-  wrap "find ./ ${conditions} -exec '${me}' '${next_fsm}' '{}' +"
-
-  # Some debugging stuff
-  #eval "find ./ ${conditions}" | awk '(1){print $0;} END{print NR;}'
-  #puts "${conditions}"
-}
-
-# Sets the environment variables to be used by `withenv`
+# Sets the environment variables to be used by `run_with_env`
 set_options() {
   # In case set by environment for some reason
   TARGET=""
@@ -196,8 +136,7 @@ set_options() {
   VERBOSE=""
   while [ "$#" -gt 0 ]; do
     case "$1" in
-      -c|--catious) # OVERWRITE="${ow_symlinks}" ;;
-                     die 1 'Currently not supported' ;;
+      -c|--catious)  OVERWRITE="${ow_symlinks}" ;;
       -f|--force)    OVERWRITE="${ow_force}" ;;
       -i|--ignore)   OVERWRITE="${ow_do_not}" ;;
       -o|--output)   TARGET="$2"; shift 1 ;;
@@ -213,15 +152,75 @@ set_options() {
   VERBOSE="${VERBOSE:-false}"
 
   [ -d "${TARGET}" ] || die 1 "FATAL: Invalid output directory '${TARGET}'"
-  wrap "${me} 1"
+  run_with_env "${me} 1"
 }
+
+# Searches the directory '${files}' ignoring the files specified by '${ignore}'
+filter_for_ignore() {
+  next_fsm="$1"
+  files="$2"
+  ignore="$3"
+
+  [ -x "$ignore" ] \
+    || die "FATAL: Requires the shell script \"${ignore}\"." \
+    "This just has to output a shell-quoted string (which can be blank)." \
+    "Relative links and no unquoted newlines please"
+  eval "set -- $(${ignore})"
+
+  conditions=""
+  for arg in "$@"; do
+    conditions="${conditions} ! -path '${arg}'"
+  done
+  conditions="${conditions} \\( -type f -o -type l \\)"  # link or file
+
+  cd "${files}" || die 1 "FATAL: dotfiles specified does not exist"
+  run_with_env "find ./ ${conditions} -exec '${me}' '${next_fsm}' '{}' +"
+
+  # Some debugging stuff
+  #eval "find ./ ${conditions}" | awk '(1){print $0;} END{print NR;}'
+  #puts "${conditions}"
+}
+
+# Symlinks relative paths from their a source "${origin}" to "${TARGET}"
+link_to_target() {
+  next_fsm="$1"
+  origin="$2"   # BUG: Using 'source' as variable name + symlink using 'source'
+  shift 2       #      does an append rather than an assignment
+
+  [ -d "${origin}" ] || die "FATAL: The source '${origin}' is invalid"
+  [ -d "${TARGET}" ] || die "FATAL: The destination '${TARGET}' is invalid"
+  
+  puts "${origin}" "===="
+  for relative_path in "$@"; do
+    rel="${relative_path#./}"
+    symlink "${origin}/${rel}" "${TARGET}/${rel}" "${rel}"
+  done
+  puts "$# files processed"  ""
+   
+  run_with_env "${me} ${next_fsm}"
+}
+
+# The miscellaneous tasks
+extras() {
+  puts "Special Case" "============"
+  symlink_relative_path "${scripts_relative_path}"
+  find "${dotfiles}/${scripts_relative_path}" -exec chmod 755 '{}' +
+
+  # Download it
+  vim_plug="${HOME}/.vim/autoload/plug.vim"
+  [ -f "${vim_plug}" ] || curl -fLo "${vim_plug}" --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  symlink_relative_path ".vim/vimrc"
+  symlink_relative_path ".vim/after"
+}
+
 
 ################################################################################
 # Helpers
 puts() { printf %s\\n "$@"; }
 die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
 
-wrap() {
+run_with_env() {
   exec env \
     TARGET="${TARGET}" \
     OVERWRITE="${OVERWRITE}" \
@@ -241,8 +240,8 @@ symlink() {
   [ -e "${source}" ] || die 1 "✗ FAIL: \"${source}\" does not exist"
 
   if [ "${OVERWRITE}" = "${ow_force}" ] \
-    #|| [ "${OVERWRITE}" = "${ow_symlinks}" ] \
-    #&& { file --mime-type "${target}" | grep -q 'inode/symlink$' } 
+    || [ "${OVERWRITE}" = "${ow_symlinks}" ] \
+    && [ -n "$(find "${target}" -type l)" ]
   then
     rm -f "${target}"
   fi

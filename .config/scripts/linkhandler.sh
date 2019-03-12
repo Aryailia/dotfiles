@@ -61,35 +61,36 @@ main() {
   esac
 
   # Handle the link
-  case "${url}" in
-    # mkv, webm, mp4, certain sites -> video
-    *.[Mm][Kk][Vv]|*.[Ww][Ee][Bb][Mm]|*.[Mm][Pp]4|*hooktube.com*)  video;;
-    *clips.twitch.tv/*|*youtube.com/watch*|*youtu.be*|*bitchute.com*)  video;;
+  if puts "${url}" | grep -qi -e '\.mkv$' -e '\.webm$' -e '\.mp4$' \
+      -e 'youtube\.com/watch' -e 'youtu\.be/' -e 'clips\.twitch\.tv' \
+      -e 'bitchute\.com' -e 'hooktube\.com'; then
+    # setsid mpv --input-ipc-server="${TMPDIR}/$(date +%s)" --quiet "${url}" &
+    ${is_download} && queue.sh youtube-dl --video "${url}" &
+    ${is_local}    && setsid mpv --vo=caca --quiet "${url}" &
+    ${is_external} && setsid mpv --quiet "${url}" &
 
-    #*png|*jpg|*jpe|*jpeg|*gif)
-    #  setsid sxiv -a "${url}" >/dev/null 2>&1 &
-    #;;
+  #elif puts "${url}" | grep -qi -e '\.bmp$' -e '\.png$' -e '\.gif$' \
+  #     -e '\.tiff' -e '\.jpeg$' -e '\.jpe' -e '\.jpg$'; then
+  #  setsid sxiv -a
 
-    # mp3, flac, opus, m4a
-    *.[Mm][Pp]3|*.[Ff][Ll][Aa][Cc]|*.[Oo][Pp][Uu][Ss]|*.[Mm]4[Aa])
-      queue_directdownload "${url}"
-      #${is_download} && queue_directdownload "${url}"
-      #${is_local} && 
-    ;;
+  elif puts "${url}" | grep -qi -e '\.ogg$' -e '\.flac$' -e '\.opus$' \
+       -e '\.mp3' -e '\.$' -e '\.jpe' -e '\.jpg$'; then
+    ${is_download} && queue.sh direct "${url}" &
+    ${is_local}    && setsid mpv --quiet "${url}" &
+    ${is_external} && setsid mpv --quiet "${url}" &
 
-    *)
-      if [ -f "${url}" ]; then
-        ${is_download} &&  die "FATAL: '${url}' already downloaded"
-        ${is_local} &&     "${EDITOR}" "${url}"
-        ${is_external} &&  "${TERMINAL}" -e "${EDITOR} ${url}"
-      else
-        ${is_download} &&  queue_directdownload "${url}"  &
-        ${is_local} &&     require "${cli_browser}" && \
-          setsid "${cli_browser}" "${url}"
-        ${is_external} &&  setsid "${BROWSER}" "${url}" >/dev/null 2>&1 &
-      fi
-    ;;
-  esac
+  else
+    if [ -f "${url}" ]; then
+      ${is_download} &&  die "FATAL: '${url}' already downloaded"
+      ${is_local} &&     "${EDITOR}" "${url}"
+      ${is_external} &&  "${TERMINAL}" -e "${EDITOR} ${url}"
+    else
+      ${is_download} &&  queue_directdownload "${url}"  &
+      ${is_local} &&     require "${cli_browser}" && \
+        setsid "${cli_browser}" "${url}"
+      ${is_external} &&  setsid "${BROWSER}" "${url}" >/dev/null 2>&1 &
+    fi
+  fi
 }
 
 
@@ -99,27 +100,6 @@ die() { printf %s\\n "$@" >&2; exit 1; }
 puts() { printf %s\\n "$@"; }
 require() { command -v "$1" >/dev/null 2>&1; }
 
-video() {
-  url="$1"
 
-  # TODO: Get caca output working in busybox
-  # for controlling with json? or just so that we can have multiple instances?
-  # setsid mpv --input-ipc-server="${TMPDIR}/$(date +%s)" --quiet "${url}" &
-  ${is_download} && queue-ytdl.sh -v "${url}"
-  ${is_local} && setsid mpv --vo=caca --quiet "${url}" &
-  ${is_external} && setsid mpv --quiet "${url}" &
-}
-
-queue_directdownload() {
-  url="$1"
-  
-  filename="$(basename "${url}")"
-  if [ -f "${filename}" ]; then
-    die "FATAL: '${url}' already downloaded here"
-  else
-    # TODO: not sure if need to place one-time variable set before/after setsid
-    setsid "${queuer}" download-queue curl -LO "${url}" >/dev/null 2>&1 &
-  fi
-}
 
 main "$@"
