@@ -240,8 +240,7 @@ symlink() {
   [ -e "${source}" ] || die 1 "✗ FAIL: \"${source}\" does not exist"
 
   if [ "${OVERWRITE}" = "${ow_force}" ] \
-    || [ "${OVERWRITE}" = "${ow_symlinks}" ] \
-    && [ -n "$(find "${target}" -type l)" ]
+    || [ "${OVERWRITE}" = "${ow_symlinks}" ] && [ -L "${target}" ]
   then
     rm -f "${target}"
   fi
