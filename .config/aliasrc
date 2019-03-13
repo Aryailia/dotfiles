@@ -6,9 +6,14 @@ alias diff='diff --color=auto'
 alias   ep='editpipe.sh'
 alias grep='grep --color=auto'
 alias    l='ls -h --group-directories-first --color=auto'
+alias    la='l -A'
+alias    lal='l -Al'
+alias    ll='l -l'
 alias    t='tmux.sh'
 alias    w='weather.sh'
 alias    v='nvim'
+
+alias   gt="git log --graph --abbrev-commit --decorate --oneline --all"
 
 
 alias    rx='xrdb ~/.Xresources'

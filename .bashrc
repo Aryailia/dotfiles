@@ -9,7 +9,7 @@
 shopt -s histappend  # >> to history (not >), useful if opened mutiple sessions
 PROMPT_COMMAND='b'
 
-file="${HOME}/.config/aliasrc"; [ -f "${file}" ] && source "${file}"
+[ -f "${HOME}/.config/aliasrc" ] && source "${HOME}/.config/aliasrc"
 alias rrc='source ~/.bash_profile'
 
 c() {
@@ -17,7 +17,7 @@ c() {
     "${SCRIPTS}/namedpath.sh" --list-aliases
   else
     path="$("${SCRIPTS}/namedpath.sh" "$1"; printf x)"; path="${path%?}"
-    cd "${path}" && "${SCRIPTS}/wrappers/lx" .
+    cd "${path}" && ls -Ah --group-directories-first --color=auto
   fi
 }
 b() {
