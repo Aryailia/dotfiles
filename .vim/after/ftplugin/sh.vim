@@ -3,16 +3,17 @@
 "noremap <silent> <leader>3 :call PreviewOpen($TERMINAL . ' -e')<CR>
 "noremap <silent> <leader>4 :call PreviewClose()<CR>
 "noremap <silent> <leader>l :call PreviewSendLine('shellcheck ' . expand('%:p'))<CR>
-noremap <silent> <leader>l :call Lint()<CR>
 
 function! Lint()
-  !clear && online-shellcheck.sh -i %
+  "!clear && online-shellcheck.sh -i %
   "if command -v shellcheck >/dev/null >&2; then 
+  vertical T online-shellcheck.sh -i %
 endfunction
 
+function! Run()
+  clear 
+endfunction
 "function! Build()
-"endfunction
-"function! Run()
 "endfunction
 
 

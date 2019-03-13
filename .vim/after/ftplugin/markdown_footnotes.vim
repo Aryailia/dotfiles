@@ -90,11 +90,11 @@ function! s:OpenSplit()
     " 'b' cause theoretically faster, 'w' in case citation is after
     " 'z' to avoid match on current line
     let l:cite_row = search(s:EscapeSearch(l:def[0:s:DEF_CITE_DIFF]), 'bnwz')
-    " If found
+    " TODO: If found (then what, forgot)
     if l:cite_row != 0
       call s:SplitAndSetWinId()
-      execute('normal! ' . l:cite_row . 'zt')
-      execute('wincmd p')
+      execute('normal! ' . l:cite_row . 'zt')  " TODO: forgot why i do this
+      wincmd p  " goes to previous active window
     else
       echo 'No note citation found'
     endif

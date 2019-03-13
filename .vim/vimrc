@@ -9,11 +9,13 @@ filetype plugin indent on
 
 " Automatically executes `filetype plugin indent on` and `syntax enable`
 call plug#begin('~/.vim/plugged')
+  " VimWiki for markdown interlinks, (probably make my own, too much bloat)
   Plug 'vimwiki/vimwiki', { 'branch': 'dev' } " , 'for': 'markdown' }
-  Plug 'tpope/vim-surround'
-  Plug 'tpope/vim-scriptease'
-  Plug 'rust-lang/rust.vim'
-  Plug 'godlygeek/tabular'
+  Plug 'tpope/vim-surround'    " Adding quotes
+  Plug 'tpope/vim-scriptease'  " For the reload
+  Plug 'godlygeek/tabular'     " For psuedo-extended-markdown table formating
+  Plug 'kassio/neoterm'        " Terminal for vim and neovim
+  Plug 'rust-lang/rust.vim'    " Rust syntax hilighting
 call plug#end()
 
 " autocmd BufNewFile,BufRead *.md set filetype=markdown
@@ -88,6 +90,7 @@ call plug#end()
     \]
 
 augroup vimrc
+  autocmd!
   let g:maplocalleader = ','
   function! SaveWindowPosition()
     let b:WindowPosition = line('w0')
@@ -153,21 +156,17 @@ augroup vimrc
   imap <C-s> <C-o>\s
   vmap <C-c> \c
   nmap <C-p> \v
-augroup END
 
-
-augroup compilable
-  autocmd!
-  imap <F1> <C-o>\s
-  " Not really sure how to fix non-silent other than using two enters
-  imap <F2> <C-o>\2
-  imap <F3> <C-o>\3
-augroup END
-
-augroup rustbuild
-  autocmd FileType rust noremap <silent> <leader>2 :call BuildAndRun($TEMP . '/script.txt', 'rustc ' . $TMPDIR . '/script.txt -o %compiledfile', '%compiledfile')<CR>
-  autocmd FileType rust noremap <silent> <leader>3 :call PreviewOpenWindow($TERMINAL . ' -e')<CR>
-  autocmd FileType rust noremap <silent> <leader>4 :call PreviewClose()<CR>
+  " Build(), Run(), Lint() are defined in filetype for customisation
+  noremap <silent> <Leader>1 :call Build()<CR>
+  noremap <silent> <Leader>2 :call Run()<CR>
+  noremap <silent> <Leader>3 :vertical T clear<CR>
+  noremap <silent> <Leader>4 :vertical T exit<CR>:redraw<CR>
+  noremap <silent> <Leader>l :call Lint()<CR>
+  imap <silent> <F1> <C-o>\1
+  imap <silent> <F2> <C-o>\2
+  imap <silent> <F3> <C-o>\3
+  imap <silent> <F4> <C-o>\3
 augroup END
 
 augroup markdownbuild
@@ -179,8 +178,4 @@ augroup markdownbuild
 
   " vim-markdown-toc eats lines if ToC is folded
   autocmd BufWritePre *.md normal! zR
-augroup END
-
-" Snippets
-augroup snippets
 augroup END
