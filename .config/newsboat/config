@@ -33,7 +33,7 @@ color info white magenta bold
 # Must use prefix macros with single quote to use
 browser "linkhandler.sh -t"
 macro n next-feed article-list ; next-unread
-macro p prev-feed article-list ; next-unread
+macro p prev-feed article-list ; prev-unread
 macro v set browser "queue.sh youtube-dl --video"; open-in-browser ; set browser "linkhandler.sh -t"
 macro a set browser "queue.sh youtube-dl --audio"; open-in-browser ; set browser "linkhandler.sh -t"
 macro s set browser "queue.sh youtube-dl --video --subtitles"; open-in-browser ; set browser "linkhandler.sh -t"

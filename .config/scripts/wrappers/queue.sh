@@ -163,8 +163,8 @@ EOF
 	options="${options} --extract-audio"
 	;;
       -s|--subtitle)
-	options="${options} --write-sub --write-auto-sub
-	  --sub-lang en,zh-Hant,ja"
+	options="${options} --write-sub --write-auto-sub"
+	options="${options} --sub-lang en,zh-Hant,ja"
 	;;
       *)
 	# Confirmation when downloading a playlist or channel (save bandwith)
