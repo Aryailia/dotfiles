@@ -20,6 +20,9 @@ OPTIONS
   -u, --updates
     Forces an update even though the value has been cached. AQI in particular
     updates much more regularly (though due to non-thorough scrapping)
+
+  -o, --stdout
+    Outputs to stdout without the less rubbish. Also silences curl
 EOF
 }
 
@@ -27,14 +30,14 @@ main() {
   # Process parameters
   force_update='false'
   all_weather='false'
-  output_stdout='false'
+  output_progress=''
   cities=""
   for arg in "$@"; do
     case "${arg}" in
       -h|--help)  show_help; exit 1 ;;
       -u|--update)  force_update='true' ;;
       -f|--full)    all_weather='true' ;;
-      -o|--output)  output_stdout='true' ;;
+      -o|--stdout)  output_progress='-s' ;;
       *)   cities="${cities}$(puts "${arg}" | eval_escape) " ;;
     esac
   done
@@ -45,11 +48,11 @@ main() {
   for city in "$@"; do
     get_weather "${force_update}" "${city}" \
       | {
-        if "${all_weather}"; then  <&0 cat -
-        else                      sed '18q'; fi
+        if "${all_weather}"; then             <&0 cat -
+        else                                  sed '18q'; fi
       } | {  # `less` for output is exceeds terminal width (eg. Android)
-	if "${output_stdout}"; then  <&0 cat -
-	else                         less --chop-long-lines; fi
+	if [ -n "${output_progress}" ]; then  <&0 cat -
+	else                                  less --chop-long-lines; fi
       }
   done
 }
@@ -65,7 +68,7 @@ get_aqi() {
   city="$1"
   aqi_url='https://aqicn.org/city'
   # -s do print progress, -L follow redirects
-  curl -s -L "${aqi_url}/${city}" | awk '/"aqi"/{
+  curl "${output_progress}" -L "${aqi_url}/${city}" | awk '/"aqi"/{
     match($0, "\"aqi\":[0-9]\+");
     aqi = substr($0, RSTART, RLENGTH);
     gsub(/.*:/, "", aqi);
@@ -87,10 +90,18 @@ get_weather() {
   if "${update}" || [ ! -f "${report}" ] \
     || <"${report}" awk "(NR <= 17 && \$0 ~ /$(date '+%d %b')/){ exit 1; }"
   then
+    aqi_file="$(mktemp)"
+    weather_file="$(mktemp)"
+    # Make these curls run in parallel
+    get_aqi >"${aqi_file}" &  aqi_pid="$!"
     # -s do print progress, -L follow redirects
-    curl -s -L "${weather_url}/${city}" \
-      | sed "8i-------------- AQI: $(get_aqi "${location}")" \
+    curl "${output_progress}" -L "${weather_url}/${city}" \
+      >"${weather_file}" &    weather_pid="$!"
+
+    wait "${aqi_pid}" "${weather_pid}"
+    <"${weather_file}" sed "8i-------------- AQI: $(cat "${aqi_file}")" \
       >"${report}" || die "$?" "FATAL: Cannot write to the cached '${report}'"
+    rm "${aqi_file}" "${weather_file}"
   fi
   cat "${report}"
 }
