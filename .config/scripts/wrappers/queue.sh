@@ -162,7 +162,7 @@ EOF
 	format="${bestfreeaudio}/bestaudio/best"
 	options="${options} --extract-audio"
 	;;
-      -s|--subtitle)
+      -s|--subtitles)
 	options="${options} --write-sub --write-auto-sub"
 	options="${options} --sub-lang en,zh-Hant,ja"
 	;;
