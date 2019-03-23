@@ -129,9 +129,9 @@ EOF
 
   # Branching based on first argumnt, build the options for youtube-dl
   webm360p='243'
-  freelimit360p='bestvideo[height<=480][ext=webm]'
+  freelimit360p='bestvideo[height<=360][ext=webm]'
   freelimit480p='bestvideo[height<=480][ext=webm]'
-  limit360p='bestvideo[height<=480]'
+  limit360p='bestvideo[height<=360]'
   limit480p='bestvideo[height<=480]'
   bestfreevideo='bestvideo[ext=webm]'
   bestfreeaudio='bestaudio[ext=webm]'
