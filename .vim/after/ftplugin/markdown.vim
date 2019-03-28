@@ -12,7 +12,7 @@ augroup END
 "nnoremap <Leader>tc :call MarkdownTableOfContents()<CR>
 nnoremap <silent> <Leader><Space> :call MarkdownFollowLink()<CR>
 
-inoremap <buffer> <LocalLeader>top
+inoremap <buffer> <LocalLeader>back
   \ [back to toc](#Table%20of%20Contents)<CR>
 
 inoremap <buffer> <LocalLeader>toc
