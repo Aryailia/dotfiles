@@ -81,7 +81,7 @@ endfunction
 
 let s:WHITE = '[ \f\n\r\t]'
 let s:NONWHITE = '[^ \f\n\r\t]'
-let s:ATX = ' \{0,3\}#\{1,6\}\('
+let s:ATX = '^ \{0,3\}#\{1,6\}\('
   \ . '$\|'
   \ . ' \+\zs.\{-\}\ze *\( #\+ *\)\?$'
 \ . '\)'
@@ -117,7 +117,3 @@ function! MarkdownFollowLink()
 
   "echo [l:destination, l:file, l:anchor]
 endfunction
-
-
-nnoremap <silent> \zx :call GetMarkdownLink()<CR>
-
