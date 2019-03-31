@@ -2,7 +2,7 @@
   # >/dev/stdin $0 <type> <?content1> <?content2> ...
 # Intended to be a portable clipboard interface
 
-show_help_and_exit() {
+show_help() {
   name="$(basename "$0"; printf x)"; name="${name%??}"
   <<EOF cat - >&2
 SYNOPSIS
@@ -24,8 +24,8 @@ OPTIONS
 
 
 EXAMPLES
-  \$ ${name} --write 'hello' 'world'       # helloworld
-  \$ echo 'hello world' | ${name} --write  # hello world\n
+  \$ ${name} --write 'hello' 'world'                # helloworld
+  \$ printf '%s\n' 'hello world' | ${name} --write  # hello world\n
   \$ ${name} --read
   \$ ${name} --help
 EOF
