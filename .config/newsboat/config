@@ -2,7 +2,7 @@
 #auto-reload yes
 #reload-time 60
 
-external-url-viewer "urlscan -dc -r 'linkhandler.sh -t {}'"
+external-url-viewer "urlscan -dc -r 'linkhandler.sh -d {}'"
 
 bind-key Y pb-download
 bind-key U show-urls
@@ -37,5 +37,5 @@ macro p prev-feed article-list ; prev-unread
 macro v set browser "queue.sh youtube-dl --video"; open-in-browser ; set browser "linkhandler.sh -t"
 macro a set browser "queue.sh youtube-dl --audio"; open-in-browser ; set browser "linkhandler.sh -t"
 macro s set browser "queue.sh youtube-dl --video --subtitles"; open-in-browser ; set browser "linkhandler.sh -t"
-macro y set browser "queue.sh direct"; open-in-browser ; set browser "linkhandler.sh -t"
+macro y set external-url-viewer "urlscan -dc -r 'linkhandler.sh -d {}'"; show-urls ; set external-url-viewer "urlscan -dc -r 'linkhandler.sh -t {}'"
 macro c set browser "clipboard.sh --write <<<"; open-in-browser ; set browser "linkhandler.sh -t"
