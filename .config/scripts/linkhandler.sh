@@ -64,7 +64,7 @@ main() {
       -d|--download)  is_download="true" ;;
       -t|--terminal)  is_local="true" ;;
       -g|--gui)       is_external="true" ;;
-      --)  doubledash="true" ;;
+      --)  doubledash="true"; shift 1; continue ;;
       *)   urls="${urls} $(puts "$1" | eval_escape)" ;;
     esac
     "${doubledash}" && urls="${urls} $(puts "$1" | eval_escape)"

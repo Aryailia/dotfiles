@@ -11,7 +11,7 @@ function! Lint()
 endfunction
 
 function! Run()
-  clear 
+  vertical T sh -c %
 endfunction
 "function! Build()
 "endfunction
@@ -52,3 +52,40 @@ inoremap <buffer> <LocalLeader>help <C-o>:set paste<CR>
   \EOF<CR>
   \}<CR>
   \<C-o>:set nopaste<CR>
+imap <buffer> <LocalLeader>main <C-o>:set paste<CR>
+  \main() {<CR>
+  \  # Dependencies<CR>
+  \<CR>
+  \  # Options processing<CR>
+  \  params=""<CR>
+  \  no_more_options="false"<CR>
+  \  while [ "$#" -gt 0 ]; do<CR>
+  \    is_param="false"<CR>
+  \    "${no_more_options}" <Bar><Bar> case "$1" in<CR>
+  \      -h<Bar>--help)  show_help; exit 0 ;;<CR>
+  \      --)  no_more_options="true"; shift 1; continue ;;<CR>
+  \      *)   is_param="true" ;;<CR>
+  \    esac<CR>
+  \    "${no_more_options}" <Bar><Bar> "${is_param}" <Bslash><CR>
+  \      && params="${params} $(puts "$1" <Bar> eval_escape)"<CR>
+  \    shift 1<CR>
+  \  done<CR>
+  \<CR>
+  \  [ -z "${params}" ] && { show_help; exit 1; }<CR>
+  \  eval "set -- ${params}"<CR>
+  \<CR>
+  \}<CR>
+  \<C-o>:set nopaste<CR>
+
+imap <buffer> <LocalLeader>init 
+  \ #!/usr/bin/env sh<CR>
+  \<CR>
+  \<LocalLeader>help
+  \<CR><CR><CR>
+  \<LocalLeader>main
+  \<CR><CR><CR>
+  \# Helpers<CR>
+  \<LocalLeader>puts
+  \<LocalLeader>eval
+  \<CR>
+  \main "$@"
