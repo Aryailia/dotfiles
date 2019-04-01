@@ -2,22 +2,36 @@
 # https://stackoverflow.com/questions/6429515
 stty -ixon -ixoff # Archaic with modern CPU/modem speeds. Reclaims C-q and C-s
 
-alias diff='diff --color=auto'
-alias   ep='editpipe.sh'
-alias grep='grep --color=auto'
-alias    l='ls -h --group-directories-first --color=auto'
+alias    ab='abook -C "${HOME}/.config/abook"'
+#alias  diff='diff --color=auto'
+#alias  grep='grep --color=auto'
+alias     l='ls -h --group-directories-first --color=auto'
 alias    la='l -A'
-alias    lal='l -Al'
-alias    ll='l -l'
-alias    t='tmux.sh'
-alias    w='weather.sh'
-alias    v='nvim'
+alias   lal='l -Al'
+alias     ll='l -l'
+alias   mkf='install -m 644 /dev/null'
+alias   mks='install -m 755 /dev/null'
+alias   scb='browser.sh copy bookmarks'
+alias   sml='browser.sh menu link'
+alias   smb='browser.sh menu bookmarks'
+alias   sme='browser.sh menu search'
+alias   sgl='browser.sh gui link'
+alias   sgb='browser.sh gui bookmarks'
+alias   sge='browser.sh gui search'
+alias   stl='browser.sh terminal link'
+alias   stb='browser.sh terminal bookmarks'
+alias   ste='browser.sh terminal search'
+alias     t='tmux.sh'
+alias     w='weather.sh'
+alias     v='nvim'
 
-alias   gt="git log --graph --abbrev-commit --decorate --oneline --all"
+alias    gt="git log --graph --abbrev-commit --decorate --oneline --all"
 
 
 alias    rx='xrdb ~/.Xresources'
 alias xcaps='xdotool key Caps_Lock'
 
+alias pipugradeall='python -m pip install --upgrade $(python -m pip list \
+  --outdated | awk "(NR > 2){ print ;}")'
 #alias npmexec='printf "%s/%s" "$(npm bin)"'
 alias rimeinstall='rime_frontend=fcitx-rime bash $HOME/ime/rime-plum/rime-install'
