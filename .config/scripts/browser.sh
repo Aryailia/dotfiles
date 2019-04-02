@@ -119,7 +119,7 @@ browser() {
   "${is_terminal}" && linkhandler.sh -t "$1"
   "${is_external}" && linkhandler.sh -g "$1"
   if "${is_menu}"; then
-    cmd="$(list_browser | prompt '2 3' 'Browser' '2' '1' "$2")" || exit "$?"
+    cmd="$(list_browser | prompt '2' 'Browser' '1' "$2")" || exit "$?"
     eval "setsid ${cmd} $(puts "$1" | eval_escape)"
   fi
 }
@@ -190,14 +190,14 @@ prompt_bookmarks() {
   # Main
   b="${bookmarks_file}"
   url="$(case "${cmd}" in
-    t|tags)        <"${b}" prompt '2 4'   'Tags'      '2 3'   '1' "${s}" ;;
-    d|description|title)
-                   <"${b}" prompt '3 4'   'Name'      '2 3'   '1' "${s}" ;;
-    l|link|u|url)  <"${b}" prompt '4'     'Link'      '2'     '1' "${s}" ;;
-    a|all)         <"${b}" prompt '2 3 4' 'All'       '2 3 4' '1,3,5' "${s}" ;;
-    *)             <"${b}" prompt '2 3 4' 'Tags/Link' '2 3 4' '1,3' "${s}" ;;
+    t|tags)               <"${b}" prompt '2 4'   'Tags'      '..-2' "${s}" ;;
+    d|description|title)  <"${b}" prompt '3 4'   'Name'      '..-2' "${s}" ;;
+    l|link|u|url)         <"${b}" prompt '4'     'Link'      '..-2' "${s}" ;;
+    a|all)                <"${b}" prompt '2 3 4' 'All'       '..-2' "${s}" ;;
+    *)                    <"${b}" prompt '2 3 4' 'Tags/Link' '..-2' "${s}" ;;
   esac)" || exit "$?"
   browser "${url}" "${browser}"
+
 }
 
 
@@ -254,48 +254,35 @@ prompt_search() {
   [ -r "${search_engines}" ] || die 1 "FATAL: Requires '${search_engines}'"
 
   # Main
-  template="$(<"${search_engines}" prompt '2 3' '' '2' '1' "${engine}")" \
-    || exit "$?"
+  pattern="$(<"${search_engines}" prompt '2 3' '' '1' "${engine}")" || exit "$?"
   [ -z "${query}" ] && {
-    printf "${template}\\n" '[ inserts here  ]'
+    printf "${pattern}\\n" '[ inserts here  ]'
     prints "Enter query: "
     read -r query
   }
   
-  url="$(printf "${template}" "${query}")"
+  url="$(printf "${pattern}" "${query}")"
   browser "${url}" "${browser}"
 }
 
-
-
-prompt() (
+prompt() {
   # &0 the csv
   # $1 Columns to reconstruct the input csv (automatically adds line numbers)
-  # $2 Select
-  # $3 are additional arguments for fzf
-  # $4 are the fields to 
-  # $5 Grep this in the selected input columns, if blank fzf 
-  # TODO Declare fzf dependency? Fall backs?
-  csv="$(<&0 select "0 $1")"
-
-  key_list="$(puts "${csv}" | select "1 $3")"
-  key="${5:-$(
-    require "fzf" || die 1 "FATAL: Requires 'fzf' for menu functionality"
-    puts "${key_list}" \
-      | select "$3" \
-      | fzf --no-sort --height 99% --layout=reverse --prompt="$2> " --nth "$4"
-  )}"
-  error=$?
-  [ "${error}" -gt 0 ] && die "${error}" "FATAL: Exited out $2 prompt"
-  [ -z "${key}" ] &&  die 1 "FATAL: Not found"
-  
-  # -m limits to just one match
-  id="$(puts "${key_list}" | grep "${key}" -m 1)"; id="${id%%|*}"
-  # Get the last entry and removing leading and trailing spaces
-  value="$(puts "${csv}" | sed -n "/^${id}|/{ s/.*| *//; s/ *$//; p }")"
-  [ -z "${value}" ] && die 1 "FATAL: Invalid search key entered"
-  puts "${value}"
-)
+  # $2 A label for the UI
+  # $3 are the fields that are searchable by fzf
+  # $4 Grep this in the selected input columns, if blank fzf 
+  match="$(<&0 select "0 $1" \
+    | if [ -z "$4" ]; then
+      require "fzf" || die 1 "FATAL: Requires 'fzf' for menu functionality."
+      fzf --no-sort --height='99%' --layout=reverse --select-1 \
+	  --prompt="$2> " --delimiter='\|' --with-nth='2..' --nth="$3" \
+        || die "$?" "FATAL: Exited out of $2 prompt"
+    else 
+      grep "$4" -m 1 || die "$?" "FATAL: Could not grep '$4' not found"
+    fi
+  )" || exit "$?"
+  puts "${match}" | sed 's/.*|//;s/^ *//;s/ *$//'
+}
 
 select() {
   <&0 awk -v FS="|" -v select="$*" '
@@ -316,6 +303,32 @@ select() {
   '
 }
 
+
+# In case we do not want to rely on the files being padded by themselves
+# Removes comments and and pads columns to have the same width (or at least
+# that is what it is suppose to do)
+# Does not seem to link unicode for padding
+pad() {
+  awk -v FS='\|' -e '
+    /^ *\/\// { next; }
+    FNR == NR {
+      for (i = 1; i < NF; ++i) {
+        if (length($(i)) > size[i]) size[i] = length($(i));
+      }
+    }
+    NR > FNR  {
+      line=""
+      for (i = 1; i < NF; ++i) {
+	gsub("^[ \f\n\r\t]*|[ \f\n\r\t]*$", "", $(i)); # strip
+	line = sprintf("%s%s%-" size[i] "s", line, FS, $(i)); Pad
+      }
+      line = line FS $(NF);
+      print(substr(line, 2));  # skip the extra FS as the first character
+    }
+  END { for (i = 1; i <= length(size); ++i) { print size[i]; }}
+  ' "$1" "$1"
+
+}
 
 
 
