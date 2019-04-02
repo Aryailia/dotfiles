@@ -4,12 +4,12 @@ mapclear
 mapclear!
 
 "execute pathogen#infect()
-syntax on
-filetype plugin indent on
+"syntax on
+"filetype plugin indent on
 
 " Automatically executes `filetype plugin indent on` and `syntax enable`
 " :PlugInstall to install
-call plug#begin('~/.vim/plugged')
+call plug#begin('~/.vim/extra')
   " VimWiki for markdown interlinks, (probably make my own, too much bloat)
   Plug 'vimwiki/vimwiki', { 'branch': 'dev' } ", 'on': [] } 
   ", 'for': 'markdown' }

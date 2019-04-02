@@ -102,6 +102,7 @@ main() {
   me="$(realpath "$0"; printf a)"; me="${me%??}"
   dotfiles="$(dirname "${me}"; printf a)"; dotfiles="${dotfiles%??}"
   ignore="${dotfiles}/.linkerignore.sh"
+  ignore2="${dotenv}/.linkerignore.sh"
   scripts_relative_path=".config/scripts"
   # NOTE: Also see `run_with_env` for more global variables
 
@@ -115,10 +116,10 @@ main() {
   # Finite State Machine, all branches will exit
   fsm_state="$1"
   case "${fsm_state}" in
-    1)  shift 1; filter_for_ignore 2 "${dotfiles}" "${ignore}"; exit "$?" ;;
-    2)  shift 1; link_to_target    3 "${dotfiles}" "$@";        exit "$?" ;;
-    3)  shift 1; filter_for_ignore 4 "${dotenv}"   "${ignore}"; exit "$?" ;;
-    4)  shift 1; link_to_target    5 "${dotenv}"   "$@";        exit "$?" ;;
+    1)  shift 1; filter_for_ignore 2 "${dotfiles}" "${ignore}";  exit "$?" ;;
+    2)  shift 1; link_to_target    3 "${dotfiles}" "$@";         exit "$?" ;;
+    3)  shift 1; filter_for_ignore 4 "${dotenv}"   "${ignore2}"; exit "$?" ;;
+    4)  shift 1; link_to_target    5 "${dotenv}"   "$@";         exit "$?" ;;
     5)  shift 1; extras; exit ;;
   esac
   # Default case (initial run), does the options preprocessing
@@ -207,11 +208,12 @@ extras() {
   find "${dotfiles}/${scripts_relative_path}" -exec chmod 755 '{}' +
 
   # Download it
-  vim_plug="${HOME}/.vim/autoload/plug.vim"
+  vim_plug="${HOME}/.config/nvim/autoload/plug.vim"
   [ -f "${vim_plug}" ] || curl -fLo "${vim_plug}" --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  symlink_relative_path ".vim/vimrc"
-  symlink_relative_path ".vim/after"
+  symlink_relative_path ".config/nvim/init.vim"
+  symlink_relative_path ".config/nvim/vimrc"  # file structure links to init.vim
+  symlink_relative_path ".config/nvim/after"
 }
 
 
@@ -250,7 +252,11 @@ symlink() {
     if "${VERBOSE}"; then puts "! WARN: skipping without flags '${name}'"; fi
   else
     mkdir -p "${target%/*}"  # '/' is reserved on UNIX but not windows
-    ln -s "${source}" "${target}" || die "✗ FATAL: Unable to link '${name}'"
+    if [ -L "${source}" ]; then  # just copy relative symbolic links
+      cp -P "${source}" "${target}" || die 1 "✗ FATAL: Unable to copy '${name}'"
+    else  # otherwise make an aboslute symbolic link
+      ln -s "${source}" "${target}" || die 1 "✗ FATAL: Unable to link '${name}'"
+    fi
     puts "✓ SUCCESS: '${name}'"
   fi
 }

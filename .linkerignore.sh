@@ -12,9 +12,8 @@ out() { printf "'%s' " "$@"; }
 # Won't break, but you probably do not want these linked
 out './.linkerignore.sh'
 out './linker.sh'
-out './backup.sh'
 out './.config/scripts/*'
-out './.vim/*'
+out './.config/nvim/*'
 out './.git/*'
 out './.gitignore'
 out './.git_template/*'
