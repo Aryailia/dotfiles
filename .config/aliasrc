@@ -29,7 +29,7 @@ alias     t='tmux.sh'
 alias     w='weather.sh'
 alias     v='nvim'
 
-alias    gt="git log --graph --abbrev-commit --decorate --oneline --all"
+alias    gl="git log --graph --abbrev-commit --decorate --oneline --all"
 
 
 alias    rx='xrdb ~/.Xresources'

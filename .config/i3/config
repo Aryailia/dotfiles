@@ -84,12 +84,12 @@ bindsym $mod+Shift+Right move right
 for_window [instance="linkmenu"] floating enable
 for_window [instance="linkmenu"] border pixel 5
 for_window [instance="linkmenu"] fullscreen
-bindsym $mod+Shift+s exec $term -n "linkmenu" -e "websearch-fzf.sh" &
+bindsym $mod+Shift+s exec $term -n "linkmenu" -e "browser.sh menu search" &
 
 # bookmark launcher script
 #bindsym $mod+g exec --no-startup-id bookmarks-rofi.sh
-bindsym $mod+Shift+f exec $term -n "linkmenu" -e "bookmarks-fzf.sh" &
-bindsym $mod+Shift+g exec $term -n "linkmenu" -e "browser-fzf.sh" &
+bindsym $mod+Shift+f exec $term -n "linkmenu" -e "browser.sh menu bookmarks" &
+bindsym $mod+Shift+g exec $term -n "linkmenu" -e "browser.sh menu link " &
 #; [instance="bookmarksfzf"] fullscreen
 
 # split in horizontal orientation
