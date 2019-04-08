@@ -3,6 +3,7 @@
 stty -ixon -ixoff # Archaic with modern CPU/modem speeds. Reclaims C-q and C-s
 
 alias    ab='abook --datafile "${HOME}/.config/abook/addressbook"'
+alias     b='vifm .'
 alias  diff='diff --color=auto'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='es'
@@ -13,8 +14,10 @@ alias    ls='ls --color=auto'
 alias    la='l -A'
 alias   lal='l -Al'
 alias    ll='l -l'
-alias   mkf='install -m 644 /dev/null'
-alias   mks='install -m 755 /dev/null'
+alias   mkf='sh -c "for x in \"\$@\"; do touch \"\$x\"; chmod 644 \"\$x\"" _'
+alias   mks='sh -c "for x in \"\$@\"; do touch \"\$x\"; chmod 755 \"\$x\"" _'
+alias    rx='xrdb ~/.Xresources'
+#alias  rrc=''  # In individual rc files, reminder to not re-alias this
 alias   scb='browser.sh copy bookmarks'
 alias   sgl='browser.sh gui link'
 alias   sgb='browser.sh gui bookmarks'
@@ -25,15 +28,35 @@ alias   sme='browser.sh menu search'
 alias   stl='browser.sh terminal link'
 alias   stb='browser.sh terminal bookmarks'
 alias   ste='browser.sh terminal search'
+alias xcaps='xdotool key Caps_Lock'
 alias     t='tmux.sh'
 alias     w='weather.sh'
 alias     v='nvim'
 
+# This works though, just for bash, need to test on other shells
+#alias     c='c() {
+#  if [ -z "$1" ]; then "${SCRIPTS}/namedpath.sh" --list-aliases >&2
+#    printf "."
+#}; \c'
+
+# Well this does not work, meep
+#alias c='cd "$(sh -c '\''
+#  if [ -z "$1" ]; then
+#    "${SCRIPTS}/namedpath.sh" --list-aliases >&2
+#    printf "."
+#    ls -Ah --group-directories-first --color=auto
+#  else
+#    #path="$("${SCRIPTS}/namedpath.sh" "$1"; printf x)"; path="${path%?}"
+#    #cd "${path}" && ls -Ah --group-directories-first --color=auto
+#
+#    # Command substitution $(...) strips trailing newlines, unsure how to solve
+#    path="$("${SCRIPTS}/namedpath.sh" "$1" >&2)"
+#    [ -d ${path} ] && ls -Ah --group-directories-first --color=auto
+#  fi
+#'\'' _)"'
+
+
 alias    gl="git log --graph --abbrev-commit --decorate --oneline --all"
-
-
-alias    rx='xrdb ~/.Xresources'
-alias xcaps='xdotool key Caps_Lock'
 
 alias pipugradeall='python -m pip install --upgrade $(python -m pip list \
   --outdated | awk "(NR > 2){ print ;}")'
