@@ -86,7 +86,7 @@ match_link() {
 	-e 'bitchute\.com' -e 'hooktube\.com'; then
       # setsid mpv --input-ipc-server="${TMPDIR}/$(date +%s)" --quiet "${url}" &
       d "${queuer}" youtube-dl --video "${url}" &
-      t mpv --vo=caca --quiet "${url}" &
+      t mpv --vo=caca --quiet "${url}"
       g setsid mpv --quiet "${url}" &
 
     #elif puts "${url}" | grep -qi -e '\.bmp$' -e '\.png$' -e '\.gif$' \
@@ -96,18 +96,28 @@ match_link() {
     elif puts "${url}" | grep -qi -e '\.ogg$' -e '\.flac$' -e '\.opus$' \
 	 -e '\.mp3' -e '\.$' -e '\.jpe' -e '\.jpg$'; then
       d "${queuer}" direct "${url}" &
-      t mpv --quiet "${url}" &
+      t mpv --quiet "${url}"
       g setsid mpv --quiet "${url}" &
+
+    elif puts "${url}" | grep -qi -e '\.pdf$'; then
+      d "${queuer}" direct "${url}" &
+      t pdftotext --nopgbrk - | less  # The final dash prints to STDOUT
+      g zathura "${url}" &
+
+    elif puts "${url}" | grep -qi -e 'reddit\.com/$'; then
+      d "${queuer}" direct "${url}" &
+      t rtv "${url}"
+      g setsid "${BROWSER}" "${url}" >/dev/null 2>&1 &
 
     else
       if [ -f "${url}" ]; then
-	d die 1 "FATAL: '${url}' already downloaded"
-	t "${EDITOR}" "${url}"
-	g "${TERMINAL}" -e "${EDITOR} ${url}"
+        d die 1 "FATAL: '${url}' already downloaded"
+        t "${EDITOR}" "${url}"
+        g "${TERMINAL}" -e "${EDITOR} ${url}"
       else
-	d "${queuer}" direct "${url}" &
-	require "${cli_browser}" && t "${cli_browser}" "${url}"
-	g setsid "${BROWSER}" "${url}" >/dev/null 2>&1 &
+        d "${queuer}" direct "${url}" &
+        t "${cli_browser}" "${url}"
+        g setsid "${BROWSER}" "${url}" >/dev/null 2>&1 &
       fi
     fi
   done
