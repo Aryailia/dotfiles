@@ -118,7 +118,8 @@ main() {
   case "${fsm_state}" in
     1)  shift 1; filter_for_ignore 2 "${dotfiles}" "${ignore}";  exit "$?" ;;
     2)  shift 1; link_to_target    3 "${dotfiles}" "$@";         exit "$?" ;;
-    3)  shift 1; filter_for_ignore 4 "${dotenv}"   "${ignore2}"; exit "$?" ;;
+    3)  [ ! -x "${ignore2}" ] && run_with_env "${me} 5" || \
+        shift 1; filter_for_ignore 4 "${dotenv}"   "${ignore2}"; exit "$?" ;;
     4)  shift 1; link_to_target    5 "${dotenv}"   "$@";         exit "$?" ;;
     5)  shift 1; extras; exit ;;
   esac
@@ -163,7 +164,7 @@ filter_for_ignore() {
   ignore="$3"
 
   [ -x "$ignore" ] \
-    || die "FATAL: Requires the shell script \"${ignore}\"." \
+    || die 1 "FATAL: Requires the shell script \"${ignore}\"." \
     "This just has to output a shell-quoted string (which can be blank)." \
     "Relative links and no unquoted newlines please"
   eval "set -- $(${ignore})"
@@ -188,8 +189,8 @@ link_to_target() {
   origin="$2"   # BUG: Using 'source' as variable name + symlink using 'source'
   shift 2       #      does an append rather than an assignment
 
-  [ -d "${origin}" ] || die "FATAL: The source '${origin}' is invalid"
-  [ -d "${TARGET}" ] || die "FATAL: The destination '${TARGET}' is invalid"
+  [ -d "${origin}" ] || die 1 "FATAL: The source '${origin}' is invalid"
+  [ -d "${TARGET}" ] || die 1 "FATAL: The destination '${TARGET}' is invalid"
   
   puts "${origin}" "===="
   for relative_path in "$@"; do
