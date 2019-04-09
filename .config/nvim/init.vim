@@ -28,6 +28,7 @@ call plug#end()
 " General
 set nocompatible
 set foldmethod=manual
+set bg=light          " Readable on light background
 
 " Use UTF-8 if we can and env LANG didn't tell us not to
 if has('multi_byte') && !exists('$LANG') && &encoding ==# 'latin1'

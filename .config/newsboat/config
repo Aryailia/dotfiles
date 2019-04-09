@@ -25,8 +25,8 @@ bind-key N prev-unread
 
 color listnormal cyan default
 color listfocus blue white standout bold
-# color listnormal_unread blue default
-# color listfocus_unread yellow black bold
+color listnormal_unread black default
+color listfocus_unread white blue bold
 color info white magenta bold
 # color article white default
 
