@@ -157,14 +157,18 @@ json2tty() {
     (j++) { print(""); }  # Newline after first entry
     (1) {
       split($1, location, " ");
+      range_max = location[1] == location[2] ? "" : " to " location[2];
+      if (location[1] > 0)
+	print("Line " location[1] range_max ": ");
+
       for (i = location[1]; i <= location[2]; ++i) {
         print(file[i]);
       }
-      output = $3;
       
       # Because of FS being a newline, NF is one more than it should be
       # due to the newline at the end. Note that sometimes awk needs this
       # one trailing newline to process properly
+      output = $3;
       for (i = 4; i <= NF; ++i) {
         output = output "\n" $(i);
       }
