@@ -93,7 +93,7 @@ get_weather() {
     aqi_file="$(mktemp)"
     weather_file="$(mktemp)"
     # Make these curls run in parallel
-    get_aqi >"${aqi_file}" &  aqi_pid="$!"
+    get_aqi "${location}" >"${aqi_file}" &  aqi_pid="$!"
     # -s do print progress, -L follow redirects
     curl "${output_progress}" -L "${weather_url}/${city}" \
       >"${weather_file}" &    weather_pid="$!"

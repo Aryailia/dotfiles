@@ -118,7 +118,7 @@ main() {
   case "${fsm_state}" in
     1)  shift 1; filter_for_ignore 2 "${dotfiles}" "${ignore}";  exit "$?" ;;
     2)  shift 1; link_to_target    3 "${dotfiles}" "$@";         exit "$?" ;;
-    3)  [ ! -x "${ignore2}" ] && run_with_env "${me} 5" || \
+    3)  [ ! -x "${ignore2}" ] && run_with_env "${me} 5"  # run_with_env exits
         shift 1; filter_for_ignore 4 "${dotenv}"   "${ignore2}"; exit "$?" ;;
     4)  shift 1; link_to_target    5 "${dotenv}"   "$@";         exit "$?" ;;
     5)  shift 1; extras; exit ;;
@@ -163,7 +163,7 @@ filter_for_ignore() {
   files="$2"
   ignore="$3"
 
-  [ -x "$ignore" ] \
+  [ -x "${ignore}" ] \
     || die 1 "FATAL: Requires the shell script \"${ignore}\"." \
     "This just has to output a shell-quoted string (which can be blank)." \
     "Relative links and no unquoted newlines please"
