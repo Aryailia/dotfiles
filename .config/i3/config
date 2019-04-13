@@ -9,8 +9,7 @@ gaps inner 10
 gaps outer 5
 set $mod Mod4
 set $term st
-set $term_and_run st -e
-set $tmux ~/.config/scripts/wrappers/tmux.sh open
+set $tmux tmux.sh open
 
 
 # Startup
@@ -38,11 +37,11 @@ font pango:monospace 8
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec --no-startup-id $term_and_run $($tmux) &
+bindsym $mod+Return exec --no-startup-id $term -e $tmux &
 bindsym $mod+Shift+Return exec --no-startup-id $term &
-bindsym $mod+Mod1+Return exec --no-startup-id sakura -e $($tmux) &
-bindsym $mod+Control+Return exec --no-startup-id urxvt -e $($tmux) &
-bindsym $mod+Control+Mod1+Return exec --no-startup-id $tmux alacritty -e &
+bindsym $mod+Mod1+Return exec --no-startup-id sakura -e $tmux &
+bindsym $mod+Control+Return exec --no-startup-id urxvt -e $tmux &
+bindsym $mod+Control+Mod1+Return exec --no-startup-id alacritty -e $tmux &
 
 # kill focused window
 bindsym $mod+Shift+q kill

@@ -5,15 +5,16 @@
 # global constant and makes it easier to find.
 
 p() { printf '%s' "$@"; }
-puts() { printf '%s\n' "$@"; }
 
 case "$1" in
   -h|--help)  puts "Outputs constants. I think this adds transparency." ;;
-  cdpath)             puts "${HOME}/.config/named_directories" ;;
-  downloads)          p "${HOME}/storage/downloads" ;;
+  cdpath)             p "${HOME}/.config/named_directories" ;;
+  dl|downloads)       android_downloads="${HOME}/storage/downloads"
+                      [ -d "${android_downloads}" ] \
+			&& p "${android_downloads}" \
+			|| p "${HOME}/Downloads"    ;;
   dq|download-queue)  p "${TMPDIR}/download_queue" ;;
   env|environment)    p "${HOME}/.environment" ;;  # aka .env/
   scihub)             p 'http://sci-hub.tw' ;;  # changes frequently
-  shortcuts)          p "${HOME}/.config/named_directories" ;;  # aka CDPATH
   *) exit 1;;
 esac

@@ -104,6 +104,7 @@ main() {
   ignore="${dotfiles}/.linkerignore.sh"
   ignore2="${dotenv}/.linkerignore.sh"
   scripts_relative_path=".config/scripts"
+  make_shortcuts="shortcuts.sh"
   # NOTE: Also see `run_with_env` for more global variables
 
   # Parameters processing
@@ -163,6 +164,7 @@ filter_for_ignore() {
   files="$2"
   ignore="$3"
 
+  # Use `test -x` instead of require since we know full path
   [ -x "${ignore}" ] \
     || die 1 "FATAL: Requires the shell script \"${ignore}\"." \
     "This just has to output a shell-quoted string (which can be blank)." \
@@ -215,6 +217,8 @@ extras() {
   symlink_relative_path ".config/nvim/init.vim"
   symlink_relative_path ".config/nvim/vimrc"  # file structure links to init.vim
   symlink_relative_path ".config/nvim/after"
+  
+  require "${make_shortcuts}" && { $("${make_shortcuts}"); }
 }
 
 
@@ -222,6 +226,7 @@ extras() {
 # Helpers
 puts() { printf %s\\n "$@"; }
 die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
+require() { command -v "$1" >/dev/null 2>&1; }
 
 run_with_env() {
   exec env \
@@ -245,7 +250,7 @@ symlink() {
   if [ "${OVERWRITE}" = "${ow_force}" ] \
     || [ "${OVERWRITE}" = "${ow_symlinks}" ] && [ -L "${target}" ]
   then
-    rm -f "${target}"
+    rm -fr "${target}"
   fi
 
   if [ -e "${target}" ]; then
@@ -262,37 +267,5 @@ symlink() {
   fi
 }
 
-
-#blah() {
-#  # Same concept but from $dotenv
-#  locales="$(puts '
-#    .config/newsboat/urls
-#  ' | remove_hash_comments)"
-#  
-#  # Will remove any symlinks contained in $namedir that are not in this hash
-#  symlink_hash="$(puts "
-#    alias=$HOME/dotfiles/.config/aliases
-#    conf=$HOME/.config
-#    dfconf=$HOME/dotfiles/.config
-#    env=$HOME/.environment
-#    named=$HOME/.config/named_directories
-#    scripts=$HOME/dotfiles/.config/scripts
-#  
-#    dl=$HOME/Downloads
-#    projects=$HOME/projects
-#    wiki=$HOME/wiki
-#  " | remove_hash_comments)"
-#
-#  ##############################################################################
-#  # Code
-#
-#  # Chmod all the custom scripts (and ones in subfolders for script helpers)
-#}
-
-
 ################################################################################
-# Helpers
-#remove_hash_comments() { <&0 grep -v -e '^[ \t]*#' -e '^$'; }
-
-
 main "$@"
