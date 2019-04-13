@@ -1,51 +1,44 @@
 !! One Light Theme
-*foreground: #2a2b32
-*foreground_bold: #a8a19f
-*background: #f8f8f8
-*cursor: #2a2b32
+*.foreground: #2a2b32
+*.foreground_bold: #a8a19f
+*.background: #f8f8f8
+*.cursor: #2a2b32
 
-!! black
-*color0: #000000
-*color8: #2a2b32
+! black
+*.color0: #000000
+*.color8: #2a2b32
+!*.color0: #cccccc
+!*.color8: #fffefe
 !! red
-*color1: #da3e39
-*color9: #da3e39
+*.color1: #da3e39
+*.color9: #da3e39
 !! green
-*color2: #41933e
-*color10: #41933e
+*.color2: #41933e
+*.color10: #41933e
 !! yellow
-*color3: #855504
-*color11: #855504
+*.color3: #855504
+*.color11: #855504
 !! blue
-*color4: #315eee
-*color12: #315eee
+*.color4: #315eee
+*.color12: #315eee
 !! magenta
-*color5: #930092
-*color13: #930092
+*.color5: #930092
+*.color13: #930092
 !! cyan #0e6fad 34c284
-*color6: #0db6d8
-*color14: #0db6d8
+*.color6: #0db6d8
+*.color14: #0db6d8
 !! white
-*color7: #8e8f96
-*color15: #fffefe
+*.color7: #eeefe6
+*.color15: #cfcece
+!*.color7: #000000
+!*.color15: #2a2b32
 
-URxvt.background:  [85]#FFFFFF
-URxvt.depth:       32
-URxvt.font:        xft:monospace:size=9
-URxvt.scrollBar:   false
-URxvt.cursorColor: black
-! need this or urxvt errors on chinese character for you among others
-URxvt.letterSpace: 0
-
-
-! These are all possible options, presented with default values.
-! xst will fallback to *.option if st.option is not present.
-! see src/config.h for more information about option meanings.
-
-! These options only take effect on startup.
-st.termname: st-256color
+! opacity==255 means what terminal will be not transparent, 0 - fully transparent
+st.alpha:       120
+!! These options only take effect on startup.
+!st.termname: st-256color
 ! if you do not set shell, precedence is: -e arg, utmp option, SHELL env var, /etc/passwd shell
-st.shell:    /bin/bash
+!st.shell:    /bin/bash
 
 ! Th following options options can be reloaded via USR1 signal.
 st.font:              mono:size=9:antialias=true:autohint=true;
@@ -71,11 +64,7 @@ st.borderpx:          4
 ! this is a char that is exposed like so: `printf '\033[z'`
 !st.prompt_char:       $
 
-! opacity==255 means what terminal will be not transparent, 0 - fully transparent
-st.opacity:      200
 ! Defaults taken from base16-twilight colorscheme.
-st.background:   #dddddd
-st.foreground:   #000000
 !st.color1:       #cf6a4c
 !st.color2:       #8f9d6a
 !st.color3:       #f9ee98

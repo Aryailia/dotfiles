@@ -14,8 +14,15 @@ alias    ls='ls --color=auto'
 alias    la='l -A'
 alias   lal='l -Al'
 alias    ll='l -l'
-alias   mkf='sh -c "for x in \"\$@\"; do touch \"\$x\"; chmod 644 \"\$x\"" _'
-alias   mks='sh -c "for x in \"\$@\"; do touch \"\$x\"; chmod 755 \"\$x\"" _'
+alias   mkf='sh -c "for x in \"\$@\"; do
+  touch -- \"\$x\"
+  chmod 644 \"\$x\"
+done" _'
+alias   mks='sh -c "for x in \"\$@\"; do
+  touch -- \"\$x\"
+  chmod 755 -- \"\$x\"
+done" _'
+alias    nm='sudo nmtui'
 alias    rx='xrdb ~/.Xresources'
 #alias  rrc=''  # In individual rc files, reminder to not re-alias this
 alias   scb='browser.sh copy bookmarks'
@@ -58,7 +65,11 @@ alias     v='nvim'
 
 alias    gl="git log --graph --abbrev-commit --decorate --oneline --all"
 
-alias pipugradeall='python -m pip install --upgrade $(python -m pip list \
-  --outdated | awk "(NR > 2){ print ;}")'
+alias list-imes='<~/.config/fcitx/profile \
+  sed -n "/^EnabledIMList=/{ s/^.*=//p; }" \
+  | awk -v RS="," -v FS=":" "(\$2 ~ /True/){ print \$1; }"'
+alias pipugradeall='python -m pip install --upgrade $(
+  python -m pip list --outdated | awk "(NR > 2){ print \$0;}")'
 #alias npmexec='printf "%s/%s" "$(npm bin)"'
-alias rimeinstall='rime_frontend=fcitx-rime bash $HOME/ime/rime-plum/rime-install'
+alias rimeinstall='rime_frontend=fcitx-rime \
+  bash $HOME/ime/rime-plum/rime-install'
