@@ -4,6 +4,7 @@
 # eg. <'spaces'\'and quotes.txt' >  which will matches <spaces'and quotes.txt>
 out() { printf "'%s' " "$@"; }
 
+out "a" "${HOME}/.vim/after"
 out "b" "${HOME}/blog"
 out "c" "${HOME}/.config"
 out "d" "$(c.sh downloads)"

@@ -4,9 +4,6 @@
 "noremap <silent> <leader>4 :call PreviewClose()<CR>
 "noremap <silent> <leader>l :call PreviewSendLine('shellcheck ' . expand('%:p'))<CR>
 
-" Stop vim's default script from auto indenting on adding closing parenthesis
-setlocal indentkeys-=)
-
 function! Lint()
   "!clear && online-shellcheck.sh -i %
   vertical T if command -v shellcheck >/dev/null 2>&1;
