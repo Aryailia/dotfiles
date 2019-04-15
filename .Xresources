@@ -34,7 +34,7 @@
 !*.color15: #2a2b32
 
 ! opacity==255 means what terminal will be not transparent, 0 - fully transparent
-st.alpha:       120
+st.alpha:       230
 !! These options only take effect on startup.
 !st.termname: st-256color
 ! if you do not set shell, precedence is: -e arg, utmp option, SHELL env var, /etc/passwd shell
