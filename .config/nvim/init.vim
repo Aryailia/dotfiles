@@ -1,5 +1,5 @@
 " the `autocmd!` deletes previous bindings if sourced again
-" Not sure if this even helps but to help when sourcing for editing 
+" Not sure if this even helps but to help when sourcing for editing
 mapclear
 mapclear!
 
@@ -11,7 +11,7 @@ mapclear!
 " :PlugInstall to install
 call plug#begin('~/.vim/extra')
   " VimWiki for markdown interlinks, (probably make my own, too much bloat)
-  Plug 'vimwiki/vimwiki', { 'branch': 'dev' } ", 'on': [] } 
+  Plug 'vimwiki/vimwiki', { 'branch': 'dev' } ", 'on': [] }
   ", 'for': 'markdown' }
   Plug 'tpope/vim-surround'         " Adding quotes
   Plug 'tpope/vim-scriptease'       " For the reload
@@ -52,9 +52,13 @@ set splitright
 
 " The all-important default indent settings; filetypes to tweak
 set autoindent     " Use indent of previous line on new lines
-"set expandtab      " Use spaces instead of tabs
+set expandtab      " Use spaces instead of tabs, use C-v to enter tabs
 set shiftwidth=2   " Indent with two spaces
 "set softtabstop=2  " Insert two spaces with tab key
+highlight HighlightedWhitespace ctermbg=Grey guibg=Grey
+call matchadd('HighlightedWhitespace', '\t')
+call matchadd('HighlightedWhitespace', '\s\+$')
+
 
 " Wildmenu settings; see also plugin/wildignore.vim
 set wildmenu                " Use wildmenu
@@ -64,27 +68,27 @@ silent! set wildignorecase  " Case insensitive, if supported
 
 " Plugin Settings
 " yuvim, CYK input
-let g:ywvim_ims=[ 
-  \['py', '拼音', 'pinyin.ywvim'], 
-  \['zm', '郑码', 'zhengma.ywvim'], 
-  \['zy', '注音', 'zhuyin.ywvim'], 
-\] 
+let g:ywvim_ims=[
+  \['py', '拼音', 'pinyin.ywvim'],
+  \['zm', '郑码', 'zhengma.ywvim'],
+  \['zy', '注音', 'zhuyin.ywvim'],
+\]
 
-let g:ywvim_py = { 'helpim':'py', 'gb':0 } 
+let g:ywvim_py = { 'helpim':'py', 'gb':0 }
 
-let g:ywvim_zhpunc = 1 
-let g:ywvim_listmax = 5 
-let g:ywvim_esc_autoff = 0 
-let g:ywvim_autoinput = 0 
-let g:ywvim_intelligent_punc=1 
-let g:ywvim_circlecandidates = 1 
-let g:ywvim_helpim_on = 0 
-let g:ywvim_matchexact = 0 
-let g:ywvim_chinesecode = 1 
-let g:ywvim_gb = 0 
-let g:ywvim_preconv = 'g2b' 
-let g:ywvim_conv = '' 
-let g:ywvim_lockb = 1 
+let g:ywvim_zhpunc = 1
+let g:ywvim_listmax = 5
+let g:ywvim_esc_autoff = 0
+let g:ywvim_autoinput = 0
+let g:ywvim_intelligent_punc=1
+let g:ywvim_circlecandidates = 1
+let g:ywvim_helpim_on = 0
+let g:ywvim_matchexact = 0
+let g:ywvim_chinesecode = 1
+let g:ywvim_gb = 0
+let g:ywvim_preconv = 'g2b'
+let g:ywvim_conv = ''
+let g:ywvim_lockb = 1
 
 " Vimwiki
 let g:vimwiki_ext2syntax = { '.md': 'markdown', '.wiki': 'media' }
@@ -106,17 +110,17 @@ endfunction
 function! RestoreWindowPosition()
   " 123G jumps to line 123
   " zt sets the current line as the positional top line of the window
-  execute('normal! ' . (b:WindowPosition[0] + 1) . 'Gzt')
+  execute('normal! ' . (b:WindowPosition[0]) . 'Gzt')
   call cursor(b:WindowPosition[1], b:WindowPosition[2])
 endfunction
 
 " Key rebindings `:help index`
 " http://vimdoc.sourceforge.net/htmldoc/vimindex.html
-" Movement
-nnoremap j         gj
-nnoremap k         gk
-nnoremap <C-j>     j
-nnoremap <C-k>     k
+" 'j' and 'k' move visual lines, Ctrl versions to move the original real lines
+noremap j         gj
+noremap k         gk
+noremap <C-j>     j
+noremap <C-k>     k
 
 nnoremap <leader>fn :call FootnoteViewToggle()<CR>
 nnoremap <silent> <Leader>db
