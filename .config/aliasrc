@@ -23,6 +23,7 @@ alias   mks='sh -c "for x in \"\$@\"; do
   chmod 755 -- \"\$x\"
 done" _'
 alias    nm='sudo nmtui'
+alias    pm='package-manager.sh'
 alias    rx='xrdb ~/.Xresources'
 #alias  rrc=''  # In individual rc files, reminder to not re-alias this
 alias   scb='browser.sh copy bookmarks'

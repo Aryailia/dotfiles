@@ -6,15 +6,19 @@
 
 function! Lint()
   "!clear && online-shellcheck.sh -i %
-  "if command -v shellcheck >/dev/null >&2; then 
-  vertical T online-shellcheck.sh -i %
+  vertical T if command -v shellcheck >/dev/null 2>&1;
+    \   then shellcheck %;
+    \   else online-shellcheck.sh -i %;
+    \ fi
 endfunction
 
 function! Run()
   vertical T sh -c %
 endfunction
-"function! Build()
-"endfunction
+function! Build()
+  write
+  vertical T sh -c %
+endfunction
 
 
 " Snippets
@@ -22,22 +26,22 @@ endfunction
 " Thanks to Rich (https://www.etalabs.net/sh_tricks.html for eval_escape)
 inoremap <buffer> <LocalLeader>die
   \ die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2
-  \; exit "${exitcode}"; }<CR>
+  \; exit "${exitcode}"; }
 inoremap <buffer> <LocalLeader>req
-  \ require() { command -v "$1" >/dev/null 2>&1; }<CR>
+  \ require() { command -v "$1" >/dev/null 2>&1; }
 
 " Naming modeled after the print commands in ruby
 inoremap <buffer> <LocalLeader>puts
-  \ puts() { printf %s\\n "$@"; }<CR>
+  \ puts() { printf %s\\n "$@"; }
 inoremap <buffer> <LocalLeader>prints
-  \ prints() { printf %s "$@"; }<CR>
+  \ prints() { printf %s "$@"; }
 " Keeping to the analogy, this is ruby's p, but not really, so renamed
 inoremap <buffer> <LocalLeader>eval
-  \ eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }<CR>
+  \ eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 inoremap <buffer> <LocalLeader>pute
-  \ puterr() { printf %s\\n "$@" >&2; }<CR>
+  \ puterr() { printf %s\\n "$@" >&2; }
 inoremap <buffer> <LocalLeader>printe
-  \ printerr() { printf %s "$@" >&2; }<CR>
+  \ printerr() { printf %s "$@" >&2; }
 
 
 inoremap <buffer> <LocalLeader>help <C-o>:set paste<CR>
@@ -50,42 +54,106 @@ inoremap <buffer> <LocalLeader>help <C-o>:set paste<CR>
   \DESCRIPTION<CR>
   \  <CR>
   \EOF<CR>
-  \}<CR>
+  \}
   \<C-o>:set nopaste<CR>
-imap <buffer> <LocalLeader>main <C-o>:set paste<CR>
+
+
+" Simplist, cannot handle options that need arguments
+imap <buffer> <LocalLeader>main1 <C-o>:set paste<CR>
   \main() {<CR>
   \  # Dependencies<CR>
   \<CR>
   \  # Options processing<CR>
-  \  params=""<CR>
-  \  no_more_options="false"<CR>
+  \  args=""; no_options="false"<CR>
+  \  for arg in "$@"; do "${no_options}" <Bar><Bar> case "${arg}" in<CR>
+  \    --)  no_options="true" ;;<CR>
+  \    -h<Bar>--help)  show_help; exit 0 ;;<CR>
+  \    *)   args="${args} $(puts "${arg}" <Bar> eval_escape)"<CR>
+  \  esac done<CR>
+  \<CR>
+  \  [ -z "${args}" ] && { show_help; exit 1; }<CR>
+  \  eval "set -- ${args}"<CR>
+  \<CR>
+  \}
+  \<C-o>:set nopaste<CR>
+
+" Handles options that need arguments, but cannot handle combined options
+imap <buffer> <LocalLeader>main2 <C-o>:set paste<CR>
+  \main() {<CR>
+  \  # Dependencies<CR>
+  \<CR>
+  \  # Options processing<CR>
+  \  args=""<CR>
+  \  no_options="false"<CR>
   \  while [ "$#" -gt 0 ]; do<CR>
-  \    is_param="false"<CR>
-  \    "${no_more_options}" <Bar><Bar> case "$1" in<CR>
+  \    "${no_options}" <Bar><Bar> case "$1" in<CR>
+  \      --)  no_options="true"; shift 1; continue ;;<CR>
   \      -h<Bar>--help)  show_help; exit 0 ;;<CR>
-  \      --)  no_more_options="true"; shift 1; continue ;;<CR>
-  \      *)   is_param="true" ;;<CR>
+  \      -e<Bar>--example)  puts "-$2-"; shift 1 ;;
+  \      *)   args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
   \    esac<CR>
-  \    "${no_more_options}" <Bar><Bar> "${is_param}" <Bslash><CR>
-  \      && params="${params} $(puts "$1" <Bar> eval_escape)"<CR>
+  \    "${no_options}" && args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
   \    shift 1<CR>
   \  done<CR>
   \<CR>
-  \  [ -z "${params}" ] && { show_help; exit 1; }<CR>
-  \  eval "set -- ${params}"<CR>
+  \  [ -z "${args}" ] && { show_help; exit 1; }<CR>
+  \  eval "set -- ${args}"<CR>
   \<CR>
-  \}<CR>
+  \}
+  \<C-o>:set nopaste<CR>
+
+" Fullest form, handles combined single-character options (eg. pacman -Syu)
+imap <buffer> <LocalLeader>main3 <C-o>:set paste<CR>
+  \main() {<CR>
+  \  # Flags<CR>
+  \<CR>
+  \  # Dependencies<CR>
+  \<CR>
+  \  # Options processing<CR>
+  \  args=""<CR>
+  \  no_options="false"<CR>
+  \  while [ "$#" -gt 0 ]; do<CR>
+  \    if ! "${no_options}"; then<CR>
+  \      # Split grouped single-character arguments up, and interpret '--'<CR>
+  \      # Parsing '--' here allows "invalid option -- '-'" error later<CR>
+  \      opts=""<CR>
+  \      case "$1" in<CR>
+  \        --)      no_options="true"; shift 1; continue ;;<CR>
+  \        -[!-]*)  opts="${opts}$(puts "${1#-}" <Bar> sed 's/./ -&/g')" ;;<CR>
+  \        *)       opts="${opts} $1" ;;<CR>
+  \      esac<CR>
+  \<CR>
+  \      # Process arguments properly now<CR>
+  \      for entry in ${opts}; do case "${entry}" in<CR>
+  \        -h<Bar>--help)  show_help; exit 0 ;;<CR>
+  \        -e<Bar>--example)  puts "-$2-"; shift 1 ;;<CR>
+  \<CR>
+  \        # Put argument checks above this line (for error detection)<CR>
+  \        -[!-]*)  show_help; die 1 "FATAL: invalid option '${entry-}'" ;;<CR>
+  \        *)       args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
+  \      esac done<CR>
+  \    else<CR>
+  \      args="${args} $(puts "$1" <bar> eval_escape)"<CR>
+  \    fi<CR>
+  \    shift 1<CR>
+  \  done<CR>
+  \<CR>
+  \  [ -z "${args}" ] && { show_help; exit 1; }<CR>
+  \  eval "set -- ${args}"<CR>
+  \<CR>
+  \}
   \<C-o>:set nopaste<CR>
 
 imap <buffer> <LocalLeader>init 
   \ #!/usr/bin/env sh<CR>
   \<CR>
-  \<LocalLeader>help
+  \<LocalLeader>help<CR>
   \<CR><CR><CR>
-  \<LocalLeader>main
+  \<LocalLeader>main3<CR>
   \<CR><CR><CR>
   \# Helpers<CR>
-  \<LocalLeader>puts
-  \<LocalLeader>eval
+  \<LocalLeader>puts<CR>
+  \<LocalLeader>die<CR>
+  \<LocalLeader>eval<CR>
   \<CR>
   \main "$@"
