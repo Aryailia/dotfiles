@@ -8,7 +8,7 @@ show_help() {
 SYNOPSIS
   ${name} COMMAND [PARAMETER1] [PARAMETER2] ...
   ${name} QUEUE_NAME [PARAMETER1] [PARAMETER2] ...
-  
+
 DESCRIPTION
   Various commands for queuing downloads and/or other functions using
   task-spooler. If the first argument does not match  one of the commands as
@@ -54,7 +54,7 @@ elif require tsp; then tsp='tsp'
 else              die 1 'FATAL: Requires task spooler (ts/tsp)'
 fi
 
-constants="${SCRIPTS}/c.sh" 
+constants="${SCRIPTS}/c.sh"
 [ -x "${constants}" ] || die "$?" "FATAL: '${constants}' not found"
 
 # Queue does not need this checked, but it oh well
@@ -71,7 +71,7 @@ main() {
     h|-h|help|--help)  show_help; exit 0 ;;
     y|ytdl|youtube-dl)       shift 1; youtubedl "$@"; done="true" ;;
     s|scihub)                shift 1; scihub "$@"; done="true" ;;
-    d|direct|c|curl|w|wget)  shift 1; direct "$@"; done="true" ;; 
+    d|direct|c|curl|w|wget)  shift 1; direct "$@"; done="true" ;;
     0|q|queue)               shift 1 ;;
   esac
   "${done}" || queue "$@"
@@ -136,7 +136,7 @@ EOF
   bestfreevideo='bestvideo[ext=webm]'
   bestfreeaudio='bestaudio[ext=webm]'
 
-  # Process 
+  # Process
   url=""
   format=""
   options="--add-metadata --ignore-errors --continue"
@@ -144,64 +144,64 @@ EOF
     case "${arg}" in
       -h|--help)  show_ytdl_help; exit 0;;
       -v|--video)
-	format="${webm360p}+${bestfreeaudio}"
-	format="${format}/${freelimit360p}+${bestfreeaudio}"
-	format="${format}/${freelimit480p}+${bestfreeaudio}"
-	format="${format}/${webm360p}+bestaudio"
-	format="${format}/${freelimit360p}+bestaudio"
-	format="${format}/${freelimit480p}+bestaudio"
-	format="${format}/${limit360p}+${bestfreeaudio}"
-	format="${format}/${limit480p}+${bestfreeaudio}"
-	format="${format}/${limit360p}+bestaudio"
-	format="${format}/${limit480p}+bestaudio"
-	format="${format}/${bestfreevideo}+${bestfreeaudio}"
-	format="${format}/${bestfreevideo}+bestaudio"
-	format="${format}/best"
-	;;
+        format="${webm360p}+${bestfreeaudio}"
+        format="${format}/${freelimit360p}+${bestfreeaudio}"
+        format="${format}/${freelimit480p}+${bestfreeaudio}"
+        format="${format}/${webm360p}+bestaudio"
+        format="${format}/${freelimit360p}+bestaudio"
+        format="${format}/${freelimit480p}+bestaudio"
+        format="${format}/${limit360p}+${bestfreeaudio}"
+        format="${format}/${limit480p}+${bestfreeaudio}"
+        format="${format}/${limit360p}+bestaudio"
+        format="${format}/${limit480p}+bestaudio"
+        format="${format}/${bestfreevideo}+${bestfreeaudio}"
+        format="${format}/${bestfreevideo}+bestaudio"
+        format="${format}/best"
+        ;;
       -a|--audio)
-	format="${bestfreeaudio}/bestaudio/best"
-	options="${options} --extract-audio"
-	;;
+        format="${bestfreeaudio}/bestaudio/best"
+        options="${options} --extract-audio"
+        ;;
       -s|--subtitles)
-	options="${options} --write-sub --write-auto-sub"
-	options="${options} --sub-lang en,zh-Hant,ja"
-	;;
+        options="${options} --write-sub --write-auto-sub"
+        options="${options} --sub-lang en,zh-Hant,ja"
+        ;;
       *)
-	# Confirmation when downloading a playlist or channel (save bandwith)
-	# Sometimes accidentally trigger this in newsboat
+        # Confirmation when downloading a playlist or channel (save bandwith)
+        # Sometimes accidentally trigger this in newsboat
         if [ "${arg}" != "${arg#*youtu}" ]; then
-	  msg=""
-	  [ "${arg}" != "${arg#*/channel/*}" ] && msg="channel"
-	  [ "${arg}" != "${arg#*list=}" ] &&      msg="playlist"
-	  if [ -n "${msg}" ]; then  # If flag triggered (is a message), then
-	    puts "" "'${arg}'"
-	    prints "Are you sure you the MANY videos from ${msg}? (y/n) "
-	    read answer
-	    if [ "${answer}" = "${answer#[Yy]}" ]; then  # Anything but 'y' 'Y'
-	      puts "" "Skipping..."
-	      continue
-	    fi
-	  fi
-	fi
+          msg=""
+          [ "${arg}" != "${arg#*/channel/*}" ] && msg="channel"
+          [ "${arg}" != "${arg#*list=}" ] &&      msg="playlist"
+          if [ -n "${msg}" ]; then  # If flag triggered (is a message), then
+            puts "" "'${arg}'"
+            prints "Are you sure you the MANY videos from ${msg}? (y/n) "
+            read answer
+            if [ "${answer}" = "${answer#[Yy]}" ]; then  # Anything but 'y' 'Y'
+              puts "" "Skipping..."
+              continue
+            fi
+          fi
+        fi
 
-	url="${url} ${arg}"
+        url="${url} ${arg}"
 
-	#info="$(youtube-dl  --dump-single-json --flat-playlist "${arg}")"
-	#[ "$?" != "0" ] && puts "ERROR: with '${arg}'" ""
-	#count="$(puts "${info}" | jq '.entries | length')"
-	#exit
-	#if [ -n "${count}" ] && [ "${count}" -gt 3 ]; then
-	#  puts ""
-	#  puts "${info}" | jq '.uploader + " - " + .title'
-	#  prints "Are you sure you want to download  "${count}" videos? (y/n) "
+        #info="$(youtube-dl  --dump-single-json --flat-playlist "${arg}")"
+        #[ "$?" != "0" ] && puts "ERROR: with '${arg}'" ""
+        #count="$(puts "${info}" | jq '.entries | length')"
+        #exit
+        #if [ -n "${count}" ] && [ "${count}" -gt 3 ]; then
+        #  puts ""
+        #  puts "${info}" | jq '.uploader + " - " + .title'
+        #  prints "Are you sure you want to download  "${count}" videos? (y/n) "
         #  read answer
-	#  if [ "${answer}" != "${answer#[Yy]}" ]; then
-	#    url="${url} ${arg}"
-	#  else
-	#    puts "" "Skipping" ""
-	#  fi
-	#fi
-	;;
+        #  if [ "${answer}" != "${answer#[Yy]}" ]; then
+        #    url="${url} ${arg}"
+        #  else
+        #    puts "" "Skipping" ""
+        #  fi
+        #fi
+        ;;
     esac
   done
 
@@ -232,7 +232,7 @@ direct() {
       # -p . = current directory as base, -u = only print name to STDOUT
       file="$(mktemp -p . -u directdownload.XXXXXX)"
       queue download-queue curl -L "$1" -o "${file}"
-    else 
+    else
       queue download-queue curl -LO "$1"
     fi
   #elif require 'wget'; then downloader='wget'

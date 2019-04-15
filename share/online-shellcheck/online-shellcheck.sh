@@ -2,7 +2,7 @@
   # [<STDIN] $0 [OPTIONS] [PATH1] [PATH2] ...
 # TODO: Add coloring depending on warn level
 # TODO: Deal with fixes
-# 
+#
 # sample output (all one line)
 #   [{"file":"-","line":1,"endLine":1,"column":1,"endColumn":8,"level":"error",
 #   "code":2148,"message":"Tips depend on target shell and yours is unknown. Add
@@ -75,7 +75,7 @@ main() {
 
   # Execute on non-option arguments
   if ${do_stdin}; then
-    file="$(<&0 cat -)"  # '=' is 
+    file="$(<&0 cat -)"  # '=' is
     post_shellcheck "script=${file}" "var" "${file}"
   else
     for arg in "$@"; do  # '@' is for files
@@ -150,7 +150,7 @@ json2tty() {
 
       # Change after getline so does not affect normal file processing
       FS="\n";
-      RS="\n\n"; 
+      RS="\n\n";
       j = 0;
     }
 
@@ -159,12 +159,12 @@ json2tty() {
       split($1, location, " ");
       range_max = location[1] == location[2] ? "" : " to " location[2];
       if (location[1] > 0)
-	print("Line " location[1] range_max ": ");
+        print("Line " location[1] range_max ": ");
 
       for (i = location[1]; i <= location[2]; ++i) {
         print(file[i]);
       }
-      
+
       # Because of FS being a newline, NF is one more than it should be
       # due to the newline at the end. Note that sometimes awk needs this
       # one trailing newline to process properly

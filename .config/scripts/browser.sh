@@ -12,7 +12,7 @@ SYNOPSIS
 
 DESCRIPTION
   Desgined as a command line interface for my bookmarks and websearch files
-  which are both stored in csv format. 
+  which are both stored in csv format.
 
   (Also consider using surfraw)
 
@@ -71,7 +71,7 @@ main() {
   esac
 }
 
-# 
+#
 req() { require "$1" && puts "|$1$2|$1 $3"; }
 list_browser() {
   req 'surf'                 ''           ''
@@ -260,7 +260,7 @@ prompt_search() {
     prints "Enter query: "
     read -r query
   }
-  
+
   url="$(printf "${pattern}" "${query}")"
   browser "${url}" "${browser}"
 }
@@ -270,14 +270,14 @@ prompt() {
   # $1 Columns to reconstruct the input csv (automatically adds line numbers)
   # $2 A label for the UI
   # $3 are the fields that are searchable by fzf
-  # $4 Grep this in the selected input columns, if blank fzf 
+  # $4 Grep this in the selected input columns, if blank fzf
   match="$(<&0 select "0 $1" \
     | if [ -z "$4" ]; then
       require "fzf" || die 1 "FATAL: Requires 'fzf' for menu functionality."
       fzf --no-sort --height='99%' --layout=reverse --select-1 \
-	  --prompt="$2> " --delimiter='\|' --with-nth='2..' --nth="$3" \
+          --prompt="$2> " --delimiter='\|' --with-nth='2..' --nth="$3" \
         || die "$?" "FATAL: Exited out of $2 prompt"
-    else 
+    else
       grep "$4" -m 1 || die "$?" "FATAL: Could not grep '$4' not found"
     fi
   )" || exit "$?"
@@ -291,12 +291,12 @@ select() {
     (1) {
       tmp = "";
       for (i = 1; i <= count; ++i) {
-	if (cols[i] == 0) {
-	  tmp = tmp FS NR
-	} else {
+        if (cols[i] == 0) {
+          tmp = tmp FS NR
+        } else {
           #gsub(/^[ \t\f\r\n]*|[ \t\f\r\n]*$/, "", $(cols[i]));
-	  tmp = tmp FS $(cols[i]);
-	}
+          tmp = tmp FS $(cols[i]);
+        }
       }
       print(substr(tmp, 2));  # skip the extra FS as the first character
     }
@@ -319,8 +319,8 @@ pad() {
     NR > FNR  {
       line=""
       for (i = 1; i < NF; ++i) {
-	gsub("^[ \f\n\r\t]*|[ \f\n\r\t]*$", "", $(i)); # strip
-	line = sprintf("%s%s%-" size[i] "s", line, FS, $(i)); Pad
+        gsub("^[ \f\n\r\t]*|[ \f\n\r\t]*$", "", $(i)); # strip
+        line = sprintf("%s%s%-" size[i] "s", line, FS, $(i)); Pad
       }
       line = line FS $(NF);
       print(substr(line, 2));  # skip the extra FS as the first character

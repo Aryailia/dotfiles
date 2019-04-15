@@ -11,7 +11,7 @@ fn PROMPT
   let exitcode      = 'N/A'
   let timer         = '0'
   let backgroundpid = '0'
-  
+
   "$HOME/.config/prompt.sh" "$exitcode" "$timer" "$backgroundpid"
 end
 

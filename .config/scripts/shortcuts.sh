@@ -25,7 +25,7 @@ map="$(sh -c "$(<<EOF cat -
     [ "\${path}" != "\$2" ] && path="~\${path}"
     if [ -e "\$2" ] && ln -s \$2 "${shell_shortcuts}/"\$1; then
       printf "%s\\\\n"        "SUCCESS: \$1 -> \${path}" >&2
-      printf "'%s' '%s'\\\\n" "\$1" "\$2" 
+      printf "'%s' '%s'\\\\n" "\$1" "\$2"
     else
       printf "%s\\\\n" "FAIL: '\${path}' does not exist" >&2
     fi

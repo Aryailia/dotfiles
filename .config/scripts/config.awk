@@ -40,7 +40,7 @@ BEGIN{
   hX["*foreground"]      = "#"hConfig["foreground"];
   hX["*foreground_bold"] = "#"hConfig["foreground_bright"];
   hX["*background"]      = "#"hConfig["background"];
- 
+
   hX["URxvt.background"] = "["sAlphaPercentage"]#"hConfig["background"];
 
   mutateCopyColors(hConfig, hX, "st.color%s", "#%s");
@@ -48,7 +48,7 @@ BEGIN{
   hX["st.foreground"]    = "#"hConfig["foreground"];
   hX["st.background"]    = "#"hConfig["background"];
   process(sConfigDir"/.Xresources", hX, "^\s*!", pad(":"), "%s");
-  
+
 
   # LilyTerm
   delete hLily;
@@ -95,7 +95,7 @@ function process(sFilename, hConfig, pComment, pInput, pOutput) {
 
     } else {
       found = 0;
-      
+
       # Check if any of {hConfig} applies to current {line}
       for (sKey in hConfig) {
         if (match(line, sprintf(pInput, escape(sKey)))) {
@@ -109,7 +109,7 @@ function process(sFilename, hConfig, pComment, pInput, pOutput) {
       if (found == 0) result = result"\n"line;
     }
   }
-  
+
   print result >sFilename;
   return result;
 }

@@ -71,7 +71,7 @@ main() {
 
 
 
-# Usage: $0 
+# Usage: $0
 # Have to be careful of how quoting is done because it will essentialy eval
 # The code at least once
 # Eg. `tmux.sh insert echo yo` inside a tmux session yields 'yo'
@@ -140,7 +140,7 @@ split_into_tmux_and_run() {
 # Enters a generic detached session or creates a new one with a sane number.
 # 'Generic' means the default numbers-only session names. Starts from 0.
 # Best used with `tmux new-session -A -s "$($0)"`
-# $1 - true if wanting to check detached 
+# $1 - true if wanting to check detached
 get_next_session_number() {
   check_detached="$1"
 

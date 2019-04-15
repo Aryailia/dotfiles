@@ -3,7 +3,7 @@
 #####
 # Stuff you can configure
 #####
-# package checker for your distribution 
+# package checker for your distribution
 package_installed_check="xbps-query"
 # Links to the imes to install. Do not put the .git at the end
 imes_to_add="

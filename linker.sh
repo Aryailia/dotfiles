@@ -2,7 +2,7 @@
   # Essentially replaces $dotfiles and $dotenv with $HOME via symlink
   # and chmods all files in the $scripts (files the subfolders of $scripts too)
   # and setups all named directories (directory aliases for c(d))
-  # 
+  #
   # Will print ✗ on error and will exit prematurely. Indent for auto-detection
 #
 # The common approach is to git clone dotfiles into your $HOME directory, adding
@@ -193,14 +193,14 @@ link_to_target() {
 
   [ -d "${origin}" ] || die 1 "FATAL: The source '${origin}' is invalid"
   [ -d "${TARGET}" ] || die 1 "FATAL: The destination '${TARGET}' is invalid"
-  
+
   puts "${origin}" "===="
   for relative_path in "$@"; do
     rel="${relative_path#./}"
     symlink "${origin}/${rel}" "${TARGET}/${rel}" "${rel}"
   done
   puts "$# files processed"  ""
-   
+
   run_with_env "${me} ${next_fsm}"
 }
 
@@ -217,7 +217,7 @@ extras() {
   symlink_relative_path ".config/nvim/init.vim"
   symlink_relative_path ".config/nvim/vimrc"  # file structure links to init.vim
   symlink_relative_path ".config/nvim/after"
-  
+
   require "${make_shortcuts}" && { $("${make_shortcuts}"); }
 }
 
@@ -237,14 +237,14 @@ run_with_env() {
 }
 
 symlink_relative_path() {
-  symlink "${dotfiles}/$1" "${TARGET}/$1" "$1" 
+  symlink "${dotfiles}/$1" "${TARGET}/$1" "$1"
 }
 
 symlink() {
   source="$1"
   target="$2"
   name="$3"
-  
+
   [ -e "${source}" ] || die 1 "✗ FAIL: \"${source}\" does not exist"
 
   if [ "${OVERWRITE}" = "${ow_force}" ] \

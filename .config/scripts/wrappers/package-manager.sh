@@ -140,15 +140,15 @@ help_install() {
   name="$(basename "$0"; printf a)"; name="${name%??}"
   <<EOF cat - >&2
 USAGE: ${name} -I  [OPTIONS]
-  -s 
+  -s
 
-  
+
 EOF
 }
 
 # Note on using force to install a specific version of a package
 package_install() {
-  if "${FLAG_HELP}"; then 
+  if "${FLAG_HELP}"; then
     help_install
   fi
   if match_manager void && require xbps-install; then
@@ -209,7 +209,7 @@ package_query() {
       } | { [ "$#" -gt 0 ]; do_if "$?" grep -i $(printf -- ' -e %s' "$@")
       } | { "${FLAG_SINGLE}"; do_if "$?" sed 1q;
       } | {
-        if "${FLAG_SEARCH_DEPENDENTS}"; then 
+        if "${FLAG_SEARCH_DEPENDENTS}"; then
           xargs -n 1 xbps-query -x | sort | uniq
         elif "${FLAG_SEARCH_REVERSE_DEPENDENTS}"; then
           xargs -n 1 xbps-query -X | sort | uniq

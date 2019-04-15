@@ -62,7 +62,7 @@ add "$brown$(hostname | cut -c1-6) "
 #  esac
 #fi
 #
-### 
+###
 #using_su=whoami | grep -vq "$(logname)"
 #$using_su && echo 'am i'
 
@@ -102,7 +102,7 @@ fi
 # PID of backgrounded scripts, commands usually report this so kinda useless?
 # Source: Parth - https://github.com/Parth/dotfiles
 [ -n "$!" ] && [ "$!" !=  0 ] && add "$yellow PID:$! "
-  
+
 printf '%b%b' "$text" "$formatclear "
 #printf '%b%b%b' "$text" "$formatclear" "\002"
 #printf '%b' "\001\033[32m\002cheese\001\033[0m\002"

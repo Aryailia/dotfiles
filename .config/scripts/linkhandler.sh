@@ -60,7 +60,7 @@ main() {
     "${doubledash}" || case "$1" in
       #-h|--help)  show_help; exit 0 ;;
       -c|--copy)      is_copy="true"
-		      require "${copy}" || die 1 "FATAL: Requires '${copy}'" ;;
+                      require "${copy}" || die 1 "FATAL: Requires '${copy}'" ;;
       -d|--download)  is_download="true" ;;
       -t|--terminal)  is_local="true" ;;
       -g|--gui)       is_external="true" ;;
@@ -82,8 +82,8 @@ match_link() {
   for url in "$@"; do
     # Handle the link
     if puts "${url}" | grep -qi -e '\.mkv$' -e '\.webm$' -e '\.mp4$' \
-	-e 'youtube\.com/watch' -e 'youtu\.be/' -e 'clips\.twitch\.tv' \
-	-e 'bitchute\.com' -e 'hooktube\.com'; then
+        -e 'youtube\.com/watch' -e 'youtu\.be/' -e 'clips\.twitch\.tv' \
+        -e 'bitchute\.com' -e 'hooktube\.com'; then
       # setsid mpv --input-ipc-server="${TMPDIR}/$(date +%s)" --quiet "${url}" &
       d "${queuer}" youtube-dl --video "${url}" &
       t mpv --vo=caca --quiet "${url}"
@@ -94,7 +94,7 @@ match_link() {
     #  setsid sxiv -a
 
     elif puts "${url}" | grep -qi -e '\.ogg$' -e '\.flac$' -e '\.opus$' \
-	 -e '\.mp3' -e '\.$' -e '\.jpe' -e '\.jpg$'; then
+         -e '\.mp3' -e '\.$' -e '\.jpe' -e '\.jpg$'; then
       d "${queuer}" direct "${url}" &
       t mpv --quiet "${url}"
       g setsid mpv --quiet "${url}" &

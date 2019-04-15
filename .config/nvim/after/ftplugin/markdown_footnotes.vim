@@ -1,5 +1,5 @@
 " Author: Aryailia
-" 
+"
 " Vaguely inspired by https://github.com/derdennis/vim-markdownfootnotes/
 "
 " TODO:
@@ -313,9 +313,9 @@ function! s:CustomToNumber(custom)
       endif
     endwhile
     return l:out
-    
+
   " Start from the right-most, lowest-significant digits and add increasing
-  " powers of 26. Force them both lower and upper to the same case 
+  " powers of 26. Force them both lower and upper to the same case
   elseif l:type == 'latin_alphabet_lower' || l:type == 'latin_alphabet_upper'
     let l:power = 1
     let l:out = 0
@@ -325,7 +325,7 @@ function! s:CustomToNumber(custom)
     endfor
     return l:out
   endif
-  
+
   return '?'
 endfunction
 
@@ -340,7 +340,7 @@ function! s:GetRegexpAtIndex(string, pattern, index)
     let l:start = l:pos + strlen(l:found)
 
     if l:pos == -1 |          let l:found = '' | break | endif
-    if l:pos <= a:index && a:index < l:start   | break | endif 
+    if l:pos <= a:index && a:index < l:start   | break | endif
   endwhile
   return [l:pos, l:found]
 endfunction

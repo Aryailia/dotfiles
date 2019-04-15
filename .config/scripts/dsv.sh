@@ -14,7 +14,7 @@
 #   <  ""  > or <  ye boi  >  -> <ye boi>
 # - Fields with newlines or double quotes must be quoted
 
-#%self ~/ime/test.csv add yo " as\"df" erkqwer a && 
+#%self ~/ime/test.csv add yo " as\"df" erkqwer a &&
 #:console %self unittests/test.csv verify && echo 'valid dsv'
 #:!console %self unittests/test.csv count && %self unittests/test.csv extract 2 && { %self unittests/test.csv verify && echo 'valid dsv'; }
 #:console %self unittests/fail.csv count && %self unittests/fail.csv extract 2 && { %self unittests/fail.csv verify && echo 'valid dsv'; }
@@ -34,7 +34,7 @@ main() {
   fi
 
   if [ ! -r "${file}" ]; then
-    put "${file} does not exist"  1>&2 
+    put "${file} does not exist"  1>&2
     exit 1
   fi
 
@@ -79,7 +79,7 @@ main() {
         BEGIN { F = 0; }  # Not necessary, but clearer
 
         # Executes after `processDSV`
-        (!F++) { FieldCount = NF; }  # Only run on first line 
+        (!F++) { FieldCount = NF; }  # Only run on first line
 
         # Check quoting is correct
         (1) {
@@ -143,7 +143,7 @@ main() {
             printf("  $%d=<%s>\n", i, $i);
           }
           print "====="
-        }  
+        }
       '
       ;;
     help) general_help ;;
@@ -178,13 +178,13 @@ p() { printf '%s' "$@"; }
 put() { printf '%s\n' "$@"; }
 
 # Builds the $... so that they can be interpreted literally
-# Awk will then join them back together into $0 
+# Awk will then join them back together into $0
 #
-# See also: 
+# See also:
 # https://tools.ietf.org/html/rfc4180
 # https://stackoverflow.com/questions/45420535/
 # https://blog.csdn.net/Meyino/article/details/1509470
-# 
+#
 # Supports
 # - leading and trailing spaces for fields
 # - arbitrary separator (`-v FS=...` as a param)
@@ -201,16 +201,16 @@ processDSV() { awk -v FS="${delimiter}" '
   # `OriginalField` is an array of `$(...)` that should match what is written in
   #    in the original file with leading and trailing spaces removed
   # `OriginalFNR` is record number corresponding to before parsing
-  # `NextFNR` 
+  # `NextFNR`
   # `Quoting` is a boolean for whether following a multiline quote
-  # 
+  #
   # `RecordNumber` is record number after parsing
   # Parameters are the only way to create local variables in awk
   function buildCSVRecord(    _i, _record, _fpat, _continue) {
     StartRecord = NR;
 
     # If an odd number of quotes, then request next line and append it
-    $0 = PrevSeg $0; 
+    $0 = PrevSeg $0;
     if ((gsub(/"/, "&", $0) % 2) == 1) {  # & has special meaning, so no change
       Quoting = 1;
       PrevSeg = $0 RS;
@@ -260,13 +260,13 @@ processDSV() { awk -v FS="${delimiter}" '
         }
         gsub(/@C/, "\"", $(_i));      # <@Cfoo@Abar> -> <"foo@Abar>
         gsub(/@A/, "@", $(_i));       # <"foo@Abar> -> <"foo@bar>
-        
+
         _record = substr(_record, RSTART + RLENGTH + 1);  # Move past `$(_i)`
         gsub(/@C/, "\"\"", _record);  # Convert back so can be re-parsed
         # Eg. Should parse:      "","" -> @B",@C -> "","" -> "" -> @B" -> ""
         # Without convert back:  "","" -> @B",@C -> "",@C -> @C -> "
       } while (_record != "");
-      
+
       PrevSeg = "";
       _continue = 0;
     }

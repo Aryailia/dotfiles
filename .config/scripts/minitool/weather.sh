@@ -51,8 +51,8 @@ main() {
         if "${all_weather}"; then             <&0 cat -
         else                                  sed '18q'; fi
       } | {  # `less` for output is exceeds terminal width (eg. Android)
-	if [ -n "${output_progress}" ]; then  <&0 cat -
-	else                                  less --chop-long-lines; fi
+        if [ -n "${output_progress}" ]; then  <&0 cat -
+        else                                  less --chop-long-lines; fi
       }
   done
 }

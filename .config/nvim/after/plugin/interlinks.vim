@@ -1,6 +1,6 @@
 " let s:html1 = '<\%(script|pre|style\)\%(\s|\n|>\)'
 " let s:html2345 = '<!--|<?|<!\u|<![CDATA['
-" let s:html6 = '\%(<|</\)\%(address|article|aside|base|basefont|blockquote|boddy|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|h2|h3|h4|h5|h6|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul\)\%(\s|\n|/>>\)' 
+" let s:html6 = '\%(<|</\)\%(address|article|aside|base|basefont|blockquote|boddy|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|h2|h3|h4|h5|h6|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul\)\%(\s|\n|/>>\)'
 
   " \ 'header': '^ \{0,3}#\{1,6}\%( \+.*\)?',
   " \ 'header': '^ \{0,3}#\{1,6}\%( \+.*\)\?',
@@ -33,7 +33,7 @@ function! s:GetLinkAtIndex(text, targetIndex)
     let l:tilldex = l:index + strlen(l:matched)
 
     if l:index < 0 || l:index >= l:length | let l:matched = '' | break | endif
-    if a:targetIndex >= l:index && a:targetIndex < l:tilldex | break | endif 
+    if a:targetIndex >= l:index && a:targetIndex < l:tilldex | break | endif
   endwhile
   " echo l:matched.','.a:targetIndex.','.l:index.','.l:tilldex.';'
   return [l:index, l:matched]
@@ -60,7 +60,7 @@ function! s:ParseFileAST(filename)
   let l:row = 1
   for line in l:file
     if line =~ '\m^ \{0,3}#\{1,6}\%(\s+.*\)\?'
-      call add(l:ast, { 'row': l:row, 'text': s:Anchorify(line) }) 
+      call add(l:ast, { 'row': l:row, 'text': s:Anchorify(line) })
     endif
     let l:row += 1
   endfor
@@ -111,15 +111,15 @@ endfunction
 
 " function! Anchori()
 "   let l:asdf = expand("<cWORD>")
-" 
+"
 "   try
 "     noautocmd execute "vimgrep #" . s:header_regexp . "#j %"
 "   catch /^Vim\%((\a\+)\)\=:E480/ " No Match
 "   endtry
-" 
+"
 "   for d in getqflist()
 "     echo 'lovely' d
 "   endfor
-" 
+"
 "   " echo getqflist()
 " endfunction

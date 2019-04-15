@@ -9,7 +9,7 @@ SYNOPSIS
 
 Description
   This extracts the RSS feed from the youtube page. Should be able to enter
-  either channel, video 
+  either channel, video
   First one is read url from clipboard and copy output (majority of cases
   probably will work with this)
 
@@ -50,11 +50,11 @@ youtube() {
   case "${url}" in
     *[\&?]list=*)
       printf '%s%s%s' "${rss_base}" "playlist_id=" \
-	"$(curl -L -s "${url}" | get_list_id_from_canonical)"
+        "$(curl -L -s "${url}" | get_list_id_from_canonical)"
       ;;
     *)
       printf '%s%s%s' "${rss_base}" 'channel_id=' \
-	"$(curl -L -s "${url}" | get_channel_id_from_meta)"
+        "$(curl -L -s "${url}" | get_channel_id_from_meta)"
       ;;
   esac
 }

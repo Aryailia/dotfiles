@@ -9,10 +9,11 @@ p() { printf '%s' "$@"; }
 case "$1" in
   -h|--help)  puts "Outputs constants. I think this adds transparency." ;;
   cdpath)             p "${HOME}/.config/named_directories" ;;
-  dl|downloads)       android_downloads="${HOME}/storage/downloads"
-                      [ -d "${android_downloads}" ] \
-			&& p "${android_downloads}" \
-			|| p "${HOME}/Downloads"    ;;
+  dl|downloads)       android_downloads="/sdcard/Downloads"
+                      if [ -d "${android_downloads}" ]
+                        then p "${android_downloads}"
+                        else p "${HOME}/Downloads"
+                      fi ;;
   dq|download-queue)  p "${TMPDIR}/download_queue" ;;
   env|environment)    p "${HOME}/.environment" ;;  # aka .env/
   scihub)             p 'http://sci-hub.tw' ;;  # changes frequently

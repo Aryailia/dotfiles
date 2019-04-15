@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
   # $0 <relative_or_absolute_path>
 # Thanks to Rich (etalabs.net) for empty directory and filename tricks
-# 
+#
 # TODO: Add rigorous portability to ${CDPATH}/'c.sh cdpath' parsing?
 #       I am not even sure what ${PATH} parsing requirements are
 # TODO: Check if examples are correct
@@ -22,7 +22,7 @@ DESCRIPTION
 
   Prints the full path of PATH, if the relative link begins with an
   alias, then replace it with to what it aliases. Shortcuts are
-  err "  specified by 'c.sh cdpath'. 
+  err "  specified by 'c.sh cdpath'.
 
   Prioritises the files in the \${PWD}
 
@@ -32,7 +32,7 @@ OPTIONS
   -h, --help
     Display this help message
 
-  - 
+  -
 
 NOTES
   Supports both relative and absolute links.
@@ -77,7 +77,7 @@ main() {
   cdpath="$("${globals}" cdpath)"
 
   # Process parameters (only accept the first non-flag)
-  target="" 
+  target=""
   for arg in "$@"; do
     case "${arg}" in
       -h|--help)          show_help; exit 1 ;;
@@ -97,7 +97,7 @@ main() {
     [ "./${root}" = "${node}" ] && { prints "$(pwd)/${target}"; exit 0; }
   done
 
-  # Search the directories in cdpath for an alias that matches ${root} 
+  # Search the directories in cdpath for an alias that matches ${root}
   select_root() {
     # Exiting out of 'map_over_split_into_dirpaths' ends its subshell
     [ "${path##*/}" = "${root}" ] && { printf %s "${path}"; exit 0; }
@@ -118,7 +118,7 @@ main() {
 }
 
 list_aliases() {
-  cdpath="$1" 
+  cdpath="$1"
 
   print_alias() {
     path="$1"

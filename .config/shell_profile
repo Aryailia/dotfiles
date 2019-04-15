@@ -9,7 +9,7 @@ export SCRIPTS
 # `${TMPDIR}` set in Android and MacOS
 test -z "${TMPDIR}" && { printf '%s' "$(uname)" | grep -q 'Linux'; } \
   && export TMPDIR='/tmp'
-# Windows Vista+ 
+# Windows Vista+
 test -z "${TMPDIR}" && { printf '%s' "$(uname)" | grep -q 'MSYS'; } \
   && export TMPDIR="${HOME}/AppData/Local/Temp"
 
