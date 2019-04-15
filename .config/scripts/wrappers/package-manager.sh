@@ -17,7 +17,7 @@ OPTIONS
   -Q,--query                      Exit
   -R,--remove                     Exit
 
-  -e,--extenral                   Sync local and external repository
+  -e,--external                   Sync local and external repository
   -f,--force                      WIP, force version numbers?
   -h,--help                       Display help
   -s,--source                     Use source compiler
@@ -88,7 +88,7 @@ main() {
         -Q|--query)        COMMAND="${ENUM_QUERY}" ;;
         -R|--remove)       COMMAND="${ENUM_REMOVE}" ;;
 
-        -e|--extenral)            FLAG_SYNC='true' ;;
+        -e|--external)            FLAG_SYNC='true' ;;
         -f|--force)               FLAG_FORCE='true' ;;
         -h|--help)                FLAG_HELP='true' ;;
         -s|--source)              FLAG_SOURCE='true' ;;
@@ -190,19 +190,20 @@ package_install() {
 
 package_query() {
   if match_manager void && require xbps-query; then
-    will_post_process="$(if "${FLAG_INFO}" \
+    post_process="$(if "${FLAG_INFO}" \
         || "${FLAG_SEARCH_DEPENDENTS}" || "${FLAG_SEARCH_REVERSE_DEPENDENTS}"
       then prints "${ENUM_TRUE}"
       else prints "${ENUM_FALSE}"
     fi)"
 
-    { { if "${FLAG_ORPHANS}"; then   xbps-query -O
+    { { if "${FLAG_ORPHANS}"; then   _print xbps-query -O
         #elif "${FLAG_LOCKS}"; then
-        elif "${FLAG_MANUAL}"; then  xbps-query -m
+        elif "${FLAG_MANUAL}"; then  _print xbps-query -m
         elif "${FLAG_SYNC}"; then
-          xbps-query -Rs '.' | do_if "${will_post_process}" cut -d ' ' -f 2
+          _print xbps-query -Rs ' ' | do_if "${post_process}" cut -d ' ' -f 2
+
         else
-          xbps-query -s '.'  | do_if "${will_post_process}" cut -d ' ' -f 2
+          _print xbps-query -s ' '  | do_if "${post_process}" cut -d ' ' -f 2
         fi
 
         # Want the splitting for grep
@@ -260,7 +261,7 @@ eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 _print() {
   if "${FLAG_PRINT}"; then
     cmd="$(for a in "$@"; do prints "$(puts "$a" | eval_escape) "; done)"
-    prints "${cmd% }"
+    prints "${cmd% }" >&2
   else
     "$@"
   fi
