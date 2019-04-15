@@ -7,7 +7,7 @@ show_help() {
   <<EOF cat - >&2
 SYNOPSIS
   ${name} COMMAND [PARAMETER1] [PARAMETER2] ...
-  
+
 DESCRIPTION
   Just a wrapper around all the tmux functions that work for my workflow.
   My workflow is that a new session is created whenever a new window is opened
@@ -16,19 +16,22 @@ DESCRIPTION
 COMMANDS
   h, -h, help, --help
     Displays this help menu
- 
+
   g, get
     Prints a generic session to attach to if one is available or to a sane
     number to create new session for. See \`open\` for actual attaching
-     
+
   i, insert PARAMETER
     Inserts the output of PARAMETER into the current pane by creating a
     temporary new window which executes
-    
+
+  ls, list-sessions [PARAMETERS]
+    Just a clone of tmux list-sessions
+
   o, open [PARAMETERS] (no working solution for PARAMETERS)
     Replacement running \`tmux\` to enter a tmux session. Has a keep the session
     count reasonable feature. \`tmux send-keys\` all the PARAMETERS and enters.
-    
+
   p, prune
     Due to my preview function in vim creating lots of sessions. Kill all those
     sessions if closing them without exiting.
@@ -38,17 +41,16 @@ COMMANDS
     a new tmux session when not currently inside a tmux session. Does not take
     advantage of the reasonable session count to avoid splitting random sessions
     that are not even visible. \`tmux send-keys\` all the PARAMETERS and enters.
-  
 EOF
 }
 
 # Helpers
 puts() { printf %s\\n "$@"; }
-die() { printf %s\\n "$@" >&2; exit 1; }
+die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
 is_inside_tmux() { test -z "${TMUX}"; }  # Tmux sets ${TMUX}
 
 # Dependencies
-command -v 'tmux' >/dev/null 2>&1 || die "FATAL: Requires \`tmux\`"
+command -v 'tmux' >/dev/null 2>&1 || die 1 "FATAL: Requires \`tmux\`"
 
 main() {
   cmd="$1"
@@ -56,11 +58,12 @@ main() {
   done="false"
   case "${cmd}" in
     h|-h|help|--help)  show_help; exit 0 ;;
-    g|get)     get_reasonable_generic_session_number; done="true" ;;
-    i|insert)  insert_into_current_pane "$@"; done="true" ;;
-    o|open)    run_in_generic "$@"; done="true" ;;
-    p|prune)   prune_nongenerics; done="true" ;;
-    s|split)   split_into_tmux_and_run "$@"; done="true" ;;
+    g|get)             get_next_session_number true; done="true" ;;
+    i|insert)          insert_into_current_pane "$@"; done="true" ;;
+    ls|list-sessions)  tmux list-sessions "$@"; done="true" ;;
+    o|open)            run_in_generic "$@"; done="true" ;;
+    p|prune)           prune_nongenerics; done="true" ;;
+    s|split)           split_into_tmux_and_run "$@"; done="true" ;;
   esac
   "${done}" || { show_help; exit 1; }
 }
@@ -71,11 +74,15 @@ main() {
 # Usage: $0 
 # Have to be careful of how quoting is done because it will essentialy eval
 # The code at least once
+# Eg. `tmux.sh insert echo yo` inside a tmux session yields 'yo'
 insert_into_current_pane() {
+  [ -z "${TMUX}" ] && die 1 'FATAL: Use inside a tmux session'
   id="$(tmux display-message -p "#{window_id}")"
   to_run="\"\$($*)\""
   tmux new-window "tmux send-keys -t '${id}' \"${to_run}\""
 }
+
+
 
 # Usage: $0
 # The execution portion of tmux-get-free-generic.sh
@@ -84,7 +91,7 @@ insert_into_current_pane() {
 # https://www.mail-archive.com/dev@suckless.org/msg22465.html
 # Open and run the command specified by the argument
 run_in_generic() {
-  tmux new-session -A -s "$(get_reasonable_generic_session_number)"
+  exec tmux new-session -A -s "$(get_next_session_number true)"
   #tmux send-keys "$*" Enter  # cannot send because new-session is blocking
 }
 
@@ -118,7 +125,8 @@ split_into_tmux_and_run() {
   pane_id=""
   # -d do not switch, -P print, -h horizontal, -F format of print
   if is_inside_tmux; then
-    pane_id="$(tmux new-session -dP -F '#{pane_id}')"
+    #pane_id="$(tmux new-session -dP -F '#{pane_id}')"
+    pane_id="$(tmux new-session -dAs "$(get_next_session_number false)")"
   else
     pane_id="$(tmux split-window -dPh -F '#{pane_id}')"
   fi
@@ -132,28 +140,30 @@ split_into_tmux_and_run() {
 # Enters a generic detached session or creates a new one with a sane number.
 # 'Generic' means the default numbers-only session names. Starts from 0.
 # Best used with `tmux new-session -A -s "$($0)"`
-get_reasonable_generic_session_number() {
+# $1 - true if wanting to check detached 
+get_next_session_number() {
+  check_detached="$1"
+
   attached="a "  # Space for awk to recognise new column
   detached="b "  # Space for awk to recognise new column
-  # `tmux list-sessions` outputs to stderr if server not started yet
-  generics_all="$(
+  # 2>/dev/null since `tmux list-sessions` outputs if server not started yet
+  generics="$(
     tmux list-sessions \
         -F "#{?session_attached,${attached},${detached}}#{session_name}" \
         2>/dev/null \
       | grep -e "^${detached}[0-9][0-9]*\$" -e "${attached}[0-9][0-9]*\$"
   )"
 
-  # If there is a non-attached (NF == 1) generic to attach to, attach to it
-  puts "${generics_all}" \
-    | awk '/^$/{ next; } /^'"${detached}"'/{ print $2; exit 1; }';
-  errorcode="$?"  # It errors 1 on finding a detached
-
-  if [ "${errorcode}" = "0" ]; then
-    attached_generics="${generics_all}"
-    mark="--"
-    puts "${attached_generics}" "${mark}" "_ -1" "${attached_generics}" | awk '
+  # If searching for non-attached generic and one exists, attach to it
+  if  "${check_detached}" \
+      && ! puts "${generics}" | awk "/^${detached}/{ print \$2; exit 1; }"
+    then :     # Do nothing. It errors 1 on finding a detached
+  # Otherwise find a reasonable number
+  else         # This means all sessions in ${generics} are attached (logic)
+    mark="--"  # Need to mark since going to double process ${generics}
+    puts "${generics}" "${mark}" "_ -1" "${generics}" | awk '
       /^'"${mark}"'$/ { halfway = 1; next; }
-      (!halfway) { matched[$2] = 1; }
+      (!halfway) { matched[$2] = 1; }  # First pass build array
       (halfway && !matched[$2 + 1]) { print($2 + 1); exit; }
     '
   fi
