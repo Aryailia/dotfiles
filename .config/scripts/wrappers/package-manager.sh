@@ -35,6 +35,7 @@ EOF
 }
 
 
+
 ENUM_TRUE=0
 ENUM_FALSE=1
 
@@ -94,8 +95,9 @@ main() {
           flag PROVIDESFOR SET 'true' ;;
 
         # Put argument checks above this line (for error detection)
-        -[!-]*)  show_help; die 1 "FATAL: invalid option '${entry-}'" ;;
-        *)       args="${args} $(puts "$1" | eval_escape)"
+        --[!-]*)  show_help; die 1 "FATAL: invalid option '${entry#--}'" ;;
+        -[!-]*)   show_help; die 1 "FATAL: invalid option '${entry#-}'" ;;
+        *)        args="${args} $(puts "$1" | eval_escape)"
       esac done
     else
       args="${args} $(puts "$1" | eval_escape)"
@@ -123,7 +125,7 @@ handle() {
     MIN)   prints "$3" ;;
     FUL)   prints "${4%% *}" ;;
     BOTH)  prints "$3,$4" ;;
-    SET)   eval "FLAG_$1='$5'" ;;
+    SET)   eval "FLAG_$1"=\"\$5\" ;;
     GET)   eval "\${FLAG_$1}" ;;
     UNSUPPORTED)
       name="$(basename "$0"; printf a)"; name="${name%??}"
@@ -359,7 +361,7 @@ eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 match_any() {
   matchee="$1"; shift 1
   [ -z "${matchee}" ] && return 1
-  for matcher in "$@"; do
+  for matcher in "$@"; do  # Literal match in case
     case "${matchee}" in "${matcher}") return 0 ;; esac
   done
   return 1
@@ -369,11 +371,12 @@ match_any() {
 #       may be due to shell commands running in parallel to forked processes
 #       but honestly have no idea. Thus not really sure if using awk
 #       actually guarentees the order or not.
+# NOTE: seem to have solved it with sleep though
 _print() {
   if flag PRINT GET; then
     cmd="$(for a in "$@"; do prints "$(puts "$a" | eval_escape) "; done)"
-    </dev/null awk "END{ print \"${cmd% } \\\\\"; }" >&2
-    #prints "${cmd% }" >&2  # Using awk instead to guarentee? order
+    #</dev/null awk "END{ print \"${cmd% } \\\\\"; }" >&2
+    prints "${cmd% }" >&2  # Using awk instead to guarentee? order
     #puts  # Add newline (not to STDERR though)
   else
     "$@"
@@ -384,8 +387,9 @@ _print() {
 _pbar() {
   if flag PRINT GET; then
     cmd="$(for a in "$@"; do prints "$(puts "$a" | eval_escape) "; done)"
-    awk "END{ print \" | ${cmd% } \\\\\"; }" >&2
-    #prints " | ${cmd% }" >&2  # Using awk instead to guarentee? order
+    #awk "END{ print \" | ${cmd% } \\\\\"; }" >&2
+    sleep 0.05
+    prints " | ${cmd% }" >&2  # Using awk instead to guarentee? order
     #cat -   # Add newline from _print() (not to STDERR though)
   else
     "$@"

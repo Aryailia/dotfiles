@@ -30,6 +30,10 @@ inoremap <buffer> <LocalLeader>die
 inoremap <buffer> <LocalLeader>req
   \ require() { command -v "$1" >/dev/null 2>&1; }
 
+" Defends against malicious $2 but not malicious $1. $1 must be valid varname
+inoremap <buffer> <LocalLeader>dynamic
+  \ dynamic_assign() { eval "$1"=\"$2\"; }
+
 " Naming modeled after the print commands in ruby
 inoremap <buffer> <LocalLeader>puts
   \ puts() { printf %s\\n "$@"; }
@@ -124,13 +128,14 @@ imap <buffer> <LocalLeader>main3 <C-o>:set paste<CR>
   \      esac<CR>
   \<CR>
   \      # Process arguments properly now<CR>
-  \      for entry in ${opts}; do case "${entry}" in<CR>
+  \      for x in ${opts}; do case "${x}" in<CR>
   \        -h<Bar>--help)  show_help; exit 0 ;;<CR>
   \        -e<Bar>--example)  puts "-$2-"; shift 1 ;;<CR>
   \<CR>
   \        # Put argument checks above this line (for error detection)<CR>
-  \        -[!-]*)  show_help; die 1 "FATAL: invalid option '${entry-}'" ;;<CR>
-  \        *)       args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
+  \        --[!-]*)  show_help; die 1 "FATAL: invalid option '${x#--}'" ;;<CR>
+  \        -[!-]*)   show_help; die 1 "FATAL: invalid option '${x#-}'" ;;<CR>
+  \        *)        args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
   \      esac done<CR>
   \    else<CR>
   \      args="${args} $(puts "$1" <bar> eval_escape)"<CR>
