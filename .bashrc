@@ -26,7 +26,7 @@ EOF
 )"
 
 [ -f "${HOME}/.config/aliasrc" ] && source "${HOME}/.config/aliasrc"
-alias rrc='source ~/.bash_profile'
+alias rrc='source ~/.bashrc; source ~/.config/shell_profile'
 
 c() {
   if [ -z "$1" ]; then

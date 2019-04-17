@@ -8,6 +8,17 @@ alias  diff='diff --color=auto'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='es'
 alias    es='browser.sh edit search'
+alias    ga='git add'
+alias    gc='git commit --message'
+alias    gn='git clone --recursive'
+alias   glg="git log --graph --abbrev-commit --decorate --oneline --all"
+alias    gp='git push --recursive-submodules=on-demand'
+alias    gs='git status'
+#alias  gcb='sh -c "
+#  git checkout -b \"$1\"
+#  git submodule foreach '\''git checkout -b \"$1\"'\''
+#" _'
+#alias    gu='git submodule update --remote --merge'
 alias  grep='grep --color=auto'
 alias     l='ls -h --group-directories-first'
 alias    ls='ls --color=auto'
@@ -16,7 +27,7 @@ alias   lal='l -Al'
 alias    ll='l -l'
 alias   mkf='sh -c "for x in \"\$@\"; do
   touch -- \"\$x\"
-  chmod 644 \"\$x\"
+  chmod 644 -- \"\$x\"
 done" _'
 alias   mks='sh -c "for x in \"\$@\"; do
   touch -- \"\$x\"
@@ -24,6 +35,7 @@ alias   mks='sh -c "for x in \"\$@\"; do
 done" _'
 alias    nm='sudo nmtui'
 alias    pm='package-manager.sh'
+alias    rb='trash'
 alias    rx='xrdb ~/.Xresources'
 #alias  rrc=''  # In individual rc files, reminder to not re-alias this
 alias   scb='browser.sh copy bookmarks'
@@ -64,7 +76,7 @@ alias     v='nvim'
 #'\'' _)"'
 
 
-alias    gl="git log --graph --abbrev-commit --decorate --oneline --all"
+alias debug-path='printf %s\\n "${PATH}" | tr ":" "\n" | sort'
 
 alias list-imes='<~/.config/fcitx/profile \
   sed -n "/^EnabledIMList=/{ s/^.*=//p; }" \
