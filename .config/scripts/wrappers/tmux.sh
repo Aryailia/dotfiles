@@ -58,7 +58,7 @@ main() {
   done="false"
   case "${cmd}" in
     h|-h|help|--help)  show_help; exit 0 ;;
-    g|get)             get_next_session_number true; done="true" ;;
+    g|get)             get_next_session true; done="true" ;;
     i|insert)          insert_into_current_pane "$@"; done="true" ;;
     ls|list-sessions)  tmux list-sessions "$@"; done="true" ;;
     o|open)            run_in_generic "$@"; done="true" ;;
@@ -91,7 +91,7 @@ insert_into_current_pane() {
 # https://www.mail-archive.com/dev@suckless.org/msg22465.html
 # Open and run the command specified by the argument
 run_in_generic() {
-  exec tmux new-session -A -s "$(get_next_session_number true)"
+  exec tmux new-session -A -s "$(get_next_session true)" "$(shell)"
   #tmux send-keys "$*" Enter  # cannot send because new-session is blocking
 }
 
@@ -123,12 +123,12 @@ prune_nongenerics() {
 # If not attached to a tmux session, then types <cmd...> into a new session
 split_into_tmux_and_run() {
   pane_id=""
-  # -d do not switch, -P print, -h horizontal, -F format of print
+  # -d do not switch, -P print, -h horizontal, -F print format, -s session name
   if is_inside_tmux; then
-    #pane_id="$(tmux new-session -dP -F '#{pane_id}')"
-    pane_id="$(tmux new-session -dAs "$(get_next_session_number false)")"
+    pane_id="$(tmux new-session -dPA -F '${pane_id}' \
+      -s "$(get_next_session false)" "$(shell)")"
   else
-    pane_id="$(tmux split-window -dPh -F '#{pane_id}')"
+    pane_id="$(tmux split-window -dPh -F '#{pane_id}' "$(shell)")"
   fi
 
   [ -n "$*" ] && tmux send-keys -t "$pane_id" "$*" Enter
@@ -141,7 +141,7 @@ split_into_tmux_and_run() {
 # 'Generic' means the default numbers-only session names. Starts from 0.
 # Best used with `tmux new-session -A -s "$($0)"`
 # $1 - true if wanting to check detached
-get_next_session_number() {
+get_next_session() {
   check_detached="$1"
 
   attached="a "  # Space for awk to recognise new column
@@ -168,5 +168,11 @@ get_next_session_number() {
     '
   fi
 }
+
+# Tmux runs with login shell which sources .bashrc twice (initial login
+# and tmux session started). Running the shell as `tmux new-session`
+# makes it non-login.
+# Not sure if adding `exec` here helps or hurts
+shell() { getent passwd "${LOGNAME}" | cut -d ':' -f 7; }
 
 main "$@"

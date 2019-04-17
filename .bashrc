@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
   # Included shebang for shellcheck. Indent for autodetect indent
-# TODO: Check if bashrc is for interactive sheelds and  where to declare things
+# For interactive+login shells and subprocesses
+
+stty -ixon       # Disable Ctrl-S and Ctrl-Q
+shopt -s autocd  # `cd` into a directory by typing name (without cd)
 
 # https://www.digitalocean.com/community/tutorials/how-to-use-bash-history-commands-and-expansions-on-a-linux-vps
 
 #HISTFILESIZE=10000   # Number of commands to load to disk
 #HISTSIZE=5000        # Portion of which, number of commands to load into memory
-shopt -s histappend  # >> to history not > (for mutiple sessions)
+shopt -s histappend  # History is added
 
 PROMPT_COMMAND="$(<<EOF cat -
   errorcode="\$?"
@@ -17,7 +20,7 @@ PROMPT_COMMAND="$(<<EOF cat -
   history -a  # Append command immediately to history
   history -c  # Clear current history for session
   history -r  # Read history back into memory
-  eval 'PS1="\$("${HOME}/.config/prompt.sh" "\$errorcode" "\$SECONDS")";'
+  PS1="\$("${HOME}/.config/prompt.sh" "\$errorcode" "\$SECONDS")"
   SECONDS="0"
 EOF
 )"
@@ -30,7 +33,6 @@ c() {
     "${SCRIPTS}/namedpath.sh" --list-aliases
   else
     path="$("${SCRIPTS}/namedpath.sh" "$1"; printf x)"; path="${path%?}"
-    cd "${path}" && ls -Ah --group-directories-first --color=auto
+    cd "${path}" && la  # ls with some options, defined in alias
   fi
 }
-

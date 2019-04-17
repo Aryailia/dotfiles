@@ -1,20 +1,24 @@
+# Path
 SCRIPTS="${HOME}/.config/scripts"
 PATH="${PATH}:$(find "${SCRIPTS}/" -type d | tr '\n' ':' | sed 's/:*$//')"
-PATH="${PATH}:${HOME}/.cargo/bin:/usr/local/go/bin"
+PATH="${PATH}:${HOME}/.cargo/bin"
 export PATH
+export GOPATH="${HOME}/.local/go"
 
 # Folders
 export DOTENVIRONMENT="${HOME}/.environment"
-export SCRIPTS
-# `${TMPDIR}` set in Android and MacOS
-test -z "${TMPDIR}" && { printf '%s' "$(uname)" | grep -q 'Linux'; } \
-  && export TMPDIR='/tmp'
-# Windows Vista+
-test -z "${TMPDIR}" && { printf '%s' "$(uname)" | grep -q 'MSYS'; } \
+export SCRIPTS  # defined above, exporting here for clarity
+# Setting ${TMPDIR} in Android and MacOS
+test -z "${TMPDIR}" && { uname | grep -q 'Linux'; } && export TMPDIR='/tmp'
+# Setting ${TMPDIR} in Windows Vista+
+test -z "${TMPDIR}" && { uname | grep -q 'MSYS'; } \
   && export TMPDIR="${HOME}/AppData/Local/Temp"
 
+# Programs
+# ${DISPLAY} is to check if X server is running
+test -n "${DISPLAY}" && command -v st >/dev/null 2>&1 && export TERMINAL='st'
+
 command -v nvim >/dev/null 2>&1             && export EDITOR='nvim'
-command -v st >/dev/null 2>&1  && { export TERMINAL='st'; export TERM='st'; }
 command -v termux-open-url >/dev/null 2>&1  && export BROWSER='termux-open-url'
 command -v midori >/dev/null 2>&1           && export BROWSER='midori'
 command -v surf >/dev/null 2>&1             && export BROWSER='surf'

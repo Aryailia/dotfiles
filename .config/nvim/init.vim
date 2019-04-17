@@ -34,6 +34,11 @@ set bg=light          " Readable on light background
 if has('multi_byte') && !exists('$LANG') && &encoding ==# 'latin1'
   set encoding=utf-8
 endif
+" Neovim prints random 'q' if ${TERM} is set wrong in the first login terminal
+" See https://stackoverflow.com/questions/4229658
+if ! has("gui_running")
+  set guicursor=
+endif
 
 set nrformats-=octal  " Leading 0s are not recognised as octals
 set formatoptions-=c  " Do not auto add comments

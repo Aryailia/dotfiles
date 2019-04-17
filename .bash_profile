@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
   #:!console bash %self
-# Profile runs on login shells
+# For interactive shells (login and non-login) and all subprocesses
+# Since this affects the first login shell too, this is sourced by most things
 
-file="$HOME/.bashrc";               [ -f "$file" ] && source "$file"
-#file="$HOME/.config/shell_profile"; [ -f "$file" ] && source "$file"
-
+shopt -q login_shell && {
+  export TERM=linux
+  [ -f ~/.bashrc ] && source ~/.bashrc
+  [ -f ~/.config/shell_profile ] && source ~/.config/shell_profile
+}
