@@ -9,7 +9,7 @@ p() { printf '%s' "$@"; }
 case "$1" in
   -h|--help)  puts "Outputs constants. I think this adds transparency." ;;
   cdpath)             p "${HOME}/.config/named_directories" ;;
-  dl|downloads)       android_downloads="/sdcard/Downloads"
+  dl|downloads)       android_downloads="/sdcard/Download"
                       if [ -d "${android_downloads}" ]
                         then p "${android_downloads}"
                         else p "${HOME}/Downloads"
