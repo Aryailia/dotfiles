@@ -9,7 +9,7 @@ SYNOPSIS
 DESCRIPTION
 
 OPTIONS
-  -x,--target   PACKAGE_MANAGER   Specify a package manager
+  -x,--target PACKAGE_MANAGER   Specify a package manager
 
   -E,--edit                Edit
   -C,--reconfigure         WIP
@@ -95,7 +95,7 @@ main() {
           flag PROVIDESFOR SET 'true' ;;
 
         # Put argument checks above this line (for error detection)
-        --[!-]*)  show_help; die 1 "FATAL: invalid option '${entry#--}'" ;;
+        # first '--' case already covered by first case statement
         -[!-]*)   show_help; die 1 "FATAL: invalid option '${entry#-}'" ;;
         *)        args="${args} $(puts "$1" | eval_escape)"
       esac done
@@ -116,14 +116,14 @@ main() {
     "${ENUM_QUERY}")     package_query "$@" ;;
     "${ENUM_REMOVE}")    package_remove "$@" ;;
     "${ENUM_RECONFIG}")  echo WIP ;;
-    *)  show_help; exit "$(if flag HELP GET; then print 1; else 1; fi)" ;;
+    *)  show_help; exit "$(if flag HELP GET; then puts 1; else puts 1; fi)" ;;
   esac
 }
 
 handle() {
   case "$2" in
     MIN)   prints "$3" ;;
-    FUL)   prints "${4%% *}" ;;
+    FUL)   prints "$4" ;;
     BOTH)  prints "$3,$4" ;;
     SET)   eval "FLAG_$1"=\"\$5\" ;;
     GET)   eval "\${FLAG_$1}" ;;
@@ -137,18 +137,18 @@ handle() {
 
 flag() {
   case "$1" in
-    SINGLE)       handle 'SINGLE'       "$2" '-1' '--single            ' "$3" ;;
-    SYNC)         handle 'SYNC'         "$2" '-e' '--external          ' "$3" ;;
-    FORCE)        handle 'FORCE'        "$2" '-f' '--force             ' "$3" ;;
-    HELP)         handle 'HELP'         "$2" '-h' '--help              ' "$3" ;;
-    INFO)         handle 'INFO'         "$2" '-i' '--info              ' "$3" ;;
-    MANUAL)       handle 'MANUAL'       "$2" '-m' '--manual            ' "$3" ;;
-    ORPHANS)      handle 'ORPHANS'      "$2" '-o' '--orphans           ' "$3" ;;
-    PRINT)        handle 'PRINT'        "$2" '-p' '--print             ' "$3" ;;
-    QUIET)        handle 'QUIET'        "$2" '-q' '--quiet             ' "$3" ;;
-    SOURCE)       handle 'SOURCE'       "$2" '-s' '--source            ' "$3" ;;
+    SINGLE)       handle 'SINGLE'       "$2" '-1' '--single'             "$3" ;;
+    SYNC)         handle 'SYNC'         "$2" '-e' '--external'           "$3" ;;
+    FORCE)        handle 'FORCE'        "$2" '-f' '--force'              "$3" ;;
+    HELP)         handle 'HELP'         "$2" '-h' '--help'               "$3" ;;
+    INFO)         handle 'INFO'         "$2" '-i' '--info'               "$3" ;;
+    MANUAL)       handle 'MANUAL'       "$2" '-m' '--manual'             "$3" ;;
+    ORPHANS)      handle 'ORPHANS'      "$2" '-o' '--orphans'            "$3" ;;
+    PRINT)        handle 'PRINT'        "$2" '-p' '--print'              "$3" ;;
+    QUIET)        handle 'QUIET'        "$2" '-q' '--quiet'              "$3" ;;
+    SOURCE)       handle 'SOURCE'       "$2" '-s' '--source'             "$3" ;;
 
-    DEPENDENTS)   handle 'DEPENDETS'    "$2" '-d' '--dependents        ' "$3" ;;
+    DEPENDENTS)   handle 'DEPENDENTS'    "$2" '-d' '--dependents'         "$3" ;;
     PROVIDESFOR)  handle 'PROVIDESFOR'  "$2" '-r' '--reverse-dependents' "$3" ;;
     all)
       shift 1
@@ -235,6 +235,9 @@ package_install() {
   fi
 }
 
+# `pm -Q -- -e '^p'` to pass options to grep
+# TODO: Out of date and global vs virtual environment (pip)
+# TODO: check '-' with no arguments counts as a parameter as a literal text
 # Flags to check checklist:
 # SINGLE
 # MANUAL
@@ -244,6 +247,11 @@ package_install() {
 # PROVIDESFOR
 # SYNC
 package_query() {
+  # Or maybe we can?
+  flag MANUAL GET && flag SYNC GET && flag ORPHANS GET \
+    && die 1 "FATAL: cannot have $(flag MANUAL MIN), $(flag SYNC MIN), or $(
+      flag ORPHANS GET) at the same time."
+
   if match_manager void && require xbps-query; then
     post_process="$(
       if  ! flag MANUAL GET && ! flag ORPHANS GET && {
@@ -266,19 +274,11 @@ package_query() {
         fi
 
         # NOTE: Want the splitting for grep
-      } | { [ "$#" -gt 0 ]; do_if "$?" _pbar grep -i $(printf -- " -e %s" "$@")
-      } | { flag SINGLE GET; <&0 do_if "$?" _pbar sed 1q
-      } | do_if "${post_process}" _pbar cut -d " " -f 2 \
-      | { [ "${post_process}" = "${ENUM_TRUE}" ] && ! flag QUIET GET
-        do_if "$?" _pbar xargs sh -c '
-          printf %s\\n >&2 -- \
-            "Quering the following packages (-q to silence):" \
-            "\"-q to silence\"" "\"-1 to limit to dependency search\"" ""
-          printf "%s " "$@" >&2
-          printf \\n====\\n >&2
-          printf %s\\n "$@"
-        ' _;
-      } | {
+      } | _filter_case_insensitive "$@" \
+      | { flag SINGLE GET; <&0 do_if "$?" _pbar sed 1q; } \
+      | do_if "${post_process}" _pbar cut -d ' ' -f 2 \
+      | do_if "${post_process}" _verbose_display \
+      | {
         if flag DEPENDENTS GET; then
           flag SYNC GET && puterr \
             "ERROR: xbps cannot query dependencies of external programs." \
@@ -288,6 +288,8 @@ package_query() {
           # NOTE: `_pbar sort` and `_pbar uniq` execute first for some reason
           #       before the other PRINT flag prints occur
           _pbar xargs -n 1 xbps-query -x | sort | uniq
+          </dev/null _pbar sort
+          </dev/null _pbar uniq
           #_pbar xargs -n 1 xbps-query -x | _pbar sort | _pbar uniq
         elif flag PROVIDESFOR GET; then
           flag SYNC GET && puterr \
@@ -296,6 +298,8 @@ package_query() {
             "Skipping all non-installed programs..." \
             "===="
           _pbar xargs -n 1 xbps-query -X | sort | uniq
+          </dev/null _pbar sort
+          </dev/null _pbar uniq
         elif flag INFO GET; then
           _pbar xargs -n 1 -I {} sh -c "xbps-query -S {}; echo '===='"
         else
@@ -303,9 +307,45 @@ package_query() {
         fi
       }
     }
-  fi
 
-  if match_manager rust && require cargo; then
+  elif match_manager python && require pip; then
+    flag DEPENDENTS GET    && flag DEPENDENTS  UNSUPPORTED
+    flag PROVIDESFOR GET   && flag PROVIDESFOR UNSUPPORTED
+
+    flag MANUAL GET        && flag MANUAL      UNSUPPORTED
+    { { if flag ORPHANS GET; then   _print pip list --not-required
+        elif flag MANUAL GET; then  _print pip list --user
+        elif flag SYNC GET; then    _print pip search "$@"
+        else                        _print pip list | _pbar sed '1d;2d'
+        fi
+      } | { ! flag SYNC GET; <&0 do_if "$?" _filter_case_insensitive "$@"; } \
+      | { flag SINGLE GET; <&0 do_if "$?" _pbar sed 1q; } \
+      | _pbar cut -d ' ' -f 1 \
+      | _verbose_display \
+      | {
+        #if flag DEPENDENTS GET; then
+        #  flag SYNC GET && puterr \
+        #    "ERROR: pip cannot query dependencies of external programs." \
+        #    "Skipping all non-installed programs..." \
+        #    "===="
+        #  _pbar pip download -d "${TMPDIR}" /tmp --no-binary :all: \
+        #    | _pbar grep Collecting \
+        #    | _pbar cut -d ' ' -f 2 \
+        #    | grep -Ev "$PACKAGE(~|=|\!|>|<|$)"
+        #elif flag PROVIDESFOR GET; then
+        if flag INFO GET; then
+          flag SYNC GET && puterr \
+            "ERROR: pip cannot query dependencies of external programs." \
+            "Skipping all non-installed programs..." \
+            "===="
+          _pbar xargs -n 1 -I {} sh -c "pip show -f {}; echo '===='"
+        else
+          cat -
+        fi
+      }
+    }
+
+  elif match_manager rust && require cargo; then
     flag MANUAL GET        && flag MANUAL      UNSUPPORTED
     flag SINGLE GET        && flag SINGLE      UNSUPPORTED
     flag ORPHANS GET       && flag ORPHANS     UNSUPPORTED
@@ -320,8 +360,30 @@ package_query() {
       } | { flag SINGLE GET; do_if "$?" sed 1q;
       }
     }
+  else
+    die 1 "FATAL: The required manager(s) for '${TARGET}' are not installed."
   fi
 }
+
+
+_filter_case_insensitive() {
+  [ "$#" -gt 0 ]; do_if "$?" _pbar grep -i "$@"
+}
+
+_verbose_display() {
+  ! flag QUIET GET && {
+    flag INFO GET || flag DEPENDENTS GET || flag PROVIDESFOR GET
+  }
+  <&0 do_if "$?" _pbar xargs sh -c '
+    printf %s\\n >&2 -- \
+      "Quering the following packages (-q to silence):" \
+      "\"-q to silence\"" "\"-1 to limit to dependency search\"" ""
+    printf "%s " "$@" >&2
+    printf \\n====\\n >&2
+    printf %s\\n "$@"
+  ' _
+}
+
 
 # Use ${ORPHANS} for autoremove? or use for cleanup method?
 package_remove() {
@@ -335,26 +397,30 @@ package_remove() {
       then _print "${_SUDO}" xbps-remove "-${options}" "$@"
       else _print "${_SUDO}" xbps-remove "$@"
     fi
-  fi
+  elif match_manager debian && require apt; then
+    die 1 "WIP"
 
-  if match_manager python && require pip; then
-    die 1 'WIP'
-    #options="$(
-    #  flag SINGLE GET || prints "r"
-    #)"
-    #if [ -n "${options}" ]
-    #  then _print "${_SUDO}" pip uninstall "-${options}" "$@"
-    #  else _print "${_SUDO}" pip uninstall "$@"
-    #fi
+  elif match_manager python && require pip && require pip-autoremove; then
+    flag FORCE GET && flag FORCE UNSUPPORTED
+    flag ORPHANS GET && flag ORPHANS UNSUPPORTED  # Should be -l....
+    if flag SINGLE GET; then
+      _print _sudo pip uninstall "$1"
+    else
+      _print _sudo pip-autoremove "$@"
+    fi
+  elif match_manager rust && require cargo; then
+    die 1 "WIP"
+  else
+    die 1 "FATAL: The required manager(s) for '${TARGET}' are not installed."
   fi
 }
 
 
 # Helpers
 puts() { printf %s\\n "$@"; }
-puterr() { printf %s\\n "$@" >&2; }
 prints() { printf %s "$@"; }
-die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
+puterr() { printf %s\\n "$@" >&2; }
+die() { c="$1"; shift 1; for x in "$@"; do puterr "$x"; done; exit "$c"; }
 require() { command -v "$1" >/dev/null 2>&1; }
 eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 
@@ -377,7 +443,6 @@ _print() {
     cmd="$(for a in "$@"; do prints "$(puts "$a" | eval_escape) "; done)"
     #</dev/null awk "END{ print \"${cmd% } \\\\\"; }" >&2
     prints "${cmd% }" >&2  # Using awk instead to guarentee? order
-    #puts  # Add newline (not to STDERR though)
   else
     "$@"
   fi
@@ -388,9 +453,8 @@ _pbar() {
   if flag PRINT GET; then
     cmd="$(for a in "$@"; do prints "$(puts "$a" | eval_escape) "; done)"
     #awk "END{ print \" | ${cmd% } \\\\\"; }" >&2
-    sleep 0.05
+    sleep 0.05  # Need this for SELECT (sed 1q)
     prints " | ${cmd% }" >&2  # Using awk instead to guarentee? order
-    #cat -   # Add newline from _print() (not to STDERR though)
   else
     "$@"
   fi

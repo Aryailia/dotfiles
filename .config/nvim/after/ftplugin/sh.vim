@@ -24,9 +24,9 @@ endfunction
 " Snippets
 
 " Thanks to Rich (https://www.etalabs.net/sh_tricks.html for eval_escape)
-inoremap <buffer> <LocalLeader>die
-  \ die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2
-  \; exit "${exitcode}"; }
+imap <buffer> <LocalLeader>die
+  \ ,pute<CR>
+  \die() { c="$1"; shift 1; for x in "$@"; do puterr "$x"; done; exit "$c"; }
 inoremap <buffer> <LocalLeader>req
   \ require() { command -v "$1" >/dev/null 2>&1; }
 
@@ -133,7 +133,7 @@ imap <buffer> <LocalLeader>main3 <C-o>:set paste<CR>
   \        -e<Bar>--example)  puts "-$2-"; shift 1 ;;<CR>
   \<CR>
   \        # Put argument checks above this line (for error detection)<CR>
-  \        --[!-]*)  show_help; die 1 "FATAL: invalid option '${x#--}'" ;;<CR>
+  \        # first '--' case already covered by first case statement<CR>
   \        -[!-]*)   show_help; die 1 "FATAL: invalid option '${x#-}'" ;;<CR>
   \        *)        args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
   \      esac done<CR>
