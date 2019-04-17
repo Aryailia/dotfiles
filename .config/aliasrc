@@ -12,7 +12,7 @@ alias    ga='git add'
 alias    gc='git commit --message'
 alias    gn='git clone --recursive'
 alias   glg="git log --graph --abbrev-commit --decorate --oneline --all"
-alias    gp='git push --recursive-submodules=on-demand'
+alias    gp='git push --recurse-submodules=on-demand'
 alias    gs='git status'
 #alias  gcb='sh -c "
 #  git checkout -b \"$1\"
