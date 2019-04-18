@@ -1,7 +1,9 @@
 # Path
+# Using test instead of bracket syntax to support more shells
 SCRIPTS="${HOME}/.config/scripts"
-PATH="${PATH}:$(find "${SCRIPTS}/" -type d | tr '\n' ':' | sed 's/:*$//')"
-PATH="${PATH}:${HOME}/.cargo/bin"
+# TODO: Do I need to add the '/.' guard?
+PATH="${PATH}$(find "${SCRIPTS}"/ -type d -exec printf :%s '{}' \;)"
+command -v "cargo" >/dev/null 2>&1 && PATH="${PATH}:${HOME}/.cargo/bin"
 export PATH
 export GOPATH="${HOME}/.local/go"
 
@@ -9,10 +11,10 @@ export GOPATH="${HOME}/.local/go"
 export DOTENVIRONMENT="${HOME}/.environment"
 export SCRIPTS  # defined above, exporting here for clarity
 # Setting ${TMPDIR} in Android and MacOS
-test -z "${TMPDIR}" && { uname | grep -q 'Linux'; } && export TMPDIR='/tmp'
+test -d "${TMPDIR}" || { uname | grep -q 'Linux'; export TMPDIR='/tmp'; }
 # Setting ${TMPDIR} in Windows Vista+
-test -z "${TMPDIR}" && { uname | grep -q 'MSYS'; } \
-  && export TMPDIR="${HOME}/AppData/Local/Temp"
+test -d "${TMPDIR}" || { uname | grep -q 'MSYS'
+  export TMPDIR="${HOME}/AppData/Local/Temp"; }
 
 # Programs
 # ${DISPLAY} is to check if X server is running

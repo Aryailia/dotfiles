@@ -3,7 +3,7 @@
 # For interactive+login shells and subprocesses
 
 stty -ixon       # Disable Ctrl-S and Ctrl-Q
-shopt -s autocd  # `cd` into a directory by typing name (without cd)
+#shopt -s autocd  # cd without typing cd just typing name. Conflicts too much
 
 # https://www.digitalocean.com/community/tutorials/how-to-use-bash-history-commands-and-expansions-on-a-linux-vps
 

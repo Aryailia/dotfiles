@@ -95,18 +95,23 @@ ow_force="2"
 
 
 main() {
-  # Global variables that are appropriate from the shell environment
-  dotenv="${DOTENVIRONMENT}"
-
-  # Global variables static to project (assume linker is ran in base directory)
+  ###
+  # Constants
+  # This script should be located at the outermost level of dotfiles directory
   me="$(realpath "$0"; printf a)"; me="${me%??}"
   dotfiles="$(dirname "${me}"; printf a)"; dotfiles="${dotfiles%??}"
+  # Load constants (but not too many times), useful on initial install
+  [ -z "${DOTENVIRONMENT}" ] && source "${dotfiles}/.config/shell_profile"
+
+  # Global variables static to project (assume linker is ran in base directory)
+  dotenv="${DOTENVIRONMENT}"
   ignore="${dotfiles}/.linkerignore.sh"
   ignore2="${dotenv}/.linkerignore.sh"
   scripts_relative_path=".config/scripts"
   make_shortcuts="shortcuts.sh"
   # NOTE: Also see `run_with_env` for more global variables
 
+  ###
   # Parameters processing
   # Help check
   for arg in "$@"; do case "${arg}" in

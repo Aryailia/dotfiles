@@ -41,18 +41,36 @@ COMMANDS
     a new tmux session when not currently inside a tmux session. Does not take
     advantage of the reasonable session count to avoid splitting random sessions
     that are not even visible. \`tmux send-keys\` all the PARAMETERS and enters.
+
+ENVIRONMENT
+  SHELL
+    The shell to use for the tmux session. Usually already set
 EOF
 }
 
 # Helpers
 puts() { printf %s\\n "$@"; }
-die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
+die() { c="$1"; shift 1; for x in "$@"; do puts "$x" >&2; done; exit "$c"; }
 is_inside_tmux() { test -z "${TMUX}"; }  # Tmux sets ${TMUX}
+require() { command -v "$1" >/dev/null 2>&1; }
 
-# Dependencies
-command -v 'tmux' >/dev/null 2>&1 || die 1 "FATAL: Requires \`tmux\`"
+
 
 main() {
+  # Dependencies
+  require 'tmux' || die 1 "FATAL: Requires \`tmux\`"
+  # Tmux runs with login shell which sources .bashrc twice (initial login
+  # and tmux session started). Running the shell as `tmux new-session`
+  # makes it non-login.
+  # Not sure if adding `exec` here helps or hurts
+  [ -x "${SHELL}" ] || SHELL="$(
+    if require getent && require logname  && logname >/dev/null 2>&1
+      then getent passwd "$(logname)" | cut -d ':' -f 7  # get default shell
+      else command -v bash
+    fi
+  )"
+
+  # Main
   cmd="$1"
   [ "$#" -gt "0" ] && shift 1
   done="false"
@@ -67,7 +85,6 @@ main() {
   esac
   "${done}" || { show_help; exit 1; }
 }
-
 
 
 
@@ -91,7 +108,7 @@ insert_into_current_pane() {
 # https://www.mail-archive.com/dev@suckless.org/msg22465.html
 # Open and run the command specified by the argument
 run_in_generic() {
-  exec tmux new-session -A -s "$(get_next_session true)" "$(shell)"
+  exec tmux new-session -A -s "$(get_next_session true)" "${SHELL}"
   #tmux send-keys "$*" Enter  # cannot send because new-session is blocking
 }
 
@@ -126,9 +143,9 @@ split_into_tmux_and_run() {
   # -d do not switch, -P print, -h horizontal, -F print format, -s session name
   if is_inside_tmux; then
     pane_id="$(tmux new-session -dPA -F '${pane_id}' \
-      -s "$(get_next_session false)" "$(shell)")"
+      -s "$(get_next_session false)" "${SHELL}")"
   else
-    pane_id="$(tmux split-window -dPh -F '#{pane_id}' "$(shell)")"
+    pane_id="$(tmux split-window -dPh -F '#{pane_id}' "${SHELL}")"
   fi
 
   [ -n "$*" ] && tmux send-keys -t "$pane_id" "$*" Enter
@@ -168,11 +185,5 @@ get_next_session() {
     '
   fi
 }
-
-# Tmux runs with login shell which sources .bashrc twice (initial login
-# and tmux session started). Running the shell as `tmux new-session`
-# makes it non-login.
-# Not sure if adding `exec` here helps or hurts
-shell() { getent passwd "${LOGNAME}" | cut -d ':' -f 7; }
 
 main "$@"

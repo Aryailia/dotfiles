@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-shortcutsrc="${HOME}/.config/shortcutsrc"
+shortcuts="${HOME}/.config/shortcuts.sh"
 shell_shortcuts="${HOME}/.config/named_directories"
 vifm_shortcuts="${HOME}/.config/vifm/directory_shortcuts"
 
@@ -8,15 +8,15 @@ require() { command -v "$1" >/dev/null 2>&1; }
 die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
 puts() { printf %s\\n "$@"; }
 
-require "${shortcutsrc}" || die 1 "FATAL: Need '${shortcutsrc}' generated"
+require "${shortcuts}" || die 1 "FATAL: Need '${shortcuts}' script"
 
 mkdir -p "${shell_shortcuts}"    # Put the shortcuts inside this directory
 mkdir -p "${vifm_shortcuts%/*}"  # basedir, probably no need to check edge cases
 
-# Expect eval-escaped (shell-quotable) output from `${shortcutsrc}`
-eval "set -- $("${shortcutsrc}")" || die 1 "FATAL: Error with '${shortcutsrc}'"
+# Expect eval-escaped (shell-quotable) output from `${shortcuts}`
+eval "set -- $("${shortcuts}")" || die 1 "FATAL: Error with '${shortcuts}'"
 
-# Both sanitise shortcutrc and create the symlinks for the shell shortcuts
+# Sanitise ${shortcuts} output and create the symlinks for the shell shortcuts
 # STDERR is to the tty, STDOUT is to ${map}
 rm "${shell_shortcuts}"/*
 map="$(sh -c "$(<<EOF cat -
