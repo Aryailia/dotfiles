@@ -6,7 +6,7 @@
 # Test if config files are readable then load settings
 [ -r "$HOME/.Xresources" ] && xrdb "$HOME/.Xresources"
 #[ -r "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xdefaults"
-[ -r "$HOME/.Xmodmap" ]  && xmodmap "$HOME/.Xmodmap" # swap RCtrl and CapsLock
+#[ -r "$HOME/.Xmodmap" ]  && xmodmap "$HOME/.Xmodmap" # swap RCtrl and CapsLock
 
 #setterm -blength 0 # remove beep
 
