@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
   # >/dev/stdin $0 <type> <?content1> <?content2> ...
 # Intended to be a portable clipboard interface
-# Useful tmux as clipboad info: https://unix.stackexchange.com/questions/56477/
+# Useful tmux as clipboard info: https://unix.stackexchange.com/questions/56477/
 
 show_help() {
   <<EOF cat - >&2
@@ -64,11 +64,11 @@ main() {
 
   eval "set -- ${args}"
   xdg_config="${XDG_CONFIG_HOME:-"${HOME}/.config"}"
-  clipboard="${xdg_config}/clipboard"
+  clipboard_file="${xdg_config}/clipboard"
 
   # Main
-  # Like GNU utils, ignore STDIN if parameter-specified input given
   if [ "${READ}" = 'false' ]; then
+    # Like GNU utils, ignore STDIN if parameter-specified input given
     { if [ "$#" -eq 0 ]
       then <&0 cat -
       else prints "$@"
@@ -83,15 +83,19 @@ main() {
       # Process the input to copy
       if   is_to_run 'termux-set'; then  <&0 termux-clipboard-set
       elif is_to_run 'xclip'; then       <&0 xclip -in -selection clipboard
-      # Command will complain if no tmux server is running
-      elif is_to_run 'tmux' && tmux_on; then
-        <&0 tmux load-buffer -b 'clipbord' -
 
-      else
+      # Command will complain if no tmux server is running
+      # `tmux_on` first so --verbose does not print
+      elif tmux_on && is_to_run 'tmux'; then
+        echo yo
+        <&0 tmux load-buffer -b 'clipboard' -
+
+      # Use `is_to_run` instead of else for '--verbose'
+      elif is_to_run 'file'; then
         [ -w "${xdg_config}" ] || die 1 "FATAL: '${xdg_config}' not writeable"
-        <&0 cat - >"${clipboard}"
+        <&0 cat - >"${clipboard_file}"
         # Also insert into the buffer
-        #require tmux && tmux_on && tmux -b 'clipboard' "${clipboard}"
+        #require tmux && tmux_on && tmux -b 'clipboard' "${clipboard_file}"
       fi
     }
 
@@ -99,7 +103,7 @@ main() {
     if   is_to_run 'termux-get'; then       termux-clipboard-get
     elif is_to_run 'xclip'; then            xclip -out -selection clipboard
     elif is_to_run 'tmux' && tmux_on; then  tmux save-buffer -b clipboard -
-    elif is_to_run 'file'; then             cat "${clipboard}"
+    elif is_to_run 'file'; then             cat "${clipboard_file}"
     fi
   else
     die 1 "FATAL: \`${name}\` requires '-r' or '-w'" "\`${name} -h\` for help"
@@ -111,9 +115,9 @@ main() {
 
 ##############################################################################
 # Associative array implementation for choice lookups
+
 # Makes it easier to add more aliases for the different clipboards
 # map_to is where the aliases are controlled
-
 ENUM_COMMAND="1"
 ENUM_ID="2"
 
@@ -135,17 +139,21 @@ map_to() {
     tmux)               select_enum "$2" "3" "tmux" ;;
     file)               select_enum "$2" "4" ":" ;;
     ?*)  die 1 "FATAL: Clipboard program '$1' is not supported" ;;
-    *)                  elect_enum "$2" "0" ":" ;;
+    *)                  select_enum "$2" "0" ":" ;;
   esac
 }
 
 is_to_run() {
+  tmp_is_to_run="$(map_to "$1" "${ENUM_COMMAND}")"
   if [ "${CHOICE}" = "$(map_to '' "${ENUM_ID}")" ] \
     || [ "${CHOICE}" = "$(map_to "$1" "${ENUM_ID}")" ] \
-    && require "$(map_to "$1" "${ENUM_COMMAND}")"
+    && require "${tmp_is_to_run}"
   then
-    "${VERBOSE}" && puts "${name} - using \`$(
-      map_to "$1" "${ENUM_COMMAND}")\` as the clipboard" >&2
+    "${VERBOSE}" && puts "${name} - using $(
+      if [ "${tmp_is_to_run}" = ":" ]
+        then prints "'${clipboard_file}'"
+        else prints "${tmp_is_to_run}"
+      fi) as the clipboard" >&2
     return 0
   else
     return 1
