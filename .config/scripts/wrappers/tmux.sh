@@ -21,7 +21,7 @@ COMMANDS
     Prints a generic session to attach to if one is available or to a sane
     number to create new session for. See \`open\` for actual attaching
 
-  i, insert PARAMETER
+  i, insert-evaluate PARAMETER
     Inserts the output of PARAMETER into the current pane by creating a
     temporary new window which executes
 
@@ -75,13 +75,13 @@ main() {
   [ "$#" -gt "0" ] && shift 1
   done="false"
   case "${cmd}" in
-    h|-h|help|--help)  show_help; exit 0 ;;
-    g|get)             get_next_session true; done="true" ;;
-    i|insert)          insert_into_current_pane "$@"; done="true" ;;
-    ls|list-sessions)  tmux list-sessions "$@"; done="true" ;;
-    o|open)            run_in_generic "$@"; done="true" ;;
-    p|prune)           prune_nongenerics; done="true" ;;
-    s|split)           split_into_tmux_and_run "$@"; done="true" ;;
+    h|-h|help|--help)   show_help; exit 0 ;;
+    g|get)              get_next_session true; done="true" ;;
+    i|insert-evaluate)  insert_into_current_pane "$@"; done="true" ;;
+    ls|list-sessions)   tmux list-sessions "$@"; done="true" ;;
+    o|open)             run_in_generic "$@"; done="true" ;;
+    p|prune)            prune_nongenerics; done="true" ;;
+    s|split)            split_into_tmux_and_run "$@"; done="true" ;;
   esac
   "${done}" || { show_help; exit 1; }
 }
@@ -142,7 +142,7 @@ split_into_tmux_and_run() {
   pane_id=""
   # -d do not switch, -P print, -h horizontal, -F print format, -s session name
   if is_inside_tmux; then
-    pane_id="$(tmux new-session -dPA -F '${pane_id}' \
+    pane_id="$(tmux new-session -dPA -F '#{pane_id}' \
       -s "$(get_next_session false)" "${SHELL}")"
   else
     pane_id="$(tmux split-window -dPh -F '#{pane_id}' "${SHELL}")"

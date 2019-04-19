@@ -24,9 +24,12 @@ endfunction
 " Snippets
 
 " Thanks to Rich (https://www.etalabs.net/sh_tricks.html for eval_escape)
-imap <buffer> <LocalLeader>die
-  \ ,pute<CR>
-  \die() { c="$1"; shift 1; for x in "$@"; do puterr "$x"; done; exit "$c"; }
+imap <buffer> <LocalLeader>die <C-o>:set paste<CR>
+  \<C-o>:if ! search('\m^ *puts() *{', 'bnw')<CR>
+  \  execute "normal i,puts\n"<CR>
+  \endif<CR>
+  \die() { c="$1"; shift 1; for x in "$@"; do puts "$x" >&2; done; exit "$c"; }
+  \<C-o>:set nopaste<CR>
 inoremap <buffer> <LocalLeader>req
   \ require() { command -v "$1" >/dev/null 2>&1; }
 
@@ -46,6 +49,18 @@ inoremap <buffer> <LocalLeader>pute
   \ puterr() { printf %s\\n "$@" >&2; }
 inoremap <buffer> <LocalLeader>printe
   \ printerr() { printf %s "$@" >&2; }
+
+inorema <buffer> <LocalLeader>match_any <C-o>:set paste<CR>
+  \match_any() {<CR>
+  \  matchee="$1"; shift 1<CR>
+  \  [ -z "${matchee}" ] && return 1<CR>
+  \  for matcher in "$@"; do  # Literal match in case<CR>
+  \    case "${matchee}" in "${matcher}") return 0 ;; esac<CR>
+  \  done<CR>
+  \  return 1<CR>
+  \}
+  \<C-o>:set nopaste<CR>
+
 
 
 inoremap <buffer> <LocalLeader>help <C-o>:set paste<CR>
@@ -93,7 +108,7 @@ imap <buffer> <LocalLeader>main2 <C-o>:set paste<CR>
   \    "${no_options}" <Bar><Bar> case "$1" in<CR>
   \      --)  no_options="true"; shift 1; continue ;;<CR>
   \      -h<Bar>--help)  show_help; exit 0 ;;<CR>
-  \      -e<Bar>--example)  puts "-$2-"; shift 1 ;;
+  \      -e<Bar>--example)  puts "-$2-"; shift 1 ;;<CR>
   \      *)   args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
   \    esac<CR>
   \    "${no_options}" && args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
