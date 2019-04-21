@@ -78,6 +78,13 @@ alias     v='nvim'
 
 alias debug-path='printf %s\\n "${PATH}" | tr ":" "\n" | sort'
 
+# -i list all Internet and x.25 network files
+# -n prevents conversion of network numbers to host names (DNS translation)
+# -l prevents conversion of user id numbers to login names
+# -P prevents conversion of port numbers to port names
+uname -o | grep -q 'GNU/Linux' && alias list-open-ports='lsof -i -nlP \
+  | awk "{print \$9, \$8, \$1}" | sed "s/.*://" | sort -u'
+uname -o | grep -q 'Android' && alias list-open-ports='lsof -i -nlP'
 alias list-imes='<~/.config/fcitx/profile \
   sed -n "/^EnabledIMList=/{ s/^.*=//p; }" \
   | awk -v RS="," -v FS=":" "(\$2 ~ /True/){ print \$1; }"'
