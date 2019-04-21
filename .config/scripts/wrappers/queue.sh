@@ -225,8 +225,9 @@ EOF
 
 direct() {
   url="$1"
+  [ -n "$1" ] || die "$?" "FATAL: queue.sh directdownload needs a URL"
 
-  cd "${downloads}" || die '$?' "This should have already been checked"
+  cd "${downloads}" || die "$?" "This should have already been checked"
   if require 'curl'; then
     if [ "${url}" != "${url%/}" ]; then
       # -p . = current directory as base, -u = only print name to STDOUT

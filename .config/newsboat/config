@@ -2,13 +2,23 @@
 #auto-reload yes
 #reload-time 60
 
-external-url-viewer "urlscan -dc -r 'linkhandler.sh -t {}'"
+history-limit 0
 
+# For some reason urlscan -r kills ${BROWSER} variable
+#external-url-viewer "urlscan -cd -r 'linkhandler.sh -t \"{}\"'"
+
+# Need cat otherwise python throws a pipe error
+#external-url-viewer "urlscan -cdn | cat - | linkhandler.sh -t"
+external-url-viewer "urlscan.sh -m | linkhandler.sh -t"
+
+# Cannot have multiple keys for the same keybind
+# Can only have Ctrl + capital letter
+# pageup and pagedown bindings seem to interfere with macros
 bind-key Y pb-download
 bind-key U show-urls
-bind-key u pageup
-bind-key d pagedown
+bind-key ^U pageup
 bind-key D delete-article
+bind-key ^D pagedown
 bind-key G end
 bind-key g home
 bind-key l open
@@ -31,11 +41,21 @@ color info white magenta bold
 # color article white default
 
 # Must use prefix macros with single quote to use
+# External-url-viewer pipes the entire screen to the command 
+# Browser feeds the one link as a command line argument
 browser "linkhandler.sh -t"
 macro n next-feed article-list ; next-unread
 macro p prev-feed article-list ; prev-unread
 macro v set browser "queue.sh youtube-dl --video"; open-in-browser ; set browser "linkhandler.sh -t"
 macro a set browser "queue.sh youtube-dl --audio"; open-in-browser ; set browser "linkhandler.sh -t"
 macro s set browser "queue.sh youtube-dl --video --subtitles"; open-in-browser ; set browser "linkhandler.sh -t"
-macro y set external-url-viewer "urlscan -dc -r 'linkhandler.sh -d {}'"; show-urls ; set external-url-viewer "urlscan -dc -r 'linkhandler.sh -t {}'"
+
 macro c set browser "clipboard.sh --write <<<"; open-in-browser ; set browser "linkhandler.sh -t"
+macro e set browser "linkhandler.sh -g"; open-in-browser ; set browser "linkhandler.sh -t"
+macro V set external-url-viewer "${EDITOR}"; show-urls ; set external-url-viewer "urlscan.sh -m | linkhandler.sh -t"
+
+#macro E set external-url-viewer "urlscan -dc -r 'linkhandler.sh -g {}'"; show-urls ; set external-url-viewer "urlscan -cdn | cat - | linkhandler.sh -t"
+#macro d set external-url-viewer "urlscan -dc -r 'linkhandler.sh -d {}'"; show-urls ; set external-url-viewer "urlscan -dc -r 'linkhandler.sh -t {}'"
+
+macro E set external-url-viewer "urlscan.sh --menu | linkhandler.sh -g"; show-urls ; set external-url-viewer "urlscan.sh -m | linkhandler.sh -t"
+macro d set external-url-viewer "urlscan.sh --menu | linkhandler.sh -d"; show-urls ; set external-url-viewer "urlscan.sh -m | linkhandler.sh -t"
