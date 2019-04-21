@@ -6,11 +6,11 @@ show_help() {
   name="$(basename "$0"; printf a)"; name="${name%??}"
   <<EOF cat - >&2
 SYNOPSIS
-  ${name} OPTIONS
+  ${name} [OPTIONS] [URL1 [URL2 [...]]]
 
 DESCRIPTION
   Accepts <url> and determines what behaviour to run depending on the
-  behaviour specified by <option>
+  behaviour specified by <option>. You can also pass a url via STDIN instead
 
 OPTIONS
   -c, --copy
@@ -32,8 +32,16 @@ OPTIONS
 EOF
 }
 
-# Constants
-cli_browser="w3m"
+
+# Choosing programs specifically
+# Terminal browser wrapper
+cli_browser() {
+  w3m "$1"
+  wait "$$"
+  rm "${HOME}/.w3m/cookie"
+}
+#MASTODAN_HANDLER=""
+#STREAM=""
 
 
 
@@ -58,7 +66,7 @@ main() {
   doubledash="false"
   while [ "$#" -gt 0 ]; do
     "${doubledash}" || case "$1" in
-      #-h|--help)  show_help; exit 0 ;;
+      -h|--help)  show_help; exit 0 ;;
       -c|--copy)      is_copy="true"
                       require "${copy}" || die 1 "FATAL: Requires '${copy}'" ;;
       -d|--download)  is_download="true" ;;
@@ -71,14 +79,16 @@ main() {
     shift 1
   done
 
+  eval "set -- ${urls}"
+
   # At least one option specified and at least one url given
-  if "${is_download}" || "${is_local}" || "${is_external}" && [ -n "${urls}" ]
-    then eval "match_link ${urls}"
+  if "${is_download}" || "${is_local}" || "${is_external}"
+    then if [ "$#" -gt 0 ]; then handle "$@"; else handle "$(cat -)"; fi
     else show_help; exit 1
   fi
 }
 
-match_link() {
+handle() {
   for url in "$@"; do
     # Handle the link
     if puts "${url}" | grep -qi -e '\.mkv$' -e '\.webm$' -e '\.mp4$' \
@@ -116,12 +126,13 @@ match_link() {
         g "${TERMINAL}" -e "${EDITOR} ${url}"
       else
         d "${queuer}" direct "${url}" &
-        t "${cli_browser}" "${url}"
-        g setsid "${BROWSER}" "${url}" >/dev/null 2>&1 &
+        t cli_browser "${url}"
+        g setsid "${BROWSER}" "${url}" # >/dev/null 2>&1 &
       fi
     fi
   done
 }
+
 
 
 # Helpers
