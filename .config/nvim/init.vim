@@ -108,6 +108,80 @@ let g:vmt_cycle_list_item_markers = 1
 let g:vmt_fence_hidden_markdown_style = ''
 
 let g:maplocalleader = ','
+
+" Rebinds
+" 'j' and 'k' move visual lines, Ctrl versions to move the original real lines
+nnoremap j    gj
+vnoremap j    gj
+nnoremap k    gk
+vnoremap k    gk
+nnoremap <C-j> j
+vnoremap <C-j> j
+nnoremap <C-k> k
+vnoremap <C-k> k
+
+" Select the same selection again after doing an indent
+vnoremap > >gv
+vnoremap < <gv
+"nmap <silent> あ a
+
+" Saving
+nnoremap <leader>s :write<CR>
+nmap <F1> <Leader>s
+nmap <C-s> <Leader>s
+imap <F1> <C-o><Leader>s
+imap <C-s> <C-o><Leader>s
+
+" Clipboard 
+" Sync Clipboard, not sure why it needs double newline
+nnoremap <leader>qc
+  \ :if has('clipboard') <Bar> let @* = @" <Bar> let @+ = @" <Bar> endif<CR><CR>
+nnoremap <leader>p "*p
+nnoremap <leader>P "*P
+nnoremap <leader>v :let @" = system('clipboard.sh --read')<CR>p
+nnoremap <leader>V :let @" = system('clipboard.sh --read')<CR>P
+vnoremap <leader>y "*y :let @+ = @*<CR>gv
+
+vmap <Leader>c y:call system('clipboard.sh --write', @")<CR><Leader>qcgv
+nmap <Leader>c :silent call system("clipboard.sh --write", @")<CR><Leader>qc
+vmap <C-c> <Leader>c
+nmap <C-p> <Leader>v
+
+
+
+" Build(), Run(), Lint() are defined in filetype for customisation
+noremap <silent> <Leader>1 :call Build()<CR>
+noremap <silent> <Leader>2 :call Run()<CR>
+noremap <silent> <Leader>3 :vertical T clear<CR>
+noremap <silent> <Leader>4 :vertical T exit<CR>:redraw<CR>
+noremap <silent> <Leader>l :call Lint()<CR>
+imap <silent> <F1> <C-o><Leader>1
+imap <silent> <F2> <C-o><Leader>2
+imap <silent> <F3> <C-o><Leader>3
+imap <silent> <F4> <C-o><Leader>3
+
+
+" Plugin Development Debugging stuff
+nnoremap <leader>fn :call FootnoteViewToggle()<CR>
+nnoremap <silent> <Leader>db
+  \ :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
+  \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
+  \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
+  \ . ">"<CR>
+noremap <leader>hg :call PrintHighlightGroup()<CR>
+noremap <leader><tab> :Tab /\|<CR>
+noremap <leader>rs :write! !parsemarkdown.awk<CR>
+nnoremap <F11> :call FollowCursorLink()<CR>
+nnoremap <F12> :call FollowBack()<CR>
+
+
+
+" Misc stuff, change settings
+noremap <leader>rn :set relativenumber!<CR>
+
+
+
+" Vimrc garbage
 function! SaveWindowPosition()
   let b:WindowPosition = [line('w0'), line('.'), col('.')]
 endfunction
@@ -119,78 +193,16 @@ function! RestoreWindowPosition()
   call cursor(b:WindowPosition[1], b:WindowPosition[2])
 endfunction
 
-" Key rebindings `:help index`
-" http://vimdoc.sourceforge.net/htmldoc/vimindex.html
-" 'j' and 'k' move visual lines, Ctrl versions to move the original real lines
-noremap j         gj
-noremap k         gk
-noremap <C-j>     j
-noremap <C-k>     k
-
-nnoremap <leader>fn :call FootnoteViewToggle()<CR>
-nnoremap <silent> <Leader>db
-  \ :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
-  \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
-  \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
-  \ . ">"<CR>
-nnoremap <leader>s :write<CR>
-
-" #Clipboard stuff
-" Sync Clipboard, not sure why it needs double newline
-nnoremap <leader>qc
-  \ :if has('clipboard') \| let @* = @" \| let @+ = @" \| endif<CR><CR>
-
-vmap <leader>c y:call system('clipboard.sh --write', @")<CR>\qc
-nmap <leader>c :silent call system("clipboard.sh --write", @")<CR>\qc
-nnoremap <leader>v :let @" = system('clipboard.sh --read')<CR>p
-nnoremap <leader>V :let @" = system('clipboard.sh --read')<CR>P
-
-vnoremap <leader>y "*y :let @+ = @*<CR>
-nnoremap <leader>p "*p
-nnoremap <leader>P "*P
-
-" Select the same selection again after doing an indent
-vnoremap > >gv
-vnoremap < <gv
-
-noremap <leader>rn :set relativenumber!<CR>
 noremap <leader>rc
   \ :Runtime<CR>
-  \ :call SaveWindowPosition()<CR>
-  \ :source $MYVIMRC<CR>
-  \ :echom 'Reload' . $MYVIMRC<CR>
-  \ :redraw<CR>
-  \ :call RestoreWindowPosition()<CR>
+  \:call SaveWindowPosition()<CR>
+  \:source $MYVIMRC<CR>
+  \:echom 'Reload' . $MYVIMRC<CR>
+  \:redraw<CR>
+  \:call RestoreWindowPosition()<CR>
 noremap <leader>ts
   \ :if exists("g:syntax_on")<bar>syntax off<bar>
-  \ else<bar>syntax on<bar>endif<CR>
-noremap <leader>hg :call PrintHighlightGroup()<CR>
-
-" Likely to change very soon
-noremap <leader><tab> :Tab /\|<CR>
-noremap <leader>rs :write! !parsemarkdown.awk<CR>
-nnoremap <F11> :call FollowCursorLink()<CR>
-nnoremap <F12> :call FollowBack()<CR>
-
-" Mirrors
-nmap <F1> \s
-nmap <C-s> \s
-imap <F1> <C-o>\s
-imap <C-s> <C-o>\s
-vmap <C-c> \c
-nmap <C-p> \v
-
-" Build(), Run(), Lint() are defined in filetype for customisation
-noremap <silent> <Leader>1 :call Build()<CR>
-noremap <silent> <Leader>2 :call Run()<CR>
-noremap <silent> <Leader>3 :vertical T clear<CR>
-noremap <silent> <Leader>4 :vertical T exit<CR>:redraw<CR>
-noremap <silent> <Leader>l :call Lint()<CR>
-imap <silent> <F1> <C-o>\1
-imap <silent> <F2> <C-o>\2
-imap <silent> <F3> <C-o>\3
-imap <silent> <F4> <C-o>\3
-"nmap <silent> あ a
+  \else<bar>syntax on<bar>endif<CR>
 
 augroup vimrc
   autocmd!
