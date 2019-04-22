@@ -97,7 +97,8 @@ handle() {
       # setsid mpv --input-ipc-server="${TMPDIR}/$(date +%s)" --quiet "${url}" &
       d "${queuer}" youtube-dl --video "${url}" &
       t mpv --vo=caca --quiet "${url}"
-      g setsid mpv --quiet "${url}" &
+      is_android && g setsid mpv --quiet "${url}" &
+      is_android || g "${BROWSER}" "${url}"
 
     #elif puts "${url}" | grep -qi -e '\.bmp$' -e '\.png$' -e '\.gif$' \
     #     -e '\.tiff' -e '\.jpeg$' -e '\.jpe' -e '\.jpg$'; then
@@ -107,7 +108,8 @@ handle() {
          -e '\.mp3' -e '\.$' -e '\.jpe' -e '\.jpg$'; then
       d "${queuer}" direct "${url}" &
       t mpv --quiet "${url}"
-      g setsid mpv --quiet "${url}" &
+      is_android && g setsid mpv --quiet "${url}" &
+      is_android || g "${BROWSER}" "${url}"
 
     elif puts "${url}" | grep -qi -e '\.pdf$'; then
       d "${queuer}" direct "${url}" &
@@ -144,5 +146,7 @@ eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 d() { ${is_download} && if ${is_copy}; then "${copy}" -w "$*"; else "$@"; fi; }
 t() { ${is_local}    && if ${is_copy}; then "${copy}" -w "$*"; else "$@"; fi; }
 g() { ${is_external} && if ${is_copy}; then "${copy}" -w "$*"; else "$@"; fi; }
+
+is_android() { uname -o | grep -q 'Android'; }
 
 main "$@"
