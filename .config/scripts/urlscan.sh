@@ -21,7 +21,7 @@ scheme="${scheme})"
 userinfo="([A-Za-z0-0_.:]+@)"  # TODO: password (deprecated)
 port="[0-9]{1,5}"
 host_character='[-a-zA-Z0-9%_]'
-path_character='[-a-zA-Z0-9%_:+.~#=@?&/!;,]'
+path_character='[-a-zA-Z0-9%_:=+.~#=@?&/!;,]'
 regexp=""
 regexp="${regexp}(${scheme}://${userinfo}?)?"
 regexp="${regexp}${host_character}+(\.${host_character}+)+"

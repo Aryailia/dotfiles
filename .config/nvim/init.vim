@@ -11,7 +11,7 @@ mapclear!
 " :PlugInstall to install
 call plug#begin('~/.vim/extra')
   " VimWiki for markdown interlinks, (probably make my own, too much bloat)
-  Plug 'vimwiki/vimwiki', { 'branch': 'dev' } ", 'on': [] }
+  "Plug 'vimwiki/vimwiki', { 'branch': 'dev' } ", 'on': [] }
   ", 'for': 'markdown' }
   Plug 'tpope/vim-surround'         " Adding quotes
   Plug 'tpope/vim-scriptease'       " For the reload
@@ -177,7 +177,7 @@ nnoremap <F12> :call FollowBack()<CR>
 
 
 " Misc stuff, change settings
-noremap <leader>rn :set relativenumber!<CR>
+noremap <leader>tn :set relativenumber!<CR>
 
 
 
@@ -193,18 +193,18 @@ function! RestoreWindowPosition()
   call cursor(b:WindowPosition[1], b:WindowPosition[2])
 endfunction
 
-noremap <leader>rc
-  \ :Runtime<CR>
-  \:call SaveWindowPosition()<CR>
+noremap <Leader>rc
+  \ :call SaveWindowPosition()<CR>
   \:source $MYVIMRC<CR>
   \:echom 'Reload' . $MYVIMRC<CR>
+  \:Runtime after/**/*.vim<CR>
   \:redraw<CR>
   \:call RestoreWindowPosition()<CR>
 noremap <leader>ts
-  \ :if exists("g:syntax_on")<bar>syntax off<bar>
-  \else<bar>syntax on<bar>endif<CR>
+  \ :if exists("g:syntax_on")<Bar>syntax off<Bar>
+  \else<Bar>syntax on<Bar>endif<CR>
 
 augroup vimrc
   autocmd!
-  autocmd! BufWritePost $MYVIMRC normal \rc
+  autocmd! BufWritePost $MYVIMRC normal <Leader>rc
 augroup END
