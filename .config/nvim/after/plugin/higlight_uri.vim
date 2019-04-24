@@ -18,42 +18,41 @@ function! SelectNextURI()
     call add(l:find, searchpos(l:pattern, 'cnW'))
   endfor
 
-  let l:closest_index = s:FindClosest(l:find)
-  let l:pattern = s:regexps[l:closest_index]
-  let l:found = l:find[l:closest_index]
-  let l:end = searchpos(l:pattern, 'cenW')
+  " Setup for the loop
+  let l:find_closest_index = s:FindClosest(l:find)
+  let l:pattern = s:regexps[l:find_closest_index]
+  let l:found = l:find[l:find_closest_index]
+  let l:end = searchpos(l:pattern, 'enW')
 
-  " Doesn't really resolve properly
-  let l:index = 0
+  " Loop until the closest index found is either
+  "   0)   a URI link found
+  "   -1)  end of file where not even a URL was found after
+  "
   " If l:found[0] is 0, so is l:found[1] ([1, 1] is smallest, 0 only on errors)
-  while 0 && l:found[0] > 0 && l:closest_index > 0 
+  "
+  " For everything but URI match (> 0), check if it is a valid file
+  " Consider just checking for '/' to qualify as a path user wants to find
+  while l:find_closest_index > 0 && l:found[0] > 0
       \ && ! filereadable(s:GetTextRange(l:found, l:end))
-    let l:find[l:closest_index] = searchpos(l:pattern, 'W')
+    let [l:x, l:y] = [line('.'), col('.')]
+    let l:find[l:find_closest_index] = searchpos(l:pattern, 'W')
     let l:end = searchpos(l:pattern, 'cenW')
-    if l:end[0] == 0 | let l:find[l:closest_index] = [0, 0] | endif
+    if l:end[0] == 0
+      let l:find[l:find_closest_index] = [0, 0]
+      cursor(l:x, l:y)
+    endif
 
-    let l:closest_index = s:FindClosest(l:find)
-    let l:pattern = s:regexps[l:closest_index]
+    let l:find_closest_index = s:FindClosest(l:find)
+    let l:pattern = s:regexps[l:find_closest_index]
 
-    let l:found = l:find[l:closest_index]
-    if l:end[0] == 0 | call cursor(l:found[0], l:found[1]) | endif
-
-    "echo l:found l:end
-    "echo l:closest_index
-    "echo s:GetTextRange(l:found, l:end)
-    "echo filereadable(s:GetTextRange(l:found, l:end))
-    "call input("Enter ")
+    let l:found = l:find[l:find_closest_index]
   endwhile
-  "echo l:found l:end
-  "echo l:closest_index
-  ""echo s:GetTextRange(l:found, l:end)
-  "echo filereadable(s:GetTextRange(l:found, l:end))
-  "  call cursor(l:origin[0], l:origin[1])
-  "return
 
-
-  if l:closest_index >= 0
-    let l:pattern = s:regexps[l:closest_index]
+  if l:find_closest_index >= 0
+    " Especially if no valid files are found, then cursor will be in different
+    " place from l:find[l:find_closest_index]
+    call cursor(l:found[0], l:found[1])
+    let l:pattern = s:regexps[l:find_closest_index]
     " Search from end to the beginning deals with \zs after quotes for
     " when searching s:double_quote and s:single_quote
     " Put cursor at the other end of the search
@@ -62,21 +61,22 @@ function! SelectNextURI()
     call searchpos(l:pattern, 'bW')
     " Put cursor at the other end of the search
     normal o
-  else
+  else " Nothing found so just reset cursor position
     call cursor(l:origin[0], l:origin[1])
   endif
 endfunction
 
-
-function! s:GetTextRange(start, end)
-  let [l:row_start, l:col_start] = a:start
-  let [l:row_end, l:col_end] = a:end
+function! s:GetTextRange(a, b)
+  let l:order = s:FindClosest([a:a, a:b])
+  let [l:row_start, l:col_start] = (l:order == 0) ? a:a : a:b
+  let [l:row_end, l:col_end] = (l:order == 0) ? a:b : a:a
   let l:lines = getline(l:row_start, l:row_end)
   if len(l:lines) == 0
     return ''
   else
+    " Remove end first before remove beginning if l:row_start == l:row_end
+    let l:lines[-1] = l:lines[-1][0: l:col_end - 1] 
     let l:lines[0] = l:lines[0][l:col_start - 1:]
-    let l:lines[-1] = l:lines[-1][: l:col_end - 1]
     return join(l:lines, "\n")
   endif
 endfunction
@@ -116,15 +116,15 @@ function! s:FindClosest(list)
 endfunction
 
 
-let s:double_quote = '\m\(^"\|[^\\]"\)\zs\(\([^"]*\|\\"\)*\)[^\\]\ze"'
-let s:single_quote = "\\m'\\zs[^']\\+\\ze'"
-"let s:unquoted = '\m\(\\\\\|\\ \|\\\n\|[^ \n]\)\+'
-let s:unquoted = '\m\f\+'
+let s:double_quote = '\m\C\(^"\|[^\\]"\)\zs\(\([^"]*\|\\"\)*\)[^\\]\ze"'
+let s:single_quote = '\m\C''\zs[^'']\+\ze'''
+"let s:unquoted = '\m\C\(\\\\\|\\ \|\\\n\|[^ \n]\)\+'
+let s:unquoted = '\m\C\f\+'
 "let s:path = s:double_quote . '\|' . s:single_quote . '\|' . s:unquoted
 
 
 
-let s:link = '\m'
+let s:link = '\m\C'
 
 let s:username_character = '[-A-Za-z_]'
 let s:password_character = '[-A-Za-z0-9_%_;=+.~#@?&/!;,]'
@@ -138,9 +138,9 @@ let s:pathname_character = s:password_character
 " if the pattern is not in the first index of the file
 "let s:link_regexp .= '\(https\?\|s\?ftp\)'
 let s:link .= '\([A-Za-z]\+://'
-let s:link .=   '\(' . s:username_character 
-let s:link .=     '\(:' . s:password_character . '*\)\?'
-let s:link .=   '@\)\?'
+"let s:link .=   '\(' . s:username_character
+"let s:link .=     '\(:' . s:password_character . '*\)\?'
+"let s:link .=   '@\)\?'
 let s:link .= '\)\?'
 
 " Domain name
@@ -150,7 +150,7 @@ let s:link .= s:hostname_character . '\+'
 " Path
 let s:link .= '\(/' . s:pathname_character . '*\)\?'
 
-"let s:regexps = [s:link, s:double_quote, s:single_quote, s:unquoted]
+let s:regexps = [s:link, s:double_quote, s:single_quote, s:unquoted]
 "let s:regexps = [s:link, s:single_quote, s:unquoted]
-let s:regexps = [s:link, s:unquoted]
+"let s:regexps = [s:link, s:unquoted]
 "let s:regexps = [s:link]
