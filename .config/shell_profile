@@ -3,7 +3,8 @@
 SCRIPTS="${HOME}/.config/scripts"
 # TODO: Do I need to add the '/.' guard?
 PATH="${PATH}$(find "${SCRIPTS}"/ -type d -exec printf :%s '{}' \;)"
-command -v "cargo" >/dev/null 2>&1 && PATH="${PATH}:${HOME}/.cargo/bin"
+command -v 'cargo' >/dev/null 2>&1 || command -v 'rustup-init' >/dev/null 2>&1 \
+  || command -v 'rustc' && PATH="${PATH}:${HOME}/.cargo/bin"
 export PATH
 export GOPATH="${HOME}/.local/go"
 
