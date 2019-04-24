@@ -97,7 +97,19 @@ fi
 #
 # Look at trap 'timer' DEBUG if I want to skip delay timer, too hacky for me
 # If too much idle time, can just enter to set to 0 again
-[ "${timer}" -gt 180 ] && add "${magenta} ${timer}s "
+if [ "${timer}" -gt 180 ]; then
+  add "${magenta} "
+  if   [ "${timer}" -lt 250 ]; then
+    add "${timer}s"
+  elif [ "${timer}" -lt 3600 ]; then
+    add "$((timer / 60))m$((timer % 60))s"
+  elif [ "${timer}" -lt 86400 ]; then
+    add "$((timer / 3600))s$((timer % 3600 / 60))m"
+  else
+    add "$((timer / 86400))d$((timer % 86400 / 3600))h"
+  fi
+  add " "
+fi
 
 ###
 # PID - Sometimes backgrounding does not check process
