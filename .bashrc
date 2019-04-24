@@ -20,7 +20,7 @@ PROMPT_COMMAND="$(<<EOF cat -
   history -a  # Append command immediately to history
   history -c  # Clear current history for session
   history -r  # Read history back into memory
-  PS1="\$("${HOME}/.config/prompt.sh" "\$errorcode" "\$SECONDS")"
+  PS1="\$("${HOME}/.config/prompt.sh" "\$errorcode" "\$SECONDS" "\$!")"
   SECONDS="0"
 EOF
 )"
