@@ -3,12 +3,9 @@
 "  finish
 "endif
 
-nnoremap <Leader>zx :call SelectNextURI()<CR>
+noremap <unique> <Plug>SelectNextURI :call <SID>SelectNextURI()<CR>
 
-
-" NOTE: Testing this  on vim files is really annoying because vim files do
-" comments with double quotes
-function! SelectNextURI()
+function! s:SelectNextURI()
   " Save original cursor position
   let l:origin = [line('.'), col('.')]
 
@@ -138,9 +135,9 @@ let s:pathname_character = s:password_character
 " if the pattern is not in the first index of the file
 "let s:link_regexp .= '\(https\?\|s\?ftp\)'
 let s:link .= '\([A-Za-z]\+://'
-"let s:link .=   '\(' . s:username_character
-"let s:link .=     '\(:' . s:password_character . '*\)\?'
-"let s:link .=   '@\)\?'
+let s:link .=   '\(' . s:username_character
+let s:link .=     '\(:' . s:password_character . '*\)\?'
+let s:link .=   '@\)\?'
 let s:link .= '\)\?'
 
 " Domain name

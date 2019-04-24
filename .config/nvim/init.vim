@@ -150,6 +150,11 @@ nmap <unique> <Leader>c :silent call system("clipboard.sh --write", @")<CR>
 vmap <unique> <C-c> <Leader>c
 nmap <unique> <C-p> <Leader>v
 
+" Visual-mode select the next URI if valid URL or if path to existing file
+nmap <unique> <C-n> <Plug>SelectNextURI
+imap <unique> <C-n> <C-o><Plug>SelectNextURI
+vmap <unique> <C-n> <Esc><Plug>SelectNextURI
+
 " Cannot have <CR> and <C-m> mapped to different things (99% sure)
 "inoremap <unique> <C-m> <C-o>o
 
