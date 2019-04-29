@@ -36,7 +36,7 @@ function! s:SelectNextURI()
     let l:end = searchpos(l:pattern, 'cenW')
     if l:end[0] == 0
       let l:find[l:find_closest_index] = [0, 0]
-      cursor(l:x, l:y)
+      call cursor(l:x, l:y)
     endif
 
     let l:find_closest_index = s:FindClosest(l:find)
