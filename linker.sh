@@ -108,7 +108,7 @@ main() {
   ignore="${dotfiles}/.linkerignore.sh"
   ignore2="${dotenv}/.linkerignore.sh"
   scripts_relative_path=".config/scripts"
-  make_shortcuts="shortcuts.sh"
+  make_shortcuts="shortcutsrc"
   # NOTE: Also see `run_with_env` for more global variables
 
   ###
