@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-shortcuts="${HOME}/.config/shortcuts.sh"
+shortcuts="${HOME}/.config/shortcutsrc"
 shell_shortcuts="${HOME}/.config/named_directories"
 vifm_shortcuts="${HOME}/.config/vifm/directory_shortcuts"
 
