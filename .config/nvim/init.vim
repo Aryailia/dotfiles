@@ -137,9 +137,10 @@ imap <unique> <C-s> <C-o><Leader>s
 " Consider trick of `if has("clipboard") @+ = @* = @"` ?
 vnoremap <unique> <Leader>c y:call system('clipboard.sh --write', @")<CR>gv
 nnoremap <unique> <Leader>c :silent call system("clipboard.sh --write", @")<CR>
-nnoremap <unique> <leader>p :let @" = system('clipboard.sh --read')<CR>p
-nnoremap <unique> <leader>P :let @" = system('clipboard.sh --read')<CR>P
+inoremap <unique> <C-p> <C-o>:let @" = system('clipboard.sh --read')<CR><C-r>"
 
+nmap <unique> <Leader>p i<C-p><Esc>
+nmap <unique> <Leader>P a<C-p><Esc>
 vmap <unique> <C-c> <Leader>c
 nmap <unique> <C-c> <Leader>c
 nmap <unique> <C-p> <Leader>p
