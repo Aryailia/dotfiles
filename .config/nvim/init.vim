@@ -134,21 +134,15 @@ nmap <unique> <C-s> <Leader>s
 imap <unique> <C-s> <C-o><Leader>s
 
 " Clipboard 
-" Sync Clipboard, not sure why it needs double newline
-nnoremap <unique> <leader>qc
-  \ :if has('clipboard') <Bar> let @* = @" <Bar> let @+ = @" <Bar> endif<CR><CR>
-nnoremap <unique> <leader>p "*p
-nnoremap <unique> <leader>P "*P
-nnoremap <unique> <leader>v :let @" = system('clipboard.sh --read')<CR>p
-nnoremap <unique> <leader>V :let @" = system('clipboard.sh --read')<CR>P
-vnoremap <unique> <leader>y "*y :let @+ = @*<CR>gv
+" Consider trick of `if has("clipboard") @+ = @* = @"` ?
+vnoremap <unique> <Leader>c y:call system('clipboard.sh --write', @")<CR>gv
+nnoremap <unique> <Leader>c :silent call system("clipboard.sh --write", @")<CR>
+nnoremap <unique> <leader>p :let @" = system('clipboard.sh --read')<CR>p
+nnoremap <unique> <leader>P :let @" = system('clipboard.sh --read')<CR>P
 
-vmap <unique> <Leader>c y:call system('clipboard.sh --write', @")<CR>
-  \<Leader>qcgv
-nmap <unique> <Leader>c :silent call system("clipboard.sh --write", @")<CR>
-  \<Leader>qc
 vmap <unique> <C-c> <Leader>c
-nmap <unique> <C-p> <Leader>v
+nmap <unique> <C-c> <Leader>c
+nmap <unique> <C-p> <Leader>p
 
 " Visual-mode select the next URI if valid URL or if path to existing file
 nmap <unique> <C-n> <Plug>SelectNextURI

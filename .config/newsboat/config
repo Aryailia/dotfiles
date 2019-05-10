@@ -17,7 +17,7 @@ external-url-viewer "urlscan.sh -m | linkhandler.sh -t"
 bind-key Y pb-download
 bind-key U show-urls
 bind-key ^U pageup
-bind-key D delete-article
+bind-key x delete-article
 bind-key ^D pagedown
 bind-key G end
 bind-key g home
@@ -27,15 +27,15 @@ bind-key K prev-feed articlelist
 bind-key j down
 bind-key k up
 bind-key h quit
-bind-key x pb-delete
+#bind-key x pb-delete
 bind-key n next-unread
 bind-key m toggle-article-read
 bind-key N prev-unread
 
 
-color listnormal cyan default
+color listnormal cyan black
 color listfocus blue white standout bold
-color listnormal_unread black default
+color listnormal_unread white black
 color listfocus_unread white blue bold
 color info white magenta bold
 # color article white default
@@ -50,12 +50,14 @@ macro v set browser "queue.sh youtube-dl --video"; open-in-browser ; set browser
 macro a set browser "queue.sh youtube-dl --audio"; open-in-browser ; set browser "linkhandler.sh -t"
 macro s set browser "queue.sh youtube-dl --video --subtitles"; open-in-browser ; set browser "linkhandler.sh -t"
 
-macro c set browser "clipboard.sh --write <<<"; open-in-browser ; set browser "linkhandler.sh -t"
-macro e set browser "linkhandler.sh -g"; open-in-browser ; set browser "linkhandler.sh -t"
-macro V set external-url-viewer "${EDITOR}"; show-urls ; set external-url-viewer "urlscan.sh -m | linkhandler.sh -t"
+macro c set browser "clipboard.sh --write"; open-in-browser ; set browser "linkhandler.sh -t"
+macro o set browser "linkhandler.sh -g"; open-in-browser ; set browser "linkhandler.sh -t"
+macro e set external-url-viewer "${EDITOR}"; show-urls ; set external-url-viewer "urlscan.sh -m | linkhandler.sh -t"
+
+macro E set browser "printf %s '%u'; ${EDITOR} ~/.config/newsboat/config"; open-in-browser ; set browser "linkhandler.sh -t"
 
 #macro E set external-url-viewer "urlscan -dc -r 'linkhandler.sh -g {}'"; show-urls ; set external-url-viewer "urlscan -cdn | cat - | linkhandler.sh -t"
 #macro d set external-url-viewer "urlscan -dc -r 'linkhandler.sh -d {}'"; show-urls ; set external-url-viewer "urlscan -dc -r 'linkhandler.sh -t {}'"
 
-macro E set external-url-viewer "urlscan.sh --menu | linkhandler.sh -g"; show-urls ; set external-url-viewer "urlscan.sh -m | linkhandler.sh -t"
+macro U set external-url-viewer "urlscan.sh --menu | linkhandler.sh -g"; show-urls ; set external-url-viewer "urlscan.sh -m | linkhandler.sh -t"
 macro d set external-url-viewer "urlscan.sh --menu | linkhandler.sh -d"; show-urls ; set external-url-viewer "urlscan.sh -m | linkhandler.sh -t"

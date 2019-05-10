@@ -2,11 +2,12 @@
   # $0 <option> <URL>
 # Decide what program to open with. Defaults to browser
 
+me="$(basename "$0"; printf a)"; me="${me%??}"
+
 show_help() {
-  name="$(basename "$0"; printf a)"; name="${name%??}"
   <<EOF cat - >&2
 SYNOPSIS
-  ${name} [OPTIONS] [URL1 [URL2 [...]]]
+  ${me} [OPTIONS] [URL1 [URL2 [...]]]
 
 DESCRIPTION
   Accepts <url> and determines what behaviour to run depending on the
@@ -89,6 +90,7 @@ main() {
 }
 
 handle() {
+  [ "$*" = "" ] && die 1 "${me} - no url provided"
   for url in "$@"; do
     # Handle the link
     if puts "${url}" | grep -qi -e '\.mkv$' -e '\.webm$' -e '\.mp4$' \
