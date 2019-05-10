@@ -4,6 +4,7 @@ stty -ixon -ixoff # Archaic with modern CPU/modem speeds. Reclaims C-q and C-s
 
 alias    ab='abook --datafile "${HOME}/.config/abook/addressbook"'
 alias     b='vifm .'
+alias    cw='cd-of sh -c '\''printf %s "$(dirname "$(command -v "$1")")"'\'' _'
 alias  diff='diff --color=auto'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='es'
@@ -53,28 +54,14 @@ alias     t='tmux.sh'
 alias     w='weather.sh'
 alias     v='nvim'
 
-# This works though, just for bash, need to test on other shells
-#alias     c='c() {
-#  if [ -z "$1" ]; then "${SCRIPTS}/namedpath.sh" --list-aliases >&2
-#    printf "."
-#}; \c'
-
-# Well this does not work, meep
-#alias c='cd "$(sh -c '\''
-#  if [ -z "$1" ]; then
-#    "${SCRIPTS}/namedpath.sh" --list-aliases >&2
-#    printf "."
-#    ls -Ah --group-directories-first --color=auto
-#  else
-#    #path="$("${SCRIPTS}/namedpath.sh" "$1"; printf x)"; path="${path%?}"
-#    #cd "${path}" && ls -Ah --group-directories-first --color=auto
-#
-#    # Command substitution $(...) strips trailing newlines, unsure how to solve
-#    path="$("${SCRIPTS}/namedpath.sh" "$1" >&2)"
-#    [ -d ${path} ] && ls -Ah --group-directories-first --color=auto
-#  fi
-#'\'' _)"'
-
+alias c='cd-of sh -c '\''
+  if [ -z "$1" ]; then
+    "${SCRIPTS}/namedpath.sh" --list-aliases >&2
+    return 1
+  else
+    "${SCRIPTS}/namedpath.sh" "$1"
+  fi'\'' _ \
+'
 
 alias debug-path='printf %s\\n "${PATH}" | tr ":" "\n" | sort'
 

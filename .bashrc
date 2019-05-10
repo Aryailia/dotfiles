@@ -28,11 +28,17 @@ EOF
 [ -f "${HOME}/.config/aliasrc" ] && source "${HOME}/.config/aliasrc"
 alias rrc='source ~/.bashrc; source ~/.config/shell_profile'
 
-c() {
-  if [ -z "$1" ]; then
-    "${SCRIPTS}/namedpath.sh" --list-aliases
-  else
-    path="$("${SCRIPTS}/namedpath.sh" "$1"; printf x)"; path="${path%?}"
-    cd "${path}" && la  # ls with some options, defined in alias
-  fi
+#c() {
+#  if [ -z "$1" ]; then
+#    "${SCRIPTS}/namedpath.sh" --list-aliases
+#  else
+#    path="$("${SCRIPTS}/namedpath.sh" "$1"; printf x)"; path="${path%?}"
+#    cd "${path}" && la  # ls with some options, defined in alias
+#  fi
+#}
+
+cd-of() {
+  temp="$("$@"; err="$?"; printf x; exit "${err}")" || return "$?"
+  temp="${temp%x}"
+  cd "${temp}"
 }
