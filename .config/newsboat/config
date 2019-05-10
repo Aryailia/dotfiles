@@ -50,7 +50,7 @@ macro v set browser "queue.sh youtube-dl --video"; open-in-browser ; set browser
 macro a set browser "queue.sh youtube-dl --audio"; open-in-browser ; set browser "linkhandler.sh -t"
 macro s set browser "queue.sh youtube-dl --video --subtitles"; open-in-browser ; set browser "linkhandler.sh -t"
 
-macro c set browser "clipboard.sh --write"; open-in-browser ; set browser "linkhandler.sh -t"
+macro c set browser "clipboard.sh --write '%u'"; open-in-browser ; set browser "linkhandler.sh -t"
 macro o set browser "linkhandler.sh -g"; open-in-browser ; set browser "linkhandler.sh -t"
 macro e set external-url-viewer "${EDITOR}"; show-urls ; set external-url-viewer "urlscan.sh -m | linkhandler.sh -t"
 
