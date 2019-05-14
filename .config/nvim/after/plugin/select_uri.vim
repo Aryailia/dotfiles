@@ -7,64 +7,81 @@ noremap <unique> <Plug>SelectNextURI :call <SID>SelectNextURI()<CR>
 
 function! s:SelectNextURI()
   " Save original cursor position
-  let l:origin = [line('.'), col('.')]
+  let [l:originRow, l:originCol] = [line('.'), col('.')]
 
-  " Build l:find from s:regexps. This FSM for all the searches
-  let l:find = []
-  for l:pattern in s:regexps
-    call add(l:find, searchpos(l:pattern, 'cnW'))
-  endfor
+  let [l:pos, l:closestIndex] =
+    \ s:FindClosestReadablePatternBefore(s:regexps, searchpos(s:link, 'cnW'))
 
-  " Setup for the loop
-  let l:find_closest_index = s:FindClosest(l:find)
-  let l:pattern = s:regexps[l:find_closest_index]
-  let l:found = l:find[l:find_closest_index]
-  let l:end = searchpos(l:pattern, 'enW')
-
-  " Loop until the closest index found is either
-  "   0)   a URI link found
-  "   -1)  end of file where not even a URL was found after
-  "
-  " If l:found[0] is 0, so is l:found[1] ([1, 1] is smallest, 0 only on errors)
-  "
-  " For everything but URI match (> 0), check if it is a valid file
-  " Consider just checking for '/' to qualify as a path user wants to find
-  while l:find_closest_index > 0 && l:found[0] > 0
-      \ && ! filereadable(s:GetTextRange(l:found, l:end))
-    let [l:x, l:y] = [line('.'), col('.')]
-    let l:find[l:find_closest_index] = searchpos(l:pattern, 'W')
-    let l:end = searchpos(l:pattern, 'cenW')
-    if l:end[0] == 0
-      let l:find[l:find_closest_index] = [0, 0]
-      call cursor(l:x, l:y)
-    endif
-
-    let l:find_closest_index = s:FindClosest(l:find)
-    let l:pattern = s:regexps[l:find_closest_index]
-
-    let l:found = l:find[l:find_closest_index]
-  endwhile
-
-  if l:find_closest_index >= 0
-    " Especially if no valid files are found, then cursor will be in different
-    " place from l:find[l:find_closest_index]
-    call cursor(l:found[0], l:found[1])
-    let l:pattern = s:regexps[l:find_closest_index]
-    " Search from end to the beginning deals with \zs after quotes for
-    " when searching s:double_quote and s:single_quote
-    " Put cursor at the other end of the search
-    call searchpos(l:pattern, 'eW')
-    normal v
-    call searchpos(l:pattern, 'bW')
-    " Put cursor at the other end of the search
-    normal o
+  if l:closestIndex >= 0
+    call cursor(l:pos[0], l:pos[1])
+    call s:SelectSearchPattern((s:regexps + [s:link])[l:closestIndex])
   else " Nothing found so just reset cursor position
-    call cursor(l:origin[0], l:origin[1])
+    call cursor(l:originRow, l:originCol)
   endif
 endfunction
 
-function! s:GetTextRange(a, b)
-  let l:order = s:FindClosest([a:a, a:b])
+" noremap <unique> <C-m>0 :call DebugSelectURI(0)<CR>
+" noremap <unique> <C-m>1 :call DebugSelectURI(1)<CR>
+" noremap <unique> <C-m>2 :call DebugSelectURI(2)<CR>
+" noremap <unique> <C-m>3 :call DebugSelectURI(3)<CR>
+" vnoremap <C-m>0 <Esc>:call DebugSelectURI(0)<CR>
+" vnoremap <C-m>1 <Esc>:call DebugSelectURI(1)<CR>
+" vnoremap <C-m>2 <Esc>:call DebugSelectURI(2)<CR>
+" vnoremap <C-m>3 <Esc>:call DebugSelectURI(3)<CR>
+"
+" noremap <unique> <C-m> :call DebugSelectURI(1)<CR>
+" function! DebugSelectURI(type)
+"   call s:MaybeHasAnchorPathExists('Table')
+"   "call s:FindClosestReadablePatternBefore([s:simple_path], [100, 100])
+"   "call s:FindClosestReadablePatternBefore(s:regexps, [100, 100])
+"   "call s:SelectSearchPattern(s:regexps[a:type])
+" endfunction
+
+" Searches for all the patterns in list a:patternList from cursor till a:limit
+" Returns -1 if limit is [0, x] and no pattern was found
+" Intended for a:limit to also be the result of a searchpos
+function! s:FindClosestReadablePatternBefore(patternList, limit)
+  let [l:cursorX, l:cursorY] = [line('.'), col('.')]
+  let l:limitIndex = len(a:patternList)
+
+  let l:posList = []
+  for a in a:patternList
+    call add(l:posList, [l:cursorX, l:cursorY - 1])
+  endfor
+  call add(l:posList, a:limit)
+
+  let l:posIndex = l:limitIndex  " Value to return if non of a:patternList found
+  while 1
+    let l:posIndex = s:MinPosition(l:posList)  " Ignores [0, 0] (search fails)
+    if l:posIndex < 0 || l:posIndex >= l:limitIndex | break | endif
+    let l:pattern = a:patternList[l:posIndex]
+
+    call cursor(l:posList[l:posIndex][0], l:posList[l:posIndex][1])
+    let l:posList[l:posIndex] = searchpos(l:pattern, 'W')
+    let l:val = s:TextRange(l:posList[l:posIndex], searchpos(l:pattern, 'cenW'))
+
+    "echo 'Debug the regexps:' l:val
+    if s:MaybeHasAnchorPathExists(l:val) | break | endif
+  endwhile
+  " l:posIndex == -1 when all l:posList and a:limit are [0, x] (not found)
+  return [l:posList[l:posIndex], l:posIndex]
+endfunction
+
+
+function! s:SelectSearchPattern(pattern)
+  " Search from end to the beginning deals with \zs after quotes for
+  " when searching s:double_quote and s:single_quote
+  " Put cursor at the other end of the search
+  call searchpos(a:pattern, 'eW')
+  normal! v
+  call searchpos(a:pattern, 'bW')
+    " Put cursor at the other end of the search
+  normal! o
+endfunction
+
+
+function! s:TextRange(a, b)
+  let l:order = s:MinPosition([a:a, a:b])
   let [l:row_start, l:col_start] = (l:order == 0) ? a:a : a:b
   let [l:row_end, l:col_end] = (l:order == 0) ? a:b : a:a
   let l:lines = getline(l:row_start, l:row_end)
@@ -79,21 +96,31 @@ function! s:GetTextRange(a, b)
 endfunction
 
 
-" Alternative to using filereadable(), will match unreadable files and
-" directories
-function! s:FileExists(path)
+" Essentially filereadable(), will match unreadable files and directories
+" Will also check both with and without a hastag (think html anchors)
+"   (i.e. Checks 'as.md#df' checks both 'as.md#df' and 'as.md')
+" but not the validity of the hashtag itself ('#df' might not exist in 'as.md')
+function! s:MaybeHasAnchorPathExists(path)
   " Using expand because glob works from getcwd() which might be different
   " from the directory of the file (eg. vim 'directory/file.md')
   " Links in general will be relative to their file's directory
   " expand('%:p:h') returns '/' when working at root
-  let l:path = expand('%:p:h') . '/'. a:path
-  " TODO: Remove dots, multiple slashes, evaluate double dots?
-  return ! empty(glob(l:path))
+  let l:sanitisedPath = substitute(a:path, '\m\*', '\\*', 'g')
+  let l:splitPathByHash = split(l:sanitisedPath, '#', 1)
+  let l:basedir = expand('%:p:h')
+
+  let l:path1 = l:basedir . '/' . l:sanitisedPath
+  let l:path2 = l:basedir . '/' . join(l:splitPathByHash[0:-2], '#')
+  return (len(l:splitPathByHash) > 1)
+    \ ? ! empty(glob(l:path1)) || ! empty(glob(l:path2))
+    \ : ! empty(glob(l:path1))
 endfunction
 
 
 
-function! s:FindClosest(list)
+" Will ignore [0, x] and [x, 0] positions as these are invalid
+" Returns -1 if no position is found
+function! s:MinPosition(list)
   let l:length = len(a:list)
 
   let l:closeIndex = -1
@@ -102,6 +129,7 @@ function! s:FindClosest(list)
 
   while l:index < l:length
     let [l:r, l:c] =  a:list[l:index]
+    " s:FindClosestReadablePatternBefore() relies on no check l:closeCol == 0
     if l:closeRow == 0 || r < l:closeRow || (r == l:closeRow && c < l:closeCol)
       let l:closeIndex = l:index
       let [l:closeRow, l:closeCol] =  a:list[l:closeIndex]
@@ -118,6 +146,15 @@ let s:single_quote = '\m\C''\zs[^'']\+\ze'''
 "let s:unquoted = '\m\C\(\\\\\|\\ \|\\\n\|[^ \n]\)\+'
 let s:unquoted = '\m\C\f\+'
 "let s:path = s:double_quote . '\|' . s:single_quote . '\|' . s:unquoted
+
+" This should be the general simple use case
+"let s:file_character='[^\n ''"]'
+"let s:file_separator = '-\n ''"!@$%^*-+\|;:,.<>?'
+let s:path_separator = ' \n''"(){}[\]'
+let s:simple_path = '\m\C'
+  \ . '\([' . s:path_separator . ']\|^\)'
+  \ .  '\zs\([^' . s:path_separator. ']\|\\ \)\+\ze'
+  \ . '\([' . s:path_separator . ']\|$\)'
 
 
 
@@ -147,7 +184,8 @@ let s:link .= s:hostname_character . '\+'
 " Path
 let s:link .= '\(/' . s:pathname_character . '*\)\?'
 
-let s:regexps = [s:link, s:double_quote, s:single_quote, s:unquoted]
-"let s:regexps = [s:link, s:single_quote, s:unquoted]
-"let s:regexps = [s:link, s:unquoted]
-"let s:regexps = [s:link]
+" This should be looking for paths
+"let s:regexps = [s:double_quote, s:single_quote, s:unquoted]
+"let s:regexps = [s:single_quote, s:unquoted]
+"let s:regexps = [s:unquoted]
+let s:regexps = [s:simple_path]

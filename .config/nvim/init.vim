@@ -141,8 +141,9 @@ inoremap <unique> <C-p> <C-o>:let @" = system('clipboard.sh --read')<CR><C-r>"
 
 nmap <unique> <Leader>p i<C-p><Esc>
 nmap <unique> <Leader>P a<C-p><Esc>
+nmap <unique> <Leader>v i<C-p><Esc>
+nmap <unique> <Leader>V a<C-p><Esc>
 vmap <unique> <C-c> <Leader>c
-nmap <unique> <C-c> <Leader>c
 nmap <unique> <C-p> <Leader>p
 
 " Visual-mode select the next URI if valid URL or if path to existing file
