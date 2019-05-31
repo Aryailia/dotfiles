@@ -24,12 +24,20 @@ endfunction
 " Snippets
 
 " Thanks to Rich (https://www.etalabs.net/sh_tricks.html for eval_escape)
-imap <buffer> <LocalLeader>die <C-o>:set paste<CR>
+imap <buffer> <LocalLeader>die1
+  \ <C-o>:setlocal paste<CR>
   \<C-o>:if ! search('\m^ *puts() *{', 'bnw')<CR>
   \  execute "normal i,puts\n"<CR>
   \endif<CR>
   \die() { c="$1"; shift 1; for x in "$@"; do puts "$x" >&2; done; exit "$c"; }
-  \<C-o>:set nopaste<CR>
+  \<C-o>:setlocal nopaste<CR>
+imap <buffer> <LocalLeader>die2
+  \ <C-o>:setlocal paste<CR>
+  \<C-o>:if ! search('\m^ *puts() *{', 'bnw')<CR>
+  \  execute "normal i,puts\n"<CR>
+  \endif<CR>
+  \die2() { c="$1"; t="$2"; shift 2; puts "$t: '${name}'" "$@" >&2; exit "$c"; }
+  \<C-o>:setlocal nopaste<CR>
 inoremap <buffer> <LocalLeader>req
   \ require() { command -v "$1" >/dev/null 2>&1; }
 
@@ -50,7 +58,8 @@ inoremap <buffer> <LocalLeader>pute
 inoremap <buffer> <LocalLeader>printe
   \ printerr() { printf %s "$@" >&2; }
 
-inorema <buffer> <LocalLeader>match_any <C-o>:set paste<CR>
+inorema <buffer> <LocalLeader>match
+  \ <C-o>:setlocal paste<CR>
   \match_any() {<CR>
   \  matchee="$1"; shift 1<CR>
   \  [ -z "${matchee}" ] && return 1<CR>
@@ -59,13 +68,15 @@ inorema <buffer> <LocalLeader>match_any <C-o>:set paste<CR>
   \  done<CR>
   \  return 1<CR>
   \}
-  \<C-o>:set nopaste<CR>
+  \<C-o>:setlocal nopaste<CR>
 
 
 
-inoremap <buffer> <LocalLeader>help <C-o>:set paste<CR>
+inoremap <buffer> <LocalLeader>help
+  \ <C-o>:setlocal paste<CR>
+  \name="$(basename "$0"; printf a)"; name="${name%?a}"<CR>
+  \<CR>
   \show_help() {<CR>
-  \  name="$(basename "$0"; printf a)"; name="${name%??}"<CR>
   \  <<EOF cat - >&2<CR>
   \SYNOPSIS<CR>
   \  ${name}<CR>
@@ -74,11 +85,12 @@ inoremap <buffer> <LocalLeader>help <C-o>:set paste<CR>
   \  <CR>
   \EOF<CR>
   \}
-  \<C-o>:set nopaste<CR>
+  \<C-o>:setlocal nopaste<CR>
 
 
 " Simplist, cannot handle options that need arguments
-imap <buffer> <LocalLeader>main1 <C-o>:set paste<CR>
+imap <buffer> <LocalLeader>main1
+  \ <C-o>:setlocal paste<CR>
   \main() {<CR>
   \  # Dependencies<CR>
   \<CR>
@@ -94,10 +106,11 @@ imap <buffer> <LocalLeader>main1 <C-o>:set paste<CR>
   \  eval "set -- ${args}"<CR>
   \<CR>
   \}
-  \<C-o>:set nopaste<CR>
+  \<C-o>:setlocal nopaste<CR>
 
 " Handles options that need arguments, but cannot handle combined options
-imap <buffer> <LocalLeader>main2 <C-o>:set paste<CR>
+imap <buffer> <LocalLeader>main2
+  \ <C-o>:setlocal paste<CR>
   \main() {<CR>
   \  # Dependencies<CR>
   \<CR>
@@ -119,10 +132,11 @@ imap <buffer> <LocalLeader>main2 <C-o>:set paste<CR>
   \  eval "set -- ${args}"<CR>
   \<CR>
   \}
-  \<C-o>:set nopaste<CR>
+  \<C-o>:setlocal nopaste<CR>
 
 " Fullest form, handles combined single-character options (eg. pacman -Syu)
-imap <buffer> <LocalLeader>main3 <C-o>:set paste<CR>
+imap <buffer> <LocalLeader>main3
+  \ <C-o>:setlocal paste<CR>
   \main() {<CR>
   \  # Flags<CR>
   \<CR>
@@ -162,7 +176,7 @@ imap <buffer> <LocalLeader>main3 <C-o>:set paste<CR>
   \  eval "set -- ${args}"<CR>
   \<CR>
   \}
-  \<C-o>:set nopaste<CR>
+  \<C-o>:setlocal nopaste<CR>
 
 imap <buffer> <LocalLeader>init
   \ #!/usr/bin/env sh<CR>
@@ -173,7 +187,7 @@ imap <buffer> <LocalLeader>init
   \<CR><CR><CR>
   \# Helpers<CR>
   \<LocalLeader>puts<CR>
-  \<LocalLeader>die<CR>
+  \<LocalLeader>die2<CR>
   \<LocalLeader>eval<CR>
   \<CR>
   \main "$@"

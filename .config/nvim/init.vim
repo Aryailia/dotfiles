@@ -13,13 +13,15 @@ call plug#begin('~/.vim/extra')
   " VimWiki for markdown interlinks, (probably make my own, too much bloat)
   "Plug 'vimwiki/vimwiki', { 'branch': 'dev' } ", 'on': [] }
   ", 'for': 'markdown' }
+  "Plug 'tpope/vim-scriptease'       " For the reload
+  Plug 'tpope/vim-unimpaired'       " Setting toggles, back/next nav shortcuts
   Plug 'tpope/vim-surround'         " Adding quotes
-  Plug 'tpope/vim-scriptease'       " For the reload
   Plug 'aryailia/vim-markdown-toc'  " Table of contents woo
   Plug 'godlygeek/tabular'          " Primarily for markdown table formatting
   Plug 'kassio/neoterm'             " Terminal for vim and neovim
   Plug 'rust-lang/rust.vim'         " Rust syntax hilighting
   Plug 'jreybert/vimagit'           " Git UI
+  Plug 'rlue/vim-barbaric'          " Swap IME on insert mode
 call plug#end()
 
 " autocmd BufNewFile,BufRead *.md set filetype=markdown
@@ -41,8 +43,9 @@ if ! has("gui_running")
 endif
 
 set nrformats-=octal  " Leading 0s are not recognised as octals
-set formatoptions-=c  " Do not auto add comments
 set formatoptions+=j  " Delete comment leaders when joining lines
+set formatoptions-=c  " Do not auto add comments
+set ignorecase
 
 set number " setting relativenumber was kiling performance
 syntax sync minlines=256  " improve syntax performance
@@ -109,9 +112,21 @@ let g:vmt_fence_hidden_markdown_style = ''
 
 let g:maplocalleader = ','
 
-" Rebinds
+" Rebinds, use unique everywhere so it yells at me if I duplicate a keybind
 " Disable Ex mode (can still use gQ)
 nnoremap <unique> Q <Nul>
+
+" Clear whitespace
+nnoremap <unique> <leader>w :%s/\s\+$//g<CR>
+
+" Stuff modelled after tpope's vim-unimpared
+" Spellcheck with chooseable locale, 'o' for othography
+nnoremap <silent> <unique> yoo
+  \ :if &spell<Bar>
+    \setlocal nospell<Bar>
+  \else<Bar>
+    \execute 'setlocal spell spelllang=' . input('spelllang=', 'en_gb')<Bar>
+  \endif<CR>
 
 " 'j' and 'k' move visual lines, Ctrl versions to move the original real lines
 nnoremap <unique> j    gj
@@ -133,23 +148,26 @@ nnoremap <unique> <leader>s :write<CR>
 nmap <unique> <C-s> <Leader>s
 imap <unique> <C-s> <C-o><Leader>s
 
-" Clipboard 
+" Clipboard
 " Consider trick of `if has("clipboard") @+ = @* = @"` ?
-vnoremap <unique> <Leader>c y:call system('clipboard.sh --write', @")<CR>gv
 nnoremap <unique> <Leader>c :silent call system("clipboard.sh --write", @")<CR>
-inoremap <unique> <C-p> <C-o>:let @" = system('clipboard.sh --read')<CR><C-r>"
+vnoremap <unique> <Leader>c y:call system('clipboard.sh --write', @")<CR>gv
+inoremap <unique> <C-p>
+  \ <C-o>:setlocal paste<CR>
+  \<C-o>:let @" = system('clipboard.sh --read')<CR><C-r>"
+  \<C-o>:setlocal nopaste<CR>
 
-nmap <unique> <Leader>p i<C-p><Esc>
-nmap <unique> <Leader>P a<C-p><Esc>
-nmap <unique> <Leader>v i<C-p><Esc>
-nmap <unique> <Leader>V a<C-p><Esc>
-vmap <unique> <C-c> <Leader>c
+nmap <unique> <Leader>p a<C-p><Esc>
+nmap <unique> <Leader>P i<C-p><Esc>
+nmap <unique> <Leader>v a<C-p><Esc>
+nmap <unique> <Leader>V i<C-p><Esc>
 nmap <unique> <C-p> <Leader>p
+vmap <unique> <C-c> <Leader>c
 
 " Visual-mode select the next URI if valid URL or if path to existing file
-nmap <unique> <C-n> <Plug>SelectNextURI
-imap <unique> <C-n> <C-o><Plug>SelectNextURI
-vmap <unique> <C-n> <Esc><Plug>SelectNextURI
+nmap <unique> <C-l> <Plug>SelectNextURI
+imap <unique> <C-l> <C-o><Plug>SelectNextURI
+vmap <unique> <C-l> <Esc><Plug>SelectNextURI
 
 " Cannot have <CR> and <C-m> mapped to different things (99% sure)
 "inoremap <unique> <C-m> <C-o>o
@@ -173,16 +191,11 @@ nnoremap <unique> <silent> <Leader>db
   \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
   \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
   \ . ">"<CR>
-noremap <unique> <leader>hg :call PrintHighlightGroup()<CR>
+noremap <leader>hg :echo "yo"<CR>
 noremap <unique> <leader><tab> :Tab /\|<CR>
 noremap <unique> <leader>rs :write! !parsemarkdown.awk<CR>
 nnoremap <unique> <F11> :call FollowCursorLink()<CR>
 nnoremap <unique> <F12> :call FollowBack()<CR>
-
-
-
-" Misc stuff, change settings
-noremap <unique> <leader>tn :set relativenumber!<CR>
 
 
 
@@ -198,14 +211,18 @@ function! RestoreWindowPosition()
   call cursor(b:WindowPosition[1], b:WindowPosition[2])
 endfunction
 
-noremap <unique> <Leader>rc
-  \ :call SaveWindowPosition()<CR>
-  \:source $MYVIMRC<CR>
-  \:echom 'Reload' . $MYVIMRC<CR>
-  \:Runtime after/**/*.vim<CR>
-  \:redraw<CR>
-  \:call RestoreWindowPosition()<CR>
-noremap <unique> <leader>ts
+nnoremap <unique> <Leader>rc
+  \ :silent call system("setsid reloadvim.sh '"
+  \. line('w0') . "' '" . line('.') . "' '" . col('.') . "' '"
+  \. expand('%') . "'")<CR>
+"noremap <unique> <Leader>rc
+"  \ :call SaveWindowPosition()<CR>
+"  \:source $MYVIMRC<CR>
+"  \:Runtime after/**/*<CR>
+"  \:echom 'Reload' . $MYVIMRC<CR>
+"  \:redraw<CR>
+"  \:call RestoreWindowPosition()<CR>
+nnoremap <unique> <leader>ts
   \ :if exists("g:syntax_on")<Bar>syntax off<Bar>
   \else<Bar>syntax on<Bar>endif<CR>
 

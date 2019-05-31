@@ -3,7 +3,7 @@
 "  finish
 "endif
 
-noremap <unique> <Plug>SelectNextURI :call <SID>SelectNextURI()<CR>
+noremap <Plug>SelectNextURI :call <SID>SelectNextURI()<CR>
 
 function! s:SelectNextURI()
   " Save original cursor position

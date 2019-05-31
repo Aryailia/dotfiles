@@ -42,6 +42,8 @@ COMMANDS
     advantage of the reasonable session count to avoid splitting random sessions
     that are not even visible. \`tmux send-keys\` all the PARAMETERS and enters.
 
+  test-inside-session
+  get-current-command
 ENVIRONMENT
   SHELL
     The shell to use for the tmux session. Usually already set
@@ -51,7 +53,7 @@ EOF
 # Helpers
 puts() { printf %s\\n "$@"; }
 die() { c="$1"; shift 1; for x in "$@"; do puts "$x" >&2; done; exit "$c"; }
-is_inside_tmux() { test -z "${TMUX}"; }  # Tmux sets ${TMUX}
+is_inside_tmux() { test -n "${TMUX}"; }  # Tmux sets ${TMUX}
 require() { command -v "$1" >/dev/null 2>&1; }
 
 
@@ -73,17 +75,18 @@ main() {
   # Main
   cmd="$1"
   [ "$#" -gt "0" ] && shift 1
-  done="false"
   case "${cmd}" in
-    h|-h|help|--help)   show_help; exit 0 ;;
-    g|get)              get_next_session true; done="true" ;;
-    i|insert-evaluate)  insert_into_current_pane "$@"; done="true" ;;
-    ls|list-sessions)   tmux list-sessions "$@"; done="true" ;;
-    o|open)             run_in_generic "$@"; done="true" ;;
-    p|prune)            prune_nongenerics; done="true" ;;
-    s|split)            split_into_tmux_and_run "$@"; done="true" ;;
+    h|-h|help|--help)     show_help ;;
+    g|get)                get_next_session true ;;
+    i|insert-evaluate)    insert_into_current_pane "$@" ;;
+    ls|list-sessions)     tmux list-sessions "$@" ;;
+    o|open)               run_in_generic "$@" ;;
+    p|prune)              prune_nongenerics ;;
+    s|split)              split_into_tmux_and_run "$@" ;;
+    test-inside-session)  is_inside_tmux ;;
+    get-current-command)  get_current_command ;;
+    *)  show_help; exit 1 ;;
   esac
-  "${done}" || { show_help; exit 1; }
 }
 
 
@@ -93,7 +96,7 @@ main() {
 # The code at least once
 # Eg. `tmux.sh insert echo yo` inside a tmux session yields 'yo'
 insert_into_current_pane() {
-  [ -z "${TMUX}" ] && die 1 'FATAL: Use inside a tmux session'
+  is_inside_tmux || die 1 'FATAL: Use inside a tmux session'
   id="$(tmux display-message -p "#{window_id}")"
   to_run="\"\$($*)\""
   tmux new-window "tmux send-keys -t '${id}' \"${to_run}\""
@@ -141,7 +144,7 @@ prune_nongenerics() {
 split_into_tmux_and_run() {
   pane_id=""
   # -d do not switch, -P print, -h horizontal, -F print format, -s session name
-  if is_inside_tmux; then
+  if ! is_inside_tmux; then
     pane_id="$(tmux new-session -dPA -F '#{pane_id}' \
       -s "$(get_next_session false)" "${SHELL}")"
   else
@@ -184,6 +187,15 @@ get_next_session() {
       (halfway && !matched[$2 + 1]) { print($2 + 1); exit; }
     '
   fi
+}
+
+
+
+# This should be run from an setsid or from the .tmux.config file (I think)
+get_current_command() {
+  # -n newest, -a PID and full command, -t terminal
+  pgrep -n -l -t "$(tmux display-message -p "#{pane_tty}" | sed 's|/dev/||')" \
+    | awk '{ sub(/^[0-9]* /, ""); a=$0; } END{ printf("%s", a); }'
 }
 
 main "$@"
