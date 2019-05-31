@@ -193,9 +193,12 @@ get_next_session() {
 
 # This should be run from an setsid or from the .tmux.config file (I think)
 get_current_command() {
-  # -n newest, -a PID and full command, -t terminal
-  pgrep -n -l -t "$(tmux display-message -p "#{pane_tty}" | sed 's|/dev/||')" \
+  # Busybox -a seems to be the same as -l, -n newest, -s SID
+  pgrep -nls "$(tmux display-message -p "#{pane_pid}")" \
     | awk '{ sub(/^[0-9]* /, ""); a=$0; } END{ printf("%s", a); }'
+  ## -n newest, -a PID and full command, -t terminal
+  #pgrep -n -l -t "$(tmux display-message -p "#{pane_tty}" | sed 's|/dev/||')" \
+    #| awk '{ sub(/^[0-9]* /, ""); a=$0; } END{ printf("%s", a); }'
 }
 
 main "$@"
