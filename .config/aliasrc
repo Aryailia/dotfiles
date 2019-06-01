@@ -1,11 +1,13 @@
-#!/bin/sh
+#!/usr/bin/env sh
 # https://stackoverflow.com/questions/6429515
 stty -ixon -ixoff # Archaic with modern CPU/modem speeds. Reclaims C-q and C-s
 
 alias    ab='abook --datafile "${HOME}/.config/abook/addressbook"'
 alias     b='vifm .'
 alias    cw='cd-of sh -c '\''printf %s "$(dirname "$(command -v "$1")")"'\'' _'
-alias  diff='diff --color=auto'
+alias    dc='git diff --word-diff=color --word-diff-regex=.'
+alias    dl='git diff --color-moved=plain'
+alias    dw='git diff --word-diff=color'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='es'
 alias    es='browser.sh edit search'
