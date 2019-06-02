@@ -17,8 +17,13 @@ HISTIGNORE='ls:bg:fg:history'  # Do not log these commands
 shopt -s histappend            # History is added
 #shopt -s cmdhist               # Join multi-line commands onto a single line
 
-# Do not log these commands
+# Need to source this in the interactive shell
+[ -f "${HOME}/.config/aliasrc" ] && source "${HOME}/.config/aliasrc"
 
+# Bash specific stuff
+alias rrc='source ~/.bashrc ~/.bash_profile'
+
+# Use `cat` instead of a function so we do not pollute namespace
 PROMPT_COMMAND="$(<<EOF cat -
   errorcode="\$?"
   # More history syncing hackery (bash saves history once session closes)
@@ -32,18 +37,6 @@ PROMPT_COMMAND="$(<<EOF cat -
   SECONDS="0"
 EOF
 )"
-
-[ -f "${HOME}/.config/aliasrc" ] && source "${HOME}/.config/aliasrc"
-alias rrc='source ~/.bashrc; source ~/.config/shell_profile'
-
-#c() {
-#  if [ -z "$1" ]; then
-#    "${SCRIPTS}/namedpath.sh" --list-aliases
-#  else
-#    path="$("${SCRIPTS}/namedpath.sh" "$1"; printf x)"; path="${path%?}"
-#    cd "${path}" && la  # ls with some options, defined in alias
-#  fi
-#}
 
 cd-of() {
   temp="$("$@"; err="$?"; printf x; exit "${err}")" || return "$?"
