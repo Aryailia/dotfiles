@@ -1,10 +1,10 @@
-let xdg_config = "$HOME/.config"
-source "$xdg_config/shellrc"
-source "$xdg_config/shell_profile"
+#let xdg_config = "$HOME/.config"
+source "$HOME/.profile"
+source "$HOME/.config/aliasrc"
 #export timer = "$(date +%s)"
 
 # Do not `lx` if directory change failed
-fn c target; cd "$(namedpath "$target")" && lx .;  end
+fn c target; cd "$(namedpath "$target")" && ls .;  end
 
 fn PROMPT
   let exitcode      = "$?" # this does not work

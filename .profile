@@ -1,18 +1,21 @@
 # Path
-# Using `test` instead of `[ ]` syntax to support more shells
+# Using `test` instead of `[ -z A ]` syntax to support more shells
+# `ion` does not support `[ -z A ]` test syntax
+# `ion` does not support `A=B` variable declaration (but `export A=B` works)
+# `ion` does not support 2>&1
 
-SCRIPTS="${HOME}/.config/scripts"
-RUSTPATH="${HOME}/.cargo/bin"
-GOPATH="${HOME}/.local/go"
-case ":${PATH}:" in *:"${SCRIPTS}":*) ;; *) PATH="${PATH}:${SCRIPTS}" ;; esac
-case ":${PATH}:" in *:"${RUSTPATH}":*) ;; *) PATH="${PATH}:${RUSTPATH}" ;; esac
-export PATH GOPATH
+# PATH
+export SCRIPTS="${HOME}/.config/scripts"
+export GOPATH="${HOME}/.local/go"
+printf %s\\n "${PATH}" | grep -q ":${SCRIPTS}:" \
+  || export PATH="${PATH}:${SCRIPTS}"
+printf %s\\n "${PATH}" | grep -q ":${HOME}/.cargo/bin:" \
+  || export PATH="${PATH}:${HOME}/.cargo/bin"
 
 # Folders
-DOTENVIRONMENT="${HOME}/.environment"
-uname -o | grep -q 'Linux' && TMPDIR='/tmp'  # Linux/MacOS
-uname -o | grep -q 'MSYS' &&  TMPDIR="${HOME}/AppData/Local/Temp"  # Win
-export SCRIPTS TMPDIR
+export DOTENVIRONMENT="${HOME}/.environment"
+uname -o | grep -q 'Linux' && export TMPDIR='/tmp'  # Linux/MacOS
+uname -o | grep -q 'MSYS' &&  export TMPDIR="${HOME}/AppData/Local/Temp"  # Win
 
 # ${HOME} directory cleanup
 export NOTMUCH_CONFIG="${HOME}/.config/notmuch-config"
@@ -20,17 +23,18 @@ export GTK2_RC_FILES="${HOME}/.config/gtk-2.0/gtkrc-2.0"
 export LESSHISTFILE="/dev/null"
 export INPUTRC="${HOME}/.config/inputrc"
 
-# Default programs
-## ${DISPLAY} is to check if X server is running
-#test -n "${DISPLAY}" && command -v st >/dev/null 2>&1 && export TERMINAL='st'
-command -v st >/dev/null 2>&1               && TERMINAL='st'
-command -v vim >/dev/null 2>&1              && EDITOR='vim'
-command -v nvim >/dev/null 2>&1             && EDITOR='nvim'
-command -v termux-open-url >/dev/null 2>&1  && BROWSER='termux-open-url'
-command -v midori >/dev/null 2>&1           && BROWSER='midori'
-command -v surf >/dev/null 2>&1             && BROWSER='surf'
-command -v zathura >/dev/null 2>&1          && READER='zathura'
-export TERMINAL EDITOR BROWSER READER
+## Default programs
+### ${DISPLAY} is to check if X server is running
+##test -n "${DISPLAY}" && command -v st >/dev/null 2>&1 && export TERMINAL='st'
+sh -c 'which st  >/dev/null 2>&1'             && export TERMINAL='st'
+sh -c 'which vim >/dev/null 2>&1'             && export EDITOR='vim'
+sh -c 'which vim >/dev/null 2>&1'             && export EDITOR='vim'
+sh -c 'which nvim >/dev/null 2>&1'            && export EDITOR='nvim'
+sh -c 'which termux-open-url >/dev/null 2>&1' \
+  && export BROWSER='termux-open-url'
+sh -c 'which midori >/dev/null 2>&1'          && export BROWSER='midori'
+sh -c 'which surf >/dev/null 2>&1'            && export BROWSER='surf'
+sh -c 'which zathura >/dev/null 2>&1'         && export READER='zathura'
 
 # Less/manpages colors
 export LESS=-R
@@ -44,4 +48,6 @@ export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
 
 # Source .bashrc to have the same environment in tty as in Xorg
 # Login shell starts with '-bash', test if it ends with bash
-test "${0%bash}" != "$0" && test -f "${HOME}/.bashrc" && . "${HOME}/.bashrc"
+printf %s\\n "$0" | grep -q 'bash$' \
+  && test -f "${HOME}/.bashrc" \
+  && . "${HOME}/.bashrc"
