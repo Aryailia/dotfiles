@@ -44,6 +44,7 @@ COMMANDS
 
   test-inside-session
   get-current-command
+  get-current-pid
 ENVIRONMENT
   SHELL
     The shell to use for the tmux session. Usually already set
@@ -85,6 +86,7 @@ main() {
     s|split)              split_into_tmux_and_run "$@" ;;
     test-inside-session)  is_inside_tmux ;;
     get-current-command)  get_current_command ;;
+    get-current-pid)      get_current_pid ;;
     *)  show_help; exit 1 ;;
   esac
 }
@@ -195,10 +197,15 @@ get_next_session() {
 get_current_command() {
   # Busybox -a seems to be the same as -l, -n newest, -s SID
   pgrep -nls "$(tmux display-message -p "#{pane_pid}")" \
-    | awk '{ sub(/^[0-9]* /, ""); a=$0; } END{ printf("%s", a); }'
+    | awk '{ sub(/^[0-9]* /, ""); a = $0; } END{ printf("%s", a); }'
   ## -n newest, -a PID and full command, -t terminal
   #pgrep -n -l -t "$(tmux display-message -p "#{pane_tty}" | sed 's|/dev/||')" \
     #| awk '{ sub(/^[0-9]* /, ""); a=$0; } END{ printf("%s", a); }'
+}
+
+get_current_pid() {
+  pgrep -nls "$(tmux display-message -p "#{pane_pid}")" \
+    | awk '{ a = $1; } END{ printf("%s", a); }'
 }
 
 main "$@"

@@ -212,9 +212,9 @@ function! RestoreWindowPosition()
 endfunction
 
 nnoremap <unique> <Leader>rc
-  \ :silent call system("setsid reloadvim.sh '"
+  \ :silent call system("    setsid reloadvim.sh '"
   \. line('w0') . "' '" . line('.') . "' '" . col('.') . "' '"
-  \. expand('%') . "'")<CR>
+  \. expand('%') . "' &")<CR>
 "noremap <unique> <Leader>rc
 "  \ :call SaveWindowPosition()<CR>
 "  \:source $MYVIMRC<CR>

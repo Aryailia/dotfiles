@@ -39,10 +39,13 @@ main() {
 
   # Main
   tmux.sh test-inside-session || die2 1 'FATAL' 'Not in tmux session'
-  #"${skip}" \
-  #  || tmux.sh get-current-command | grep_for_shell \
-  #  || tmux_die 'Not running (n)vim at the moment'
+  tmux display-message "$(tmux.sh get-current-command)"
+  "${skip}" \
+    || tmux.sh get-current-command | grep_for_editor \
+    || tmux_die 'Not running (n)vim at the moment'
+  #editor_pid="$(tmux.sh get-current-pid)"
   tmux send-keys Escape ':q' Enter
+  #wait "${editor_pid}"  # Not sure why this does not work
 
   # Need to sleep because vim eats the input stream while it closes
   # Wait until the current command is the interactive shell
@@ -56,6 +59,7 @@ main() {
       sleep 0.01
     done
   fi
+
   # For debugging:
   #tmux send-keys "$(tmux.sh get-current-command)"
 
@@ -64,9 +68,10 @@ main() {
     || tmux_die 'Slow return to bash/sh/dash (>0.2 seconds)'
 
   # Add space to not include in ${HISTCONTROL} set to ignorespace
-  tmux send-keys " ${EDITOR} \"+normal! $1Gzt$2G$3|\" \"$4\"" Enter
+  tmux send-keys "    ${EDITOR} \"+normal! $1Gzt$2G$3|\" \"$4\"" Enter
 }
 
+grep_for_editor() { <&0 grep -q -e '/vim$' -e '^vim$' -e '/nvim$' -e '^nvim$'; }
 grep_for_shell() {
   <&0 grep -q -e '/bash$' -e '^bash$' \
     -e '/sh$' -e '^sh$' -e '/dash$' -e '^dash$'
