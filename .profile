@@ -2,10 +2,10 @@
 # Using `test` instead of `[ ]` syntax to support more shells
 
 SCRIPTS="${HOME}/.config/scripts"
-#PATH="${PATH}:${SCRIPTS}"
-PATH="${PATH}$(find "${SCRIPTS}"/ -type d -exec printf :%s '{}' \;)"
-PATH="${PATH}:${HOME}/.cargo/bin"
+RUSTPATH="${HOME}/.cargo/bin"
 GOPATH="${HOME}/.local/go"
+case ":${PATH}:" in *:"${SCRIPTS}":*) ;; *) PATH="${PATH}:${SCRIPTS}" ;; esac
+case ":${PATH}:" in *:"${RUSTPATH}":*) ;; *) PATH="${PATH}:${RUSTPATH}" ;; esac
 export PATH GOPATH
 
 # Folders
@@ -42,4 +42,6 @@ export LESS_TERMCAP_se="$(printf '%b' '[0m')"
 export LESS_TERMCAP_us="$(printf '%b' '[1;32m')"
 export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
 
+# Source .bashrc to have the same environment in tty as in Xorg
+# Login shell starts with '-bash', test if it ends with bash
 test "${0%bash}" != "$0" && test -f "${HOME}/.bashrc" && . "${HOME}/.bashrc"
