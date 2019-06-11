@@ -22,8 +22,13 @@ endfunction
 
 
 " Snippets
+inoremap <buffer> <LocalLeader>#!sh
+  \ #!/usr/bin/env sh
+inoremap <buffer> <LocalLeader>#!awk
+  \ #!/usr/bin/awk -f
+inoremap <buffer> <LocalLeader>#!python
+  \ #!/usr/bin/env python
 
-" Thanks to Rich (https://www.etalabs.net/sh_tricks.html for eval_escape)
 imap <buffer> <LocalLeader>die1
   \ <C-o>:setlocal paste<CR>
   \<C-o>:if ! search('\m^ *puts() *{', 'bnw')<CR>
@@ -38,8 +43,22 @@ imap <buffer> <LocalLeader>die2
   \endif<CR>
   \die2() { c="$1"; t="$2"; shift 2; puts "$t: '${name}'" "$@" >&2; exit "$c"; }
   \<C-o>:setlocal nopaste<CR>
+
+" Neither `which` nor `command -v` are defined in posix
+" Some systems do not have `which` or it does not error code
+" For some shells (like 'dash') `command -v` works more like `test -e`
 inoremap <buffer> <LocalLeader>req
-  \ require() { command -v "$1" >/dev/null 2>&1; }
+  \ <C-o>:setlocal paste<CR>
+  \require() {<CR>
+  \  for dir in $(printf %s "${PATH}" <Bar> tr ':' '\n'); do<CR>
+  \    for arg in "/.${dir}"/* "/.${dir}"/.[!.]* "/.${dir}"/..?*; do<CR>
+  \      [ -f "${arg}" ] && [ -x "${arg}" ] && return 0<CR>
+  \    done<CR>
+  \  done<CR>
+  \  return 1<CR>
+  \}
+  \<C-o>:setlocal nopaste<CR>
+
 
 " Defends against malicious $2 but not malicious $1. $1 must be valid varname
 inoremap <buffer> <LocalLeader>dynamic
@@ -50,6 +69,7 @@ inoremap <buffer> <LocalLeader>puts
   \ puts() { printf %s\\n "$@"; }
 inoremap <buffer> <LocalLeader>prints
   \ prints() { printf %s "$@"; }
+" Much thanks to Rich (https://www.etalabs.net/sh_tricks.html for eval_escape)
 " Keeping to the analogy, this is ruby's p, but not really, so renamed
 inoremap <buffer> <LocalLeader>eval
   \ eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
@@ -95,11 +115,11 @@ imap <buffer> <LocalLeader>main1
   \  # Dependencies<CR>
   \<CR>
   \  # Options processing<CR>
-  \  args=""; no_options="false"<CR>
+  \  args=''; no_options='false'<CR>
   \  for arg in "$@"; do "${no_options}" <Bar><Bar> case "${arg}" in<CR>
-  \    --)  no_options="true" ;;<CR>
+  \    --)  no_options='true' ;;<CR>
   \    -h<Bar>--help)  show_help; exit 0 ;;<CR>
-  \    *)   args="${args} $(puts "${arg}" <Bar> eval_escape)"<CR>
+  \    *)   args="${args} $(puts "${arg}" <Bar> eval_escape)" ;;<CR>
   \  esac done<CR>
   \<CR>
   \  [ -z "${args}" ] && { show_help; exit 1; }<CR>
@@ -115,14 +135,17 @@ imap <buffer> <LocalLeader>main2
   \  # Dependencies<CR>
   \<CR>
   \  # Options processing<CR>
-  \  args=""<CR>
-  \  no_options="false"<CR>
+  \  args=''<CR>
+  \  no_options='false'<CR>
   \  while [ "$#" -gt 0 ]; do<CR>
   \    "${no_options}" <Bar><Bar> case "$1" in<CR>
-  \      --)  no_options="true"; shift 1; continue ;;<CR>
+  \      --)  no_options='true'; shift 1; continue ;;<CR>
   \      -h<Bar>--help)  show_help; exit 0 ;;<CR>
-  \      -e<Bar>--example)  puts "-$2-"; shift 1 ;;<CR>
-  \      *)   args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
+  \<CR>
+  \      -f)  echo 'do not need to shift' ;;<CR>
+  \      -e<Bar>--example2)  puts "-$2-"; shift 1 ;;<CR>
+  \<CR>
+  \      *)   args="${args} $(puts "$1" <Bar> eval_escape)" ;;<CR>
   \    esac<CR>
   \    "${no_options}" && args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
   \    shift 1<CR>
@@ -143,15 +166,15 @@ imap <buffer> <LocalLeader>main3
   \  # Dependencies<CR>
   \<CR>
   \  # Options processing<CR>
-  \  args=""<CR>
-  \  no_options="false"<CR>
+  \  args=''<CR>
+  \  no_options='false'<CR>
   \  while [ "$#" -gt 0 ]; do<CR>
   \    if ! "${no_options}"; then<CR>
   \      # Split grouped single-character arguments up, and interpret '--'<CR>
   \      # Parsing '--' here allows "invalid option -- '-'" error later<CR>
-  \      opts=""<CR>
+  \      opts=''<CR>
   \      case "$1" in<CR>
-  \        --)      no_options="true"; shift 1; continue ;;<CR>
+  \        --)      no_options='true'; shift 1; continue ;;<CR>
   \        -[!-]*)  opts="${opts}$(puts "${1#-}" <Bar> sed 's/./ -&/g')" ;;<CR>
   \        *)       opts="${opts} $1" ;;<CR>
   \      esac<CR>
@@ -164,7 +187,7 @@ imap <buffer> <LocalLeader>main3
   \        # Put argument checks above this line (for error detection)<CR>
   \        # first '--' case already covered by first case statement<CR>
   \        -[!-]*)   show_help; die 1 "FATAL: invalid option '${x#-}'" ;;<CR>
-  \        *)        args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
+  \        *)        args="${args} $(puts "$1" <Bar> eval_escape)" ;;<CR>
   \      esac done<CR>
   \    else<CR>
   \      args="${args} $(puts "$1" <bar> eval_escape)"<CR>
