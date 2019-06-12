@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # https://unix.stackexchange.com/questions/326897/
 # By Hakon A. Hjortland
 

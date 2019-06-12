@@ -1,1 +1,5 @@
+# Think about how this affects termux
+#$include /etc/inputrc
 set colored-stats on
+# Do not bell on tab-completion
+set bell-style none

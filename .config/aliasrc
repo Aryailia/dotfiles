@@ -4,7 +4,7 @@ stty -ixon -ixoff # Archaic with modern CPU/modem speeds. Reclaims C-q and C-s
 
 alias    ab='abook --datafile "${HOME}/.config/abook/addressbook"'
 alias     b='vifm .'
-alias    cw='cd-of sh -c '\''printf %s "$(dirname "$(command -v "$1")")"'\'' _'
+alias    cw='cd_of sh -c '\''printf %s "$(dirname "$(command -v "$1")")"'\'' _'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='es'
 alias    es='browser.sh edit search'
@@ -23,11 +23,11 @@ alias    gs='git status'
 #" _'
 #alias    gu='git submodule update --remote --merge'
 alias  grep='grep --color=auto'
-alias     l='ls -h --group-directories-first'
+alias     l='ls --color=auto --group-directories-first -h'
 alias    ls='ls --color=auto'
-alias    la='l -A'
-alias   lal='l -Al'
-alias    ll='l -l'
+alias    la='ls --color=auto --group-directories-first -hA'
+alias   lal='ls --color=auto --group-directories-first -hAl'
+alias    ll='ls --color=auto --group-directories-first -hl'
 alias   mkf='sh -c "for x in \"\$@\"; do
   touch -- \"\$x\"
   chmod 644 -- \"\$x\"
@@ -56,7 +56,7 @@ alias     t='tmux.sh'
 alias     w='weather.sh'
 alias     v='nvim'
 
-alias c='cd-of sh -c '\''
+alias c='cd_of sh -c '\''
   if [ -z "$1" ]; then
     "${SCRIPTS}/namedpath.sh" --list-aliases >&2
     return 1
@@ -65,7 +65,18 @@ alias c='cd-of sh -c '\''
   fi'\'' _ \
 '
 
-alias debug-path='printf %s\\n "${PATH}" | tr ":" "\n" | sort'
+
+#ffmpeg -i 'input' -1-6.mp4 -vn -acodec copy 'output'
+
+# Sxhkd updates on receiving usr1 signal
+alias rhkd='pkill -USR1 sxhkd'
+
+# Android has no sudo
+alias updateman='sh -c "sudo -V >/dev/null 2>&1" \
+  && makewhatis "${PREFIX}/usr/share/man" \
+  || sudo makewhatis "/usr/share/man"
+'
+alias list-path='printf %s\\n "${PATH}" | tr ":" "\n" | sort'
 
 # -i list all Internet and x.25 network files
 # -n prevents conversion of network numbers to host names (DNS translation)
@@ -74,8 +85,8 @@ alias debug-path='printf %s\\n "${PATH}" | tr ":" "\n" | sort'
 uname -o | grep -q 'GNU/Linux' && alias list-open-ports='lsof -i -nlP \
   | awk "{print \$9, \$8, \$1}" | sed "s/.*://" | sort -u'
 uname -o | grep -q 'Android' && alias list-open-ports='lsof -i -nlP'
-alias list-imes='<~/.config/fcitx/profile \
-  sed -n "/^EnabledIMList=/{ s/^.*=//p; }" \
+alias list-imes='sed -n "/^EnabledIMList=/{ s/^.*=//p; }" \
+  ~/.config/fcitx/profile \
   | awk -v RS="," -v FS=":" "(\$2 ~ /True/){ print \$1; }"'
 alias pipugradeall='python -m pip install --upgrade $(
   python -m pip list --outdated | awk "(NR > 2){ print \$0;}")'

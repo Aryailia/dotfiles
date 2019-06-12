@@ -38,8 +38,8 @@ PROMPT_COMMAND="$(<<EOF cat -
 EOF
 )"
 
-cd-of() {
+cd_of() {
   temp="$("$@"; err="$?"; printf x; exit "${err}")" || return "$?"
   temp="${temp%x}"
-  cd "${temp}"
+  cd "${temp}" && ls --color=auto --group-directories-first -hA
 }

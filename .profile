@@ -1,15 +1,17 @@
 # Path
 # Using `test` instead of `[ -z A ]` syntax to support more shells
 # `ion` does not support `[ -z A ]` test syntax
-# `ion` does not support `A=B` variable declaration (but `export A=B` works)
-# `ion` does not support 2>&1
+# `ion` does not support `A=B` variable declaration (but supports `export A=B`)
+# `ion` does not support 2> or &1
 
 # PATH
 export SCRIPTS="${HOME}/.config/scripts"
 export GOPATH="${HOME}/.local/go"
-printf %s\\n "${PATH}" | grep -q ":${SCRIPTS}:" \
+printf %s\\n ":${PATH}:" | grep -q ":${SCRIPTS}:" \
   || export PATH="${PATH}:${SCRIPTS}"
-printf %s\\n "${PATH}" | grep -q ":${HOME}/.cargo/bin:" \
+printf %s\\n ":${PATH}:" | grep -q ":${HOME}/.local/bin:" \
+  || export PATH="${PATH}:${HOME}/.local/bin"
+printf %s\\n ":${PATH}:" | grep -q ":${HOME}/.cargo/bin:" \
   || export PATH="${PATH}:${HOME}/.cargo/bin"
 
 # Folders
@@ -23,18 +25,21 @@ export GTK2_RC_FILES="${HOME}/.config/gtk-2.0/gtkrc-2.0"
 export LESSHISTFILE="/dev/null"
 export INPUTRC="${HOME}/.config/inputrc"
 
-## Default programs
-### ${DISPLAY} is to check if X server is running
-##test -n "${DISPLAY}" && command -v st >/dev/null 2>&1 && export TERMINAL='st'
-sh -c 'which st  >/dev/null 2>&1'             && export TERMINAL='st'
-sh -c 'which vim >/dev/null 2>&1'             && export EDITOR='vim'
-sh -c 'which vim >/dev/null 2>&1'             && export EDITOR='vim'
-sh -c 'which nvim >/dev/null 2>&1'            && export EDITOR='nvim'
+# Default programs
+## ${DISPLAY} is to check if X server is running
+#test -n "${DISPLAY}" && command -v st >/dev/null 2>&1 && export TERMINAL='st'
+## Working non sh version for both ion and bash
+#printf %s "${PATH}" | xargs -n1 -d: -IZ test --e '/.Z/st' && export TEMRINAL=st
+
+# Could use `which` but it is not POSIX
+sh -c 'st -v >/dev/null 2>&1; [ "$?" = 1 ]'  && export TERMINAL='st'
+sh -c 'vim -v >/dev/null 2>&1'               && export EDITOR='vim'
+sh -c 'nvim -v >/dev/null 2>&1'              && export EDITOR='nvim'
 sh -c 'which termux-open-url >/dev/null 2>&1' \
   && export BROWSER='termux-open-url'
-sh -c 'which midori >/dev/null 2>&1'          && export BROWSER='midori'
-sh -c 'which surf >/dev/null 2>&1'            && export BROWSER='surf'
-sh -c 'which zathura >/dev/null 2>&1'         && export READER='zathura'
+sh -c 'midori -V >/dev/null 2>&1'            && export BROWSER='midori'
+sh -c 'surf -v >/dev/null 2>&1'              && export BROWSER='surf'
+sh -c 'zathura --version >/dev/null 2>&1'    && export READER='zathura'
 
 # Less/manpages colors
 export LESS=-R
