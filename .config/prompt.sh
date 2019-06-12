@@ -1,8 +1,7 @@
 #!/usr/bin/env sh
   # for setting the indent
 # Depends on sudo and git
-# https://stackoverflow.com/quesionts/24839271 for using \001 and \002
-# https://stackoverflow.com/quesionts/301353 for explanation
+# https://stackoverflow.com/questions/24839271 for using \001 and \002
 
   exitcode="${1:-"N/A"}" # I should be passed "$?"
      timer="${2:-0}"
