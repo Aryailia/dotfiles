@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+# Defaults to runs when after you login via display manager (login screen)
+# Also manually sourced from '.xinitrc'
+
+# Test if config files are readable then load settings
+[ -r "$HOME/.Xresources" ] && xrdb "$HOME/.Xresources"
+#[ -r "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xdefaults"
+#[ -r "$HOME/.Xmodmap" ]  && xmodmap "$HOME/.Xmodmap" # swap RCtrl and CapsLock
+
+## Launch dbus for fcitx and perhaps pulse audio
+## Not sure why this is -n and not -z
+## TODO: Check on fresh install
+#[ -n "$DBUS_SESSION_BUS_ADDRESS" ] && \
+#  dbus-launch --sh-syntax --exit-with-session
+#[ -n "$DBUS_SESSION_BUS_ADDRESS" ] && \
+#  eval 'dbus-launch --sh-syntax --exit-with-session'
+
+# Export fcitx variables before running graphical programs
+export XMODIFIERS="@im=fcitx"
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+killall fcitx; fcitx  # Restart fcitx
+
+# Startup up stuff
+#exec --no-startup-id compton --xrender-sync-fence --logpath /tmp/compton.log &
+feh --bg-scale ~/.config/wallpaper.jpg &  # wallpaper
+compton --xrender-sync-fence &            # Transparency
+dunst &                                   # Notifications
+sxhkd &                                   # For hotkeys
+
+## Set Caps to Mod/Escape
+#setxkbmap -option caps:super && killall xcape 2>/dev/null
+#xcape -e 'Super_L=Escape' &
+## Properties button extra Mod/Escape
+#xmodmap -e 'keycode 135 = Super_R' &
+

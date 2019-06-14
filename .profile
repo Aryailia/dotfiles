@@ -32,10 +32,11 @@ export INPUTRC="${HOME}/.config/inputrc"
 #printf %s "${PATH}" | xargs -n1 -d: -IZ test --e '/.Z/st' && export TEMRINAL=st
 
 # Could use `which` but it is not POSIX
+# missing commands are required by POSIX to return 127 error
 sh -c 'st -v >/dev/null 2>&1; [ "$?" = 1 ]'  && export TERMINAL='st'
 sh -c 'vim -v >/dev/null 2>&1'               && export EDITOR='vim'
 sh -c 'nvim -v >/dev/null 2>&1'              && export EDITOR='nvim'
-sh -c 'which termux-open-url >/dev/null 2>&1' \
+sh -c 'termux-open-url "" >/dev/null 2>&1; [ "$?" = 1 ]' \
   && export BROWSER='termux-open-url'
 sh -c 'midori -V >/dev/null 2>&1'            && export BROWSER='midori'
 sh -c 'surf -v >/dev/null 2>&1'              && export BROWSER='surf'

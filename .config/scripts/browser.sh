@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# TODO: Make it so that w3m/etc. can be run from the gui
 
 search_engines="${DOTENVIRONMENT}/websearches.csv"
 bookmarks_file="${DOTENVIRONMENT}/bookmarks.csv"
@@ -120,7 +121,8 @@ browser() {
   "${is_external}" && linkhandler.sh -g "$1"
   if "${is_menu}"; then
     cmd="$(list_browser | prompt '2' 'Browser' '1' "$2")" || exit "$?"
-    eval "setsid ${cmd} $(puts "$1" | eval_escape)"
+    eval "setsid ${cmd} "$1" >/dev/null 2>&1 &"
+    sleep 0.1  # TODO: It is really annoying that this is necessary
   fi
 }
 
@@ -337,6 +339,11 @@ prints() { printf %s "$@"; }
 puts() { printf %s\\n "$@"; }
 die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
 eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
-require() { command -v "$1" >/dev/null 2>&1; }
+require() {
+  for dir in $(printf %s "${PATH}" | tr ':' '\n'); do
+    [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && return 0
+  done
+  return 1
+}
 
 main "$@"

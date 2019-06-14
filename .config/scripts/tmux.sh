@@ -113,8 +113,10 @@ insert_into_current_pane() {
 # https://www.mail-archive.com/dev@suckless.org/msg22465.html
 # Open and run the command specified by the argument
 run_in_generic() {
-  exec tmux new-session -A -s "$(get_next_session true)" "${SHELL}"
-  #tmux send-keys "$*" Enter  # cannot send because new-session is blocking
+  if [ -z "$*" ]
+    then exec tmux new-session -A -s "$(get_next_session true)" "${SHELL}"
+    else exec tmux new-session -s "$(get_next_session true)" "$*"
+  fi
 }
 
 

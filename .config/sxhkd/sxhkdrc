@@ -1,0 +1,169 @@
+# Simple X Hotkey Daemon config file
+# NOTE: Need to fcitx environment variables set before sxhkd for its subprocess
+
+# The keys NOT bound here by sxhkd, left to the window manager (QWERTY layout)
+# The 'h' through ';' keys on the home row
+
+# Basic binds
+super + {_, alt +, ctrl +} Return
+  {$TERMINAL, alacritty, sakura} -e tmux.sh open
+super + shift + {_, alt +, ctrl +} Return
+  {$TERMINAL, alacritty, sakura}
+super + shift + q
+  kill "$(xprop -id "$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)" '\t$0' _NET_WM_PID | cut -f 2)"
+super + g ; super + {s, b, g}
+  $TERMINAL -n 'overlay' -e browser.sh menu {search, bookmark, link}
+super + d
+  dmenu_run
+#super + r
+#  $TERMINAL -e $FILE
+#super + e
+#  $TERMINAL -e tmux.sh open 'neomutt'
+#super + m
+#  $TERMINAL -e ncmpcpp
+super + n
+#  $TERMINAL -e tmux new-session -s "$(tmux.sh get)" 'newsboat'
+  $TERMINAL -e tmux.sh open 'newsboat'
+super + z
+  $TERMINAL -e htop
+#super + c
+#  $TERMINAL -e calcurse -D ~/.config/calcurse
+super + shift + a
+  $TERMINAL -e alsamixer
+#  $TERMINAL -e alsamixer; refbar
+# Camera
+#super + shift + c
+#  mpv --no-osc --no-input-default-bindings --input-conf=/dev/null --title='mpvfloat' /dev/video0
+
+#super + grave
+
+#super + Scroll_Lock
+#  killall screenkey || screenkey
+super + shift + Insert
+  notify.sh "Clipboard: $(xclip -o -selection clipboard)"; notify.sh "Primary: $(xclip -o -selection primary)"
+super + shift + x
+  printf '%s\n' No Yes | dmenu -p 'Shutdown?' | grep -q Yes && sudo shutdown -h now
+super + shift + BackSpace
+  printf '%s\n' No Yes | dmenu -p 'Reboot?' | grep -q Yes && sudo shutdown -r now
+super + shift + Escape
+  printf '%s\n' No Yes | dmenu -p 'Close Xorg?' | grep -q Yes && killall Xorg
+#super + x
+#  mpc pause; pauseallmpv; i3lock -e -f -c 1d2021; xset dpms force off
+#XF86Launch1
+#  xset dpms force off
+XF86TouchpadToggle
+  synclient "TouchpadOff=$(synclient -l | awk '/TouchpadOff/\{ print !$3; \}')"
+XF86TouchpadOff
+  synclient TouchpadOff=1
+XF86TouchpadOn
+  synclient TouchpadOff=0
+
+# Language
+super + {alt +, control +, alt + control +} 1
+  fcitx-remote -s {fcitx-keyboard-us-alt-intl-unicode, fcitx-keyboard-cn-altgr-pinyin, ipa-x-sampa}
+super + {alt +, control +, alt + control +} 2
+  fcitx-remote -s {mozc, anthy, kkc}
+super + {alt +, control +, alt + control +} 3
+  fcitx-remote -s {zhengma-large, pinyin, wbpy}
+super + {alt +, control +, alt + control +} 4
+  fcitx-remote -s {jyutping, rime, chewing}
+super + alt + 5
+  fcitx-remote -s hangul
+
+
+## Recording
+## Take screenshot
+#Print
+#  maim pic-full-$(date '+%y%m%d-%H%M-%S').png
+## Pick screenshot type
+#shift + Print
+#  maimpick
+## Record audio or video
+#super + Print
+#  dmenurecord
+## kill active recording
+#super + Delete
+#  dmenurecord kill
+#
+## Pause audio
+#super + {_,shift +} p
+#  mpc {toggle,pause}
+## Changes to next/previous tracks
+#super + {comma,period}
+#  mpc {prev,next}
+## Restart track
+#super + shift + less
+#  mpc seek 0%
+## Seek foward in song
+#super + {_,shift +} bracketright
+#  mpc seek +{10,120}
+## Seek backward in song
+#super + {_,shift +} bracketleft
+#  mpc seek -{10,120}
+## Increase volume
+#super + {equal,plus}
+#  amixer sset Master {5,15}%+; refbar
+## Decrease volume
+#super {_,shift +} + minus
+#  amixer sset Master {5,15}%-; refbar
+#super + shift + m
+#  amixer sset Master toggle; refbar
+
+## Audiokeys
+XF86AudioMute
+  amixer sset Master toggle
+XF86Audio{Raise,Lower}Volume
+  amixer sset Master 5%{+,-}
+#XF86Audio{Next,Prev}
+#  mpc {next,prev}
+#XF86Audio{Pause,Play,Stop}
+#  mpc {pause,play,stop}
+#XF86Audio{Rewind,Forward}
+#  mpc seek {-,+}10
+#XF86AudioRecord
+#  dmenurecord
+#XF86AudioMedia
+#  $TERMINAL -e ncmpcpp
+
+XF86MonBrightnessUp
+  xbacklight + 10
+XF86MonBrightnessDown
+  xbacklight - 10
+#XF86PowerOff
+#  prompt "Shutdown computer?" "sudo -A shutdown -h now"
+#XF86Calculator
+#  $TERMINAL -e bc
+#XF86Sleep
+#  prompt 'Hibernate computer?' 'sudo -A zzz'
+#XF86WWW
+#  $BROWSER
+#XF86DOS
+#  $TERMINAL
+#XF86ScreenSaver
+#  mpc pause; pauseallmpv; i3lock -e -f -c 1d2021; xset dpms force off
+#XF86TaskPane
+#  $TERMINAL -e htop
+#XF86Mail
+#  $TERMINAL -e neomutt
+#XF86MyComputer
+#  $TERMINAL -e $FILE /
+
+# Function keys
+## Hibernate
+##super + F4
+##  prompt 'Hibernate computer?' 'sudo -A zzz'
+## Start torrent daemon/open interface
+#super + F6
+#  torwrap
+## toggle torrent daemon
+#super + F7
+#  td-togggle
+## sync email
+#super + F8
+#  mailsync
+## Mount a USB drive or Android device
+#super + {F9,F10}
+#  {dmenumount,dmenuumount}
+
+#super + F12
+#  $TERMINAL -e wpa_cli

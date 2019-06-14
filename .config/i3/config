@@ -13,9 +13,9 @@ set $tmux tmux.sh open
 
 
 # Startup
-exec_always --no-startup-id feh --bg-scale ~/.config/wallpaper.jpg &
-#exec --no-startup-id compton --xrender-sync-fence --logpath /tmp/compton.log &
-exec --no-startup-id compton --xrender-sync-fence &
+#exec_always --no-startup-id feh --bg-scale ~/.config/wallpaper.jpg &
+##exec --no-startup-id compton --xrender-sync-fence --logpath /tmp/compton.log &
+#exec --no-startup-id compton --xrender-sync-fence &
 
 
 # Font for window titles. Will also be used by the bar unless a different font
@@ -37,17 +37,12 @@ font pango:monospace 8
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec --no-startup-id $term -e $tmux &
-bindsym $mod+Shift+Return exec --no-startup-id $term &
-bindsym $mod+Mod1+Return exec --no-startup-id sakura -e $tmux &
-bindsym $mod+Control+Return exec --no-startup-id urxvt -e $tmux &
-bindsym $mod+Control+Mod1+Return exec --no-startup-id alacritty -e $tmux &
+#bindsym $mod+Return exec --no-startup-id $term -e $tmux &
+#bindsym $mod+Shift+Return exec --no-startup-id $term &
+#bindsym $mod+Mod1+Return exec --no-startup-id sakura -e $tmux &
+#bindsym $mod+Control+Return exec --no-startup-id urxvt -e $tmux &
+#bindsym $mod+Control+Mod1+Return exec --no-startup-id alacritty -e $tmux &
 
-# kill focused window
-bindsym $mod+Shift+q kill
-
-# start dmenu (a program launcher)
-bindsym $mod+d exec dmenu_run &
 # There also is the (new) i3-dmenu-desktop which only displays applications
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
@@ -80,22 +75,15 @@ bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
 # websearch launcher script
-for_window [instance="linkmenu"] floating enable
-for_window [instance="linkmenu"] border pixel 5
-for_window [instance="linkmenu"] fullscreen
-bindsym $mod+Shift+s exec $term -n "linkmenu" -e "browser.sh menu search" &
-
-# bookmark launcher script
-#bindsym $mod+g exec --no-startup-id bookmarks-rofi.sh
-bindsym $mod+Shift+f exec $term -n "linkmenu" -e "browser.sh menu bookmarks" &
-bindsym $mod+Shift+g exec $term -n "linkmenu" -e "browser.sh menu link " &
-#; [instance="bookmarksfzf"] fullscreen
+for_window [instance="overlay"] floating enable
+for_window [instance="overlay"] border pixel 5
+for_window [instance="overlay"] fullscreen
 
 # split in horizontal orientation
-bindsym $mod+b split h
+#bindsym $mod+b split h
 
 # split in vertical orientation
-bindsym $mod+v split v
+#bindsym $mod+v split v
 
 # Increase size
 bindsym $mod+i gaps inner current plus 5
@@ -107,18 +95,18 @@ bindsym $mod+Shift+o gaps outer current minus 5
 bindsym $mod+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
-bindsym $mod+s layout stacking
-bindsym $mod+w layout tabbed
-bindsym $mod+e layout toggle split
+#bindsym $mod+s layout stacking
+#bindsym $mod+w layout tabbed
+#bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
 
 # change focus between tiling / floating windows
-bindsym $mod+space focus mode_toggle
+#bindsym $mod+space focus mode_toggle
 
 # focus the parent container
-bindsym $mod+a focus parent
+#bindsym $mod+a focus parent
 
 # focus the child container
 #bindsym $mod+d focus child
@@ -153,7 +141,6 @@ bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
 #bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
-bindsym $mod+Shift+e exec sh -c 'printf %s\\\\n No Yes | dmenu -p "Exit i3?" | grep Yes && i3-msg exit'
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
@@ -193,18 +180,18 @@ set $main_shortcut Mod4+Mod1
 set $alt1_shortcut Mod4+Control
 set $alt2_shortcut Mod4+Mod1+Control
 
-bindsym $main_shortcut+1 exec "fcitx-remote -s fcitx-keyboard-us-alt-intl-unicode"
+#bindsym $main_shortcut+1 exec "fcitx-remote -s fcitx-keyboard-us-alt-intl-unicode"
 # International AltGr Unicode combining, alternative
-bindsym $alt1_shortcut+1 exec "fcitx-remote -s fcitx-keyboard-cn-altgr-pinyin"
-bindsym $alt2_shortcut+1 exec "fcitx-remote -s ipa-x-sampa"
-bindsym $main_shortcut+2 exec "fcitx-remote -s mozc"
-bindsym $alt1_shortcut+2 exec "fcitx-remote -s anthy"
-bindsym $alt2_shortcut+2 exec "fcitx-remote -s kkc"
-bindsym $main_shortcut+3 exec "fcitx-remote -s zhengma-large"
-bindsym $alt1_shortcut+3 exec "fcitx-remote -s pinyin"
-bindsym $alt2_shortcut+3 exec "fcitx-remote -s wbpy"
-bindsym $main_shortcut+4 exec "fcitx-remote -s jyutping"
-bindsym $alt1_shortcut+4 exec "fcitx-remote -s rime"
-bindsym $alt2_shortcut+4 exec "fcitx-remote -s chewing"
-bindsym $main_shortcut+5 exec "fcitx-remote -s hangul"
+#bindsym $alt1_shortcut+1 exec "fcitx-remote -s fcitx-keyboard-cn-altgr-pinyin"
+#bindsym $alt2_shortcut+1 exec "fcitx-remote -s ipa-x-sampa"
+#bindsym $main_shortcut+2 exec "fcitx-remote -s mozc"
+#bindsym $alt1_shortcut+2 exec "fcitx-remote -s anthy"
+#bindsym $alt2_shortcut+2 exec "fcitx-remote -s kkc"
+#bindsym $main_shortcut+3 exec "fcitx-remote -s zhengma-large"
+#bindsym $alt1_shortcut+3 exec "fcitx-remote -s pinyin"
+#bindsym $alt2_shortcut+3 exec "fcitx-remote -s wbpy"
+#bindsym $main_shortcut+4 exec "fcitx-remote -s jyutping"
+#bindsym $alt1_shortcut+4 exec "fcitx-remote -s rime"
+#bindsym $alt2_shortcut+4 exec "fcitx-remote -s chewing"
+#bindsym $main_shortcut+5 exec "fcitx-remote -s hangul"
 
