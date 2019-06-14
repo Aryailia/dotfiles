@@ -13,15 +13,13 @@ call plug#begin('~/.vim/extra')
   " VimWiki for markdown interlinks, (probably make my own, too much bloat)
   "Plug 'vimwiki/vimwiki', { 'branch': 'dev' } ", 'on': [] }
   ", 'for': 'markdown' }
-  "Plug 'tpope/vim-scriptease'       " For the reload
   Plug 'tpope/vim-unimpaired'       " Setting toggles, back/next nav shortcuts
   Plug 'tpope/vim-surround'         " Adding quotes
   Plug 'aryailia/vim-markdown-toc'  " Table of contents woo
   Plug 'godlygeek/tabular'          " Primarily for markdown table formatting
   Plug 'kassio/neoterm'             " Terminal for vim and neovim
   Plug 'rust-lang/rust.vim'         " Rust syntax hilighting
-  Plug 'jreybert/vimagit'           " Git UI
-  Plug 'rlue/vim-barbaric'          " Swap IME on insert mode
+  Plug 'rlue/vim-barbaric'          " Swap IME on entering insert mode
 call plug#end()
 
 " autocmd BufNewFile,BufRead *.md set filetype=markdown
@@ -44,10 +42,11 @@ endif
 
 set nrformats-=octal  " Leading 0s are not recognised as octals
 set formatoptions+=j  " Delete comment leaders when joining lines
-set formatoptions-=c  " Do not auto add comments
+"set formatoptions-=r  " Do not auto add comments on <Enter>
+set formatoptions-=c  " Do not auto-wrap comments when exceeding textwidth
 set ignorecase
 
-set number " setting relativenumber was kiling performance
+set number " setting relativenumber was killing performance
 syntax sync minlines=256  " improve syntax performance
 set nocursorcolumn
 set nocursorline
@@ -75,42 +74,12 @@ silent! set wildignorecase  " Case insensitive, if supported
 
 
 " Plugin Settings
-" yuvim, CYK input
-let g:ywvim_ims=[
-  \['py', '拼音', 'pinyin.ywvim'],
-  \['zm', '郑码', 'zhengma.ywvim'],
-  \['zy', '注音', 'zhuyin.ywvim'],
-\]
-
-let g:ywvim_py = { 'helpim':'py', 'gb':0 }
-
-let g:ywvim_zhpunc = 1
-let g:ywvim_listmax = 5
-let g:ywvim_esc_autoff = 0
-let g:ywvim_autoinput = 0
-let g:ywvim_intelligent_punc=1
-let g:ywvim_circlecandidates = 1
-let g:ywvim_helpim_on = 0
-let g:ywvim_matchexact = 0
-let g:ywvim_chinesecode = 1
-let g:ywvim_gb = 0
-let g:ywvim_preconv = 'g2b'
-let g:ywvim_conv = ''
-let g:ywvim_lockb = 1
-
-" Vimwiki
-let g:vimwiki_ext2syntax = { '.md': 'markdown', '.wiki': 'media' }
-" TODO: Have not really figured this out
-let g:vimiwki_list = [
-  \ {'path': '~/wiki/', 'syntax': 'markdown', 'ext': '.md'},
-  \ {'path': '~/blog/test/', 'auto_toc': 1, 'index': 'index.wiki'}
-\]
+let g:maplocalleader = ','
 
 " Vim Markdown Table of Contents
 let g:vmt_cycle_list_item_markers = 1
 let g:vmt_fence_hidden_markdown_style = ''
 
-let g:maplocalleader = ','
 
 " Rebinds, use unique everywhere so it yells at me if I duplicate a keybind
 " Disable Ex mode (can still use gQ)
@@ -120,7 +89,7 @@ nnoremap <unique> Q <Nul>
 nnoremap <unique> <leader>w :%s/\s\+$//g<CR>
 
 " Stuff modelled after tpope's vim-unimpared
-" Spellcheck with chooseable locale, 'o' for othography
+" Spellcheck with chooseable locale, 'o' for orthography
 nnoremap <silent> <unique> yoo
   \ :if &spell<Bar>
     \setlocal nospell<Bar>
@@ -191,7 +160,6 @@ nnoremap <unique> <silent> <Leader>db
   \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
   \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
   \ . ">"<CR>
-noremap <leader>hg :echo "yo"<CR>
 noremap <unique> <leader><tab> :Tab /\|<CR>
 noremap <unique> <leader>rs :write! !parsemarkdown.awk<CR>
 nnoremap <unique> <F11> :call FollowCursorLink()<CR>

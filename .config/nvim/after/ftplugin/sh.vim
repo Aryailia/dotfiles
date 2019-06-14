@@ -22,11 +22,11 @@ endfunction
 
 
 " Snippets
-inoremap <buffer> <LocalLeader>#!sh
+inoremap <buffer> #!sh
   \ #!/usr/bin/env sh
-inoremap <buffer> <LocalLeader>#!awk
+inoremap <buffer> #!awk
   \ #!/usr/bin/awk -f
-inoremap <buffer> <LocalLeader>#!python
+inoremap <buffer> #!python
   \ #!/usr/bin/env python
 
 imap <buffer> <LocalLeader>die1
@@ -51,9 +51,7 @@ inoremap <buffer> <LocalLeader>req
   \ <C-o>:setlocal paste<CR>
   \require() {<CR>
   \  for dir in $(printf %s "${PATH}" <Bar> tr ':' '\n'); do<CR>
-  \    for arg in "/.${dir}"/* "/.${dir}"/.[!.]* "/.${dir}"/..?*; do<CR>
-  \      [ -f "${arg}" ] && [ -x "${arg}" ] && return 0<CR>
-  \    done<CR>
+  \    [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && return 0<CR>
   \  done<CR>
   \  return 1<CR>
   \}

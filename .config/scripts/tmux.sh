@@ -99,9 +99,9 @@ main() {
 # Eg. `tmux.sh insert echo yo` inside a tmux session yields 'yo'
 insert_into_current_pane() {
   is_inside_tmux || die 1 'FATAL: Use inside a tmux session'
-  id="$(tmux display-message -p "#{window_id}")"
-  to_run="\"\$($*)\""
-  tmux new-window "tmux send-keys -t '${id}' \"${to_run}\""
+  id="$(tmux display-message -p "#{pane_id}")"
+  cmd="\$($* ${id})"  # Passing a literal $( )
+  tmux new-window "tmux send-keys -t '${id}' \"${cmd}\""
 }
 
 
@@ -195,9 +195,10 @@ get_next_session() {
 
 # This should be run from an setsid or from the .tmux.config file (I think)
 get_current_command() {
+  tmux display-message -p '#{pane_current_command}'
   # Busybox -a seems to be the same as -l, -n newest, -s SID
-  pgrep -nls "$(tmux display-message -p "#{pane_pid}")" \
-    | awk '{ sub(/^[0-9]* /, ""); a = $0; } END{ printf("%s", a); }'
+  #pgrep -nls "$(tmux display-message -p "#{pane_pid}")" \
+  #  | awk '{ sub(/^[0-9]* /, ""); a = $0; } END{ printf("%s", a); }'
   ## -n newest, -a PID and full command, -t terminal
   #pgrep -n -l -t "$(tmux display-message -p "#{pane_tty}" | sed 's|/dev/||')" \
     #| awk '{ sub(/^[0-9]* /, ""); a=$0; } END{ printf("%s", a); }'
