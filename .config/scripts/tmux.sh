@@ -114,6 +114,7 @@ insert_into_current_pane() {
 # Open and run the command specified by the argument
 run_in_generic() {
   if [ -z "$*" ]
+    # Using "${SHELL}" makes this not do a double open for some reason
     then exec tmux new-session -A -s "$(get_next_session true)" "${SHELL}"
     else exec tmux new-session -s "$(get_next_session true)" "$*"
   fi

@@ -36,11 +36,6 @@ EOF
 
 # Choosing programs specifically
 # Terminal browser wrapper
-cli_browser() {
-  w3m "$1"
-  wait "$$"
-  rm "${HOME}/.w3m/cookie"
-}
 #MASTODAN_HANDLER=""
 #STREAM=""
 
@@ -56,7 +51,7 @@ is_external="false"
 # https://www.w3.org/TR/WD-html40-970708/htmlweb.html
 main() {
   # Dependencies
-  constants="${SCRIPTS}/c.sh"
+  constants="c.sh"
   queuer="queue.sh"
   copy="clipboard.sh"
   require "${constants}" || die 1 "FATAL: Requires '${constants}'"
@@ -130,8 +125,8 @@ handle() {
         g "${TERMINAL}" -e "${EDITOR} ${url}"
       else
         d "${queuer}" direct "${url}" &
-        t cli_browser "${url}"
-        g setsid "${BROWSER}" "${url}" # >/dev/null 2>&1 &
+        t browser.sh run 'w3m' "${url}"
+        g browser.sh run "${BROWSER}" "${url}"
       fi
     fi
   done
@@ -140,9 +135,14 @@ handle() {
 
 
 # Helpers
+require() {
+  for dir in $(printf %s "${PATH}" | tr ':' '\n'); do
+    [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && return 0
+  done
+  return 1
+}
 die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
 puts() { printf %s\\n "$@"; }
-require() { command -v "$1" >/dev/null 2>&1; }
 eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 
 d() { ${is_download} && if ${is_copy}; then "${copy}" -w "$*"; else "$@"; fi; }

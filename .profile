@@ -20,6 +20,7 @@ uname -o | grep -q 'Linux' && export TMPDIR='/tmp'  # Linux/MacOS
 uname -o | grep -q 'MSYS' &&  export TMPDIR="${HOME}/AppData/Local/Temp"  # Win
 
 # ${HOME} directory cleanup
+export PYTHONSTARTUP="${HOME}/.config/pythonrc"
 export NOTMUCH_CONFIG="${HOME}/.config/notmuch-config"
 export GTK2_RC_FILES="${HOME}/.config/gtk-2.0/gtkrc-2.0"
 export LESSHISTFILE="/dev/null"
@@ -33,14 +34,14 @@ export INPUTRC="${HOME}/.config/inputrc"
 
 # Could use `which` but it is not POSIX
 # missing commands are required by POSIX to return 127 error
-sh -c 'st -v >/dev/null 2>&1; [ "$?" = 1 ]'  && export TERMINAL='st'
-sh -c 'vim -v >/dev/null 2>&1'               && export EDITOR='vim'
-sh -c 'nvim -v >/dev/null 2>&1'              && export EDITOR='nvim'
+sh -c 'st -v >/dev/null 2>&1; [ "$?" = 1 ]'    && export TERMINAL='st'
+sh -c 'vim -v >/dev/null 2>&1'                 && export EDITOR='vim'
+sh -c 'nvim -v >/dev/null 2>&1'                && export EDITOR='nvim'
 sh -c 'termux-open-url "" >/dev/null 2>&1; [ "$?" = 1 ]' \
   && export BROWSER='termux-open-url'
-sh -c 'midori -V >/dev/null 2>&1'            && export BROWSER='midori'
-sh -c 'surf -v >/dev/null 2>&1'              && export BROWSER='surf'
-sh -c 'zathura --version >/dev/null 2>&1'    && export READER='zathura'
+sh -c 'midori -V >/dev/null 2>&1'              && export BROWSER='midori'
+sh -c 'surf -v >/dev/null 2>&1; [ "$?" = 1 ]'  && export BROWSER='surf'
+sh -c 'zathura --version >/dev/null 2>&1'      && export READER='zathura'
 
 # Less/manpages colors
 export LESS=-R

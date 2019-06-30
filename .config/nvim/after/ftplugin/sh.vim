@@ -36,12 +36,15 @@ imap <buffer> <LocalLeader>die1
   \endif<CR>
   \die() { c="$1"; shift 1; for x in "$@"; do puts "$x" >&2; done; exit "$c"; }
   \<C-o>:setlocal nopaste<CR>
-imap <buffer> <LocalLeader>die2
+imap <LocalLeader>die2
   \ <C-o>:setlocal paste<CR>
   \<C-o>:if ! search('\m^ *puts() *{', 'bnw')<CR>
   \  execute "normal i,puts\n"<CR>
   \endif<CR>
-  \die2() { c="$1"; t="$2"; shift 2; puts "$t: '${name}'" "$@" >&2; exit "$c"; }
+  \die2() {<CR>
+  \  c="$1"; puts "$2 : '${name}' -- $3" >&2; shift 3<CR>
+  \  puts "$@" >&2; exit "$c"<CR>
+  \}
   \<C-o>:setlocal nopaste<CR>
 
 " Neither `which` nor `command -v` are defined in posix

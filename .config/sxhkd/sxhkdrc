@@ -12,7 +12,7 @@ super + shift + {_, alt +, ctrl +} Return
 super + shift + q
   kill "$(xprop -id "$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)" '\t$0' _NET_WM_PID | cut -f 2)"
 super + g ; super + {s, b, g}
-  $TERMINAL -n 'overlay' -e browser.sh menu {search, bookmark, link}
+  $TERMINAL -n 'overlay' -e browser.sh --launch menu {search, bookmark, link}
 super + d
   dmenu_run
 #super + r
@@ -22,7 +22,6 @@ super + d
 #super + m
 #  $TERMINAL -e ncmpcpp
 super + n
-#  $TERMINAL -e tmux new-session -s "$(tmux.sh get)" 'newsboat'
   $TERMINAL -e tmux.sh open 'newsboat'
 super + z
   $TERMINAL -e htop
@@ -32,11 +31,13 @@ super + shift + a
   $TERMINAL -e alsamixer
 #  $TERMINAL -e alsamixer; refbar
 # Camera
-#super + shift + c
-#  mpv --no-osc --no-input-default-bindings --input-conf=/dev/null --title='mpvfloat' /dev/video0
+super + shift + c
+  mpv --no-osc --no-input-default-bindings --input-conf=/dev/null --title='mpvfloat' /dev/video0
 
-#super + grave
 
+
+super + grave
+  $TERMINAL -n 'overlay' -e setsid clipboard.sh -w "$(date +%s)"
 #super + Scroll_Lock
 #  killall screenkey || screenkey
 super + shift + Insert
