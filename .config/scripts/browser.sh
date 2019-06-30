@@ -349,11 +349,14 @@ process_search() {
 
 ################################################################################
 # Prompting
-terminal_prompt() (
-  printf %s "$1" >/dev/tty
-  read -r input
-  printf %s "${input}"
-)
+terminal_prompt() {
+  printf | fzf --no-clear --height=0 --layout=reverse --prompt="$1"
+}
+#terminal_prompt() (
+#  printf %s "$1" >/dev/tty
+#  read -r input
+#  printf %s "${input}"
+#)
 
 prompt() {
   # &0 the csv
