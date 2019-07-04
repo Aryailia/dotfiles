@@ -2,12 +2,12 @@
   # $0 <option> <URL>
 # Decide what program to open with. Defaults to browser
 
-me="$(basename "$0"; printf a)"; me="${me%??}"
+name="$(basename "$0"; printf a)"; name="${name%??}"
 
 show_help() {
   <<EOF cat - >&2
 SYNOPSIS
-  ${me} [OPTIONS] [URL1 [URL2 [...]]]
+  ${name} [OPTIONS] [URL1 [URL2 [...]]]
 
 DESCRIPTION
   Accepts <url> and determines what behaviour to run depending on the
@@ -54,21 +54,23 @@ main() {
   constants="c.sh"
   queuer="queue.sh"
   copy="clipboard.sh"
-  require "${constants}" || die 1 "FATAL: Requires '${constants}'"
-  require "${queuer}" || die 1 "FATAL: Requires '${queuer}'"
+  require "${constants}" || die 1 'FATAL' "Requires '${constants}'"
+  require "${queuer}" || die 1 'FATAL' "Requires '${queuer}'"
 
   # Option parsing
   urls=""
   doubledash="false"
   while [ "$#" -gt 0 ]; do
     "${doubledash}" || case "$1" in
-      -h|--help)  show_help; exit 0 ;;
+      --)  doubledash="true"; shift 1; continue ;;
+
+      -h|--help)      show_help; exit 0 ;;
       -c|--copy)      is_copy="true"
-                      require "${copy}" || die 1 "FATAL: Requires '${copy}'" ;;
+                      require "${copy}" || die 1 'FATAL' "Requires '${copy}'" ;;
       -d|--download)  is_download="true" ;;
       -t|--terminal)  is_local="true" ;;
       -g|--gui)       is_external="true" ;;
-      --)  doubledash="true"; shift 1; continue ;;
+
       *)   urls="${urls} $(puts "$1" | eval_escape)" ;;
     esac
     "${doubledash}" && urls="${urls} $(puts "$1" | eval_escape)"
@@ -85,7 +87,7 @@ main() {
 }
 
 handle() {
-  [ "$*" = "" ] && die 1 "${me} - no url provided"
+  [ "$*" = "" ] && die 1 'FATAL' 'no url provided'
   for url in "$@"; do
     # Handle the link
     if puts "${url}" | grep -qi -e '\.mkv$' -e '\.webm$' -e '\.mp4$' \
@@ -120,7 +122,7 @@ handle() {
 
     else
       if [ -f "${url}" ]; then
-        d die 1 "FATAL: '${url}' already downloaded"
+        d die 1 'FATAL' "'${url}' already downloaded"
         t "${EDITOR}" "${url}"
         g "${TERMINAL}" -e "${EDITOR} ${url}"
       else
@@ -141,10 +143,14 @@ require() {
   done
   return 1
 }
-die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
+die() {
+  c="$1"; puts "$2: '${name}' -- $3" >&2; shift 3
+  puts "$@" >&2; exit "$c"
+}
 puts() { printf %s\\n "$@"; }
 eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 
+# Copy require checked in `main` during option handling
 d() { ${is_download} && if ${is_copy}; then "${copy}" -w "$*"; else "$@"; fi; }
 t() { ${is_local}    && if ${is_copy}; then "${copy}" -w "$*"; else "$@"; fi; }
 g() { ${is_external} && if ${is_copy}; then "${copy}" -w "$*"; else "$@"; fi; }

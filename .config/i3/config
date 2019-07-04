@@ -8,8 +8,6 @@ for_window [class="^.*"] border pixel 3
 gaps inner 10
 gaps outer 5
 set $mod Mod4
-set $term st
-set $tmux tmux.sh open
 
 
 # Startup
@@ -38,15 +36,7 @@ floating_modifier $mod
 
 # start a terminal
 #bindsym $mod+Return exec --no-startup-id $term -e $tmux &
-#bindsym $mod+Shift+Return exec --no-startup-id $term &
-#bindsym $mod+Mod1+Return exec --no-startup-id sakura -e $tmux &
-#bindsym $mod+Control+Return exec --no-startup-id urxvt -e $tmux &
-#bindsym $mod+Control+Mod1+Return exec --no-startup-id alacritty -e $tmux &
 
-# There also is the (new) i3-dmenu-desktop which only displays applications
-# shipping a .desktop file. It is a wrapper around dmenu, so you need that
-# installed.
-# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
 # change focus, for windows host VM, avoid l bind that lock screen
 bindsym $mod+h focus left
@@ -140,8 +130,6 @@ bindsym $mod+Shift+0 move container to workspace 10
 
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
-# exit i3 (logs you out of your X session)
-#bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
@@ -173,26 +161,8 @@ bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
-  status_command i3status
+  status_command exec statusbar-startrefresh.sh --i3
+  bindsym --release button1 exec --no-startup-id statusbar-startrefresh.sh --i3
+
+  #status_command i3status
 }
-
-# Languages, Mo4 is Super, Mod1 is Alt
-set $main_shortcut Mod4+Mod1
-set $alt1_shortcut Mod4+Control
-set $alt2_shortcut Mod4+Mod1+Control
-
-#bindsym $main_shortcut+1 exec "fcitx-remote -s fcitx-keyboard-us-alt-intl-unicode"
-# International AltGr Unicode combining, alternative
-#bindsym $alt1_shortcut+1 exec "fcitx-remote -s fcitx-keyboard-cn-altgr-pinyin"
-#bindsym $alt2_shortcut+1 exec "fcitx-remote -s ipa-x-sampa"
-#bindsym $main_shortcut+2 exec "fcitx-remote -s mozc"
-#bindsym $alt1_shortcut+2 exec "fcitx-remote -s anthy"
-#bindsym $alt2_shortcut+2 exec "fcitx-remote -s kkc"
-#bindsym $main_shortcut+3 exec "fcitx-remote -s zhengma-large"
-#bindsym $alt1_shortcut+3 exec "fcitx-remote -s pinyin"
-#bindsym $alt2_shortcut+3 exec "fcitx-remote -s wbpy"
-#bindsym $main_shortcut+4 exec "fcitx-remote -s jyutping"
-#bindsym $alt1_shortcut+4 exec "fcitx-remote -s rime"
-#bindsym $alt2_shortcut+4 exec "fcitx-remote -s chewing"
-#bindsym $main_shortcut+5 exec "fcitx-remote -s hangul"
-

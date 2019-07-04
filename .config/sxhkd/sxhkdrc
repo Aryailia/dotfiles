@@ -21,6 +21,8 @@ super + d
 #  $TERMINAL -e tmux.sh open 'neomutt'
 #super + m
 #  $TERMINAL -e ncmpcpp
+super + w
+  $TERMINAL -e sh -c 'echo "nmcli"; echo "====="; sudo nmtui'; statusbar-startrefresh.sh
 super + n
   $TERMINAL -e tmux.sh open 'newsboat'
 super + z
@@ -112,9 +114,9 @@ super + alt + 5
 
 ## Audiokeys
 XF86AudioMute
-  amixer sset Master toggle
+  amixer sset Master toggle; statusbar-startrefresh.sh
 XF86Audio{Raise,Lower}Volume
-  amixer sset Master 5%{+,-}
+  amixer sset Master 5%{+,-}; statusbar-startrefresh.sh
 #XF86Audio{Next,Prev}
 #  mpc {next,prev}
 #XF86Audio{Pause,Play,Stop}
@@ -127,9 +129,9 @@ XF86Audio{Raise,Lower}Volume
 #  $TERMINAL -e ncmpcpp
 
 XF86MonBrightnessUp
-  xbacklight + 10
+  xbacklight + 10; statusbar-startrefresh.sh
 XF86MonBrightnessDown
-  xbacklight - 10
+  xbacklight - 10; statusbar-startrefresh.sh
 #XF86PowerOff
 #  prompt "Shutdown computer?" "sudo -A shutdown -h now"
 #XF86Calculator

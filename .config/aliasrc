@@ -36,7 +36,6 @@ alias   mks='sh -c "for x in \"\$@\"; do
   touch -- \"\$x\"
   chmod 755 -- \"\$x\"
 done" _'
-alias    nm='sudo nmtui'
 alias    pm='package-manager.sh'
 alias    rb='trash'
 alias    rx='xrdb ~/.Xresources'

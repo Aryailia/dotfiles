@@ -6,10 +6,10 @@
 
 function! Lint()
   "!clear && online-shellcheck.sh -i %
-  vertical T if command -v shellcheck >/dev/null 2>&1;
-    \   then shellcheck %;
-    \   else online-shellcheck.sh -i %;
-    \ fi
+  vertical T if shellcheck -V >/dev/null 2>&1;
+    \  then shellcheck %;
+    \  else online-shellcheck.sh -i %;
+    \fi
 endfunction
 
 function! Run()
@@ -22,38 +22,47 @@ endfunction
 
 
 " Snippets
-inoremap <buffer> #!sh
+inoremap <buffer> <LocalLeader>sbsh
   \ #!/usr/bin/env sh
-inoremap <buffer> #!awk
+inoremap <buffer> <LocalLeader>sbawk
   \ #!/usr/bin/awk -f
-inoremap <buffer> #!python
+inoremap <buffer> <LocalLeader>sbpython
   \ #!/usr/bin/env python
 
-imap <buffer> <LocalLeader>die1
-  \ <C-o>:setlocal paste<CR>
-  \<C-o>:if ! search('\m^ *puts() *{', 'bnw')<CR>
+inoremap <buffer> <LocalLeader>name
+  \ name="$( basename "$0"; printf a )"; name="${name%?a}"
+inoremap <buffer> <LocalLeader>puts
+  \ puts() { printf %s\\n "$@"; }
+imap <LocalLeader>die
+  \ <C-o>:if ! search('\m^puts() *{', 'bnw')<CR>
   \  execute "normal i,puts\n"<CR>
   \endif<CR>
-  \die() { c="$1"; shift 1; for x in "$@"; do puts "$x" >&2; done; exit "$c"; }
+  \<C-o>:if ! search('\m^name="\$( basename', 'bnw')<CR>
+  \  execute "normal i,name\n"<CR>
+  \endif<CR>
+  \<C-o>:setlocal paste<CR>
+  \die() {<CR>
+  \  c="$1"; puts "$2: '${name}' -- $3" >&2; shift 3<CR>
+  \  puts "$@" >&2; exit "$c"<CR>
+  \}
   \<C-o>:setlocal nopaste<CR>
-imap <LocalLeader>die2
-  \ <C-o>:setlocal paste<CR>
-  \<C-o>:if ! search('\m^ *puts() *{', 'bnw')<CR>
+imap <LocalLeader>asdf
+  \ <C-o>:if ! search('\m^ *puts() *{', 'bnw')<CR>
   \  execute "normal i,puts\n"<CR>
   \endif<CR>
-  \die2() {<CR>
-  \  c="$1"; puts "$2 : '${name}' -- $3" >&2; shift 3<CR>
+  \die() {<CR>
+  \  c="$1"; puts "$2: '${name}' -- $3" >&2; shift 3<CR>
   \  puts "$@" >&2; exit "$c"<CR>
   \}
   \<C-o>:setlocal nopaste<CR>
 
-" Neither `which` nor `command -v` are defined in posix
+" Neither `which` nor `command -v` are defined in POSIX
 " Some systems do not have `which` or it does not error code
 " For some shells (like 'dash') `command -v` works more like `test -e`
 inoremap <buffer> <LocalLeader>req
   \ <C-o>:setlocal paste<CR>
   \require() {<CR>
-  \  for dir in $(printf %s "${PATH}" <Bar> tr ':' '\n'); do<CR>
+  \  for dir in $( printf %s "${PATH}" <Bar> tr ':' '\n' ); do<CR>
   \    [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && return 0<CR>
   \  done<CR>
   \  return 1<CR>
@@ -62,8 +71,8 @@ inoremap <buffer> <LocalLeader>req
 
 
 " Defends against malicious $2 but not malicious $1. $1 must be valid varname
-inoremap <buffer> <LocalLeader>dynamic
-  \ dynamic_assign() { eval "$1"=\"$2\"; }
+inoremap <buffer> <LocalLeader>assign
+  \ eval_assign() { eval "$1"=\"$2\"; }
 
 " Naming modeled after the print commands in ruby
 inoremap <buffer> <LocalLeader>puts
@@ -72,7 +81,7 @@ inoremap <buffer> <LocalLeader>prints
   \ prints() { printf %s "$@"; }
 " Much thanks to Rich (https://www.etalabs.net/sh_tricks.html for eval_escape)
 " Keeping to the analogy, this is ruby's p, but not really, so renamed
-inoremap <buffer> <LocalLeader>eval
+inoremap <buffer> <LocalLeader>escape
   \ eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 inoremap <buffer> <LocalLeader>pute
   \ puterr() { printf %s\\n "$@" >&2; }
@@ -93,9 +102,10 @@ inorema <buffer> <LocalLeader>match
 
 
 
-inoremap <buffer> <LocalLeader>help
-  \ <C-o>:setlocal paste<CR>
-  \name="$(basename "$0"; printf a)"; name="${name%?a}"<CR>
+
+imap <buffer> <LocalLeader>help
+  \ <LocalLeader>name<CR>
+  \<C-o>:setlocal paste<CR>
   \<CR>
   \show_help() {<CR>
   \  <<EOF cat - >&2<CR>
@@ -109,7 +119,8 @@ inoremap <buffer> <LocalLeader>help
   \<C-o>:setlocal nopaste<CR>
 
 
-" Simplist, cannot handle options that need arguments
+" Program setup inspired by C
+" Different levels of complication for main
 imap <buffer> <LocalLeader>main1
   \ <C-o>:setlocal paste<CR>
   \main() {<CR>
@@ -120,7 +131,7 @@ imap <buffer> <LocalLeader>main1
   \  for arg in "$@"; do "${no_options}" <Bar><Bar> case "${arg}" in<CR>
   \    --)  no_options='true' ;;<CR>
   \    -h<Bar>--help)  show_help; exit 0 ;;<CR>
-  \    *)   args="${args} $(puts "${arg}" <Bar> eval_escape)" ;;<CR>
+  \    *)   args="${args} $( puts "${arg}" <Bar> eval_escape )" ;;<CR>
   \  esac done<CR>
   \<CR>
   \  [ -z "${args}" ] && { show_help; exit 1; }<CR>
@@ -129,9 +140,9 @@ imap <buffer> <LocalLeader>main1
   \}
   \<C-o>:setlocal nopaste<CR>
 
-" Handles options that need arguments, but cannot handle combined options
 imap <buffer> <LocalLeader>main2
   \ <C-o>:setlocal paste<CR>
+  \# Handles options that need arguments<CR>
   \main() {<CR>
   \  # Dependencies<CR>
   \<CR>
@@ -146,9 +157,9 @@ imap <buffer> <LocalLeader>main2
   \      -f)  echo 'do not need to shift' ;;<CR>
   \      -e<Bar>--example2)  puts "-$2-"; shift 1 ;;<CR>
   \<CR>
-  \      *)   args="${args} $(puts "$1" <Bar> eval_escape)" ;;<CR>
+  \      *)   args="${args} $( puts "$1" <Bar> eval_escape )" ;;<CR>
   \    esac<CR>
-  \    "${no_options}" && args="${args} $(puts "$1" <Bar> eval_escape)"<CR>
+  \    "${no_options}" && args="${args} $( puts "$1" <Bar> eval_escape )"<CR>
   \    shift 1<CR>
   \  done<CR>
   \<CR>
@@ -158,9 +169,9 @@ imap <buffer> <LocalLeader>main2
   \}
   \<C-o>:setlocal nopaste<CR>
 
-" Fullest form, handles combined single-character options (eg. pacman -Syu)
 imap <buffer> <LocalLeader>main3
   \ <C-o>:setlocal paste<CR>
+  \# Handles single character-options joining (eg. pacman -Syu)<CR>
   \main() {<CR>
   \  # Flags<CR>
   \<CR>
@@ -176,7 +187,7 @@ imap <buffer> <LocalLeader>main3
   \      opts=''<CR>
   \      case "$1" in<CR>
   \        --)      no_options='true'; shift 1; continue ;;<CR>
-  \        -[!-]*)  opts="${opts}$(puts "${1#-}" <Bar> sed 's/./ -&/g')" ;;<CR>
+  \        -[!-]*)  opts="${opts}$( puts "${1#-}" <Bar> sed 's/./ -&/g' )" ;;<CR>
   \        *)       opts="${opts} $1" ;;<CR>
   \      esac<CR>
   \<CR>
@@ -188,10 +199,10 @@ imap <buffer> <LocalLeader>main3
   \        # Put argument checks above this line (for error detection)<CR>
   \        # first '--' case already covered by first case statement<CR>
   \        -[!-]*)   show_help; die 1 "FATAL: invalid option '${x#-}'" ;;<CR>
-  \        *)        args="${args} $(puts "$1" <Bar> eval_escape)" ;;<CR>
+  \        *)        args="${args} $( puts "$1" <Bar> eval_escape )" ;;<CR>
   \      esac done<CR>
   \    else<CR>
-  \      args="${args} $(puts "$1" <bar> eval_escape)"<CR>
+  \      args="${args} $( puts "$1" <bar> eval_escape )"<CR>
   \    fi<CR>
   \    shift 1<CR>
   \  done<CR>
@@ -203,7 +214,7 @@ imap <buffer> <LocalLeader>main3
   \<C-o>:setlocal nopaste<CR>
 
 imap <buffer> <LocalLeader>init
-  \ #!/usr/bin/env sh<CR>
+  \ <LocalLeader>sbsh<CR>
   \<CR>
   \<LocalLeader>help<CR>
   \<CR><CR><CR>
@@ -211,7 +222,7 @@ imap <buffer> <LocalLeader>init
   \<CR><CR><CR>
   \# Helpers<CR>
   \<LocalLeader>puts<CR>
-  \<LocalLeader>die2<CR>
-  \<LocalLeader>eval<CR>
+  \<LocalLeader>die<CR>
+  \<LocalLeader>escape<CR>
   \<CR>
-  \main "$@"
+  \main "$@"<Esc>
