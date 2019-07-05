@@ -100,7 +100,7 @@ main() {
 insert_into_current_pane() {
   is_inside_tmux || die 1 'FATAL: Use inside a tmux session'
   id="$(tmux display-message -p "#{pane_id}")"
-  cmd="\$($* ${id})"  # Passing a literal $( )
+  cmd="\$(env TARGET_PANE="${id}" $*)"  # Passing a literal $( )
   tmux new-window "tmux send-keys -t '${id}' \"${cmd}\""
 }
 

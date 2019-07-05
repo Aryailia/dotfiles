@@ -21,9 +21,10 @@ main() {
   case "$1" in
     -h|--help)  show_help; exit 1 ;;
     -p|--prompt)
-      root="$(tmux display-message -t "$2" -p "#{pane_current_path}"; printf a)"
+      root="$(tmux display-message -t "${TARGET_PANE}" \
+        -p "#{pane_current_path}"; printf a)"
       root="${root%?a}" 
-      final="$(tmux capture-pane -peC -t "$2" \
+      final="$(tmux capture-pane -peC -t "${TARGET_PANE}" \
         | tac \
         | sed '/^\\033\[1m/{ s/^\\033\[1.*\\033\[49m //; q }' \
         | tac
@@ -32,7 +33,7 @@ main() {
       ;;
 
     #-t|--tmux2)
-    #  ps1="$(tmux capture-pane -peC -t "$2" \
+    #  ps1="$(tmux capture-pane -peC -t "${TARGET_PANE}" \
     #    | awk '/\S/{ a= $1 F; } END{ print a; }' \
     #    | sed 's/[^^]/[&]/g; s/\^/\\^/g'
     #  )"
@@ -40,10 +41,12 @@ main() {
     #  ;;
 
     -t|--tmux-pane)
-      root="$(tmux display-message -t "$2" -p "#{pane_current_path}"; printf a)"
+      notify.sh "${TARGET_PANE}"
+      root="$(tmux display-message -t "${TARGET_PANE}" \
+        -p "#{pane_current_path}"; printf a)"
       root="${root%?a}" 
 
-      final="$(tmux capture-pane -peC -t "$2" \
+      final="$(tmux capture-pane -peC -t "${TARGET_PANE}" \
         | awk '/\S/{ a = $(NF); }
           # Delete ANSI escape codes, then print without newline
           END{ gsub(/\\033\[[0-9]*;?[A-Za-z]/, "", a); printf("%s", a); }
@@ -52,9 +55,9 @@ main() {
       from_parameter_fragment "${root}" "${final}"
       ;;
 
-    -i)  autocomplete_from_one_parameter '.' "$2" ;;
-    -w)  working_directory_files "$2" ;;
-    -n|--normalise)  prints "$2" | normalise_dir_base ;;
+    -i)  autocomplete_from_one_parameter '.' "${TARGET_PANE}" ;;
+    -w)  working_directory_files "${TARGET_PANE}" ;;
+    -n|--normalise)  prints "${TARGET_PANE}" | normalise_dir_base ;;
     -l|--list-path)  list_null_separated_path_executables | fzf --read0 ;;
     *)  puts 'pass an argument' >&2; exit 1 ;;
   esac
