@@ -4,6 +4,16 @@
 # `ion` does not support `A=B` variable declaration (but supports `export A=B`)
 # `ion` does not support 2> or &1
 
+# ${HOME} directory cleanup
+export CARGO_HOME="${HOME}/.local/cargo"
+export RUSTUP_HOME="${HOME}/.local/rustup"
+export GNUPGHOME="${HOME}/.local/gnupg"
+export PYTHONSTARTUP="${HOME}/.config/pythonrc"
+export NOTMUCH_CONFIG="${HOME}/.config/notmuch-config"
+export GTK2_RC_FILES="${HOME}/.config/gtk-2.0/gtkrc-2.0"
+export LESSHISTFILE="/dev/null"
+export INPUTRC="${HOME}/.config/inputrc"
+
 # PATH
 export SCRIPTS="${HOME}/.config/scripts"
 export GOPATH="${HOME}/.local/go"
@@ -11,20 +21,13 @@ printf %s\\n ":${PATH}:" | grep -q ":${SCRIPTS}:" \
   || export PATH="${PATH}:${SCRIPTS}"
 printf %s\\n ":${PATH}:" | grep -q ":${HOME}/.local/bin:" \
   || export PATH="${PATH}:${HOME}/.local/bin"
-printf %s\\n ":${PATH}:" | grep -q ":${HOME}/.cargo/bin:" \
-  || export PATH="${PATH}:${HOME}/.cargo/bin"
+printf %s\\n ":${PATH}:" | grep -q ":${CARGO_HOME}/bin:" \
+  || export PATH="${PATH}:${CARGO_HOME}/bin"
 
 # Folders
 export DOTENVIRONMENT="${HOME}/.environment"
 uname -o | grep -q 'Linux' && export TMPDIR='/tmp'  # Linux/MacOS
 uname -o | grep -q 'MSYS' &&  export TMPDIR="${HOME}/AppData/Local/Temp"  # Win
-
-# ${HOME} directory cleanup
-export PYTHONSTARTUP="${HOME}/.config/pythonrc"
-export NOTMUCH_CONFIG="${HOME}/.config/notmuch-config"
-export GTK2_RC_FILES="${HOME}/.config/gtk-2.0/gtkrc-2.0"
-export LESSHISTFILE="/dev/null"
-export INPUTRC="${HOME}/.config/inputrc"
 
 # Default programs
 ## ${DISPLAY} is to check if X server is running

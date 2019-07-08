@@ -11,30 +11,37 @@ super + shift + {_, alt +, ctrl +} Return
   {$TERMINAL, alacritty, sakura}
 super + shift + q
   kill "$(xprop -id "$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)" '\t$0' _NET_WM_PID | cut -f 2)"
-super + g ; super + {s, b, g}
-  $TERMINAL -n 'overlay' -e browser.sh --launch menu {search, bookmark, link}
 super + d
   dmenu_run
-#super + r
+#super + shift + r
 #  $TERMINAL -e $FILE
-#super + e
+#super + shift + e
 #  $TERMINAL -e tmux.sh open 'neomutt'
-#super + m
+#super + shift + m
 #  $TERMINAL -e ncmpcpp
-super + w
+super + shift + w
   $TERMINAL -e sh -c 'echo "nmcli"; echo "====="; sudo nmtui'; statusbar-startrefresh.sh
-super + n
+super + shift + n
   $TERMINAL -e tmux.sh open 'newsboat'
-super + z
+super + shift + z
   $TERMINAL -e htop
-#super + c
+#super + shift + c
 #  $TERMINAL -e calcurse -D ~/.config/calcurse
 super + shift + a
-  $TERMINAL -e alsamixer
-#  $TERMINAL -e alsamixer; refbar
+  $TERMINAL -e alsamixer; statusbar-startrefresh.sh
 # Camera
 super + shift + c
   mpv --no-osc --no-input-default-bindings --input-conf=/dev/null --title='mpvfloat' /dev/video0
+
+
+
+# Xclip seems to need setsid to perserve the copy after the launching terminal has closed
+super + g ; super + {s, b, g}
+  $TERMINAL -n 'overlay' -e browser.sh --launch menu {search, bookmark, link}
+super + c ; super + {s, b}
+  $TERMINAL -n 'overlay' -e browser.sh menu {search, bookmark} --browser "clipboard"
+super + c ; super + e
+  $TERMINAL -n 'overlay' -e sh -c 'setsid clipboard.sh -w "$(<~/.config/emoji fzf | cut -d " " -f 1)"'
 
 
 
@@ -43,13 +50,19 @@ super + grave
 #super + Scroll_Lock
 #  killall screenkey || screenkey
 super + shift + Insert
-  notify.sh "Clipboard: $(xclip -o -selection clipboard)"; notify.sh "Primary: $(xclip -o -selection primary)"
-super + shift + x
-  printf '%s\n' No Yes | dmenu -p 'Shutdown?' | grep -q Yes && sudo shutdown -h now
-super + shift + BackSpace
-  printf '%s\n' No Yes | dmenu -p 'Reboot?' | grep -q Yes && sudo shutdown -r now
-super + shift + Escape
-  printf '%s\n' No Yes | dmenu -p 'Close Xorg?' | grep -q Yes && killall Xorg
+  notify.sh "Clipboard: $(xclip -o -selection clipboard)"; \
+  notify.sh "Primary: $(xclip -o -selection primary)"
+{XF86Sleep, super + BackSpace ; super + q }
+  sudo zzz -z
+#notify.sh 'Sleep!'
+# sudo halt
+super + BackSpace ; super + { w, e, r, BackSpace }
+  printf '%s\n' No Yes | dmenu -i -p { \
+    'Hibernate?' | grep -q 'Yes' && sudo zzz -Z, \
+    'Shutdown?' | grep -q 'Yes' && sudo shutdown -h now, \
+    'Reboot?' | grep -q 'Yes' && sudo reboot, \
+    'Close Xorg?' | grep -q 'Yes' && killall Xorg \
+  }
 #super + x
 #  mpc pause; pauseallmpv; i3lock -e -f -c 1d2021; xset dpms force off
 #XF86Launch1
@@ -152,9 +165,6 @@ XF86MonBrightnessDown
 #  $TERMINAL -e $FILE /
 
 # Function keys
-## Hibernate
-##super + F4
-##  prompt 'Hibernate computer?' 'sudo -A zzz'
 ## Start torrent daemon/open interface
 #super + F6
 #  torwrap

@@ -23,10 +23,11 @@ killall fcitx; fcitx  # Restart fcitx
 
 # Startup up stuff
 #exec --no-startup-id compton --xrender-sync-fence --logpath /tmp/compton.log &
-feh --bg-scale ~/.config/wallpaper.jpg &  # wallpaper
-compton --xrender-sync-fence &            # Transparency
-dunst &                                   # Notifications
-sxhkd &                                   # For hotkeys
+xbacklight -set 40&            # Screen brightness
+x.sh set-wallpaper&            # Desktop Wallpaper
+compton --xrender-sync-fence&  # Window Transparency
+dunst&                         # Notifications
+sxhkd&                         # For hotkeys
 
 ## Set Caps to Mod/Escape
 #setxkbmap -option caps:super && killall xcape 2>/dev/null
