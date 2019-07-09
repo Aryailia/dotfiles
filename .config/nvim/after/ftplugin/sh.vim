@@ -34,17 +34,15 @@ inoremap <buffer> <LocalLeader>name
 inoremap <buffer> <LocalLeader>puts
   \ puts() { printf %s\\n "$@"; }
 imap <LocalLeader>die
-  \ <C-o>:if ! search('\m^puts() *{', 'bnw')<CR>
-  \  execute "normal i,puts\n"<CR>
+  \ <C-o>:if ! search('\m^puterr() *{', 'bnw')<CR>
+  \  execute "normal i,puterr\n"<CR>
   \endif<CR>
   \<C-o>:if ! search('\m^name="\$( basename', 'bnw')<CR>
   \  execute "normal i,name\n"<CR>
   \endif<CR>
   \<C-o>:setlocal paste<CR>
-  \die() {<CR>
-  \  c="$1"; puts "$2: '${name}' -- $3" >&2; shift 3<CR>
-  \  puts "$@" >&2; exit "$c"<CR>
-  \}
+  \die() { c="$1"; puterr "$2: '${name}' -- $3"; shift 3; puterr "$@"
+  \; exit "$c"; }<CR>
   \<C-o>:setlocal nopaste<CR>
 imap <LocalLeader>asdf
   \ <C-o>:if ! search('\m^ *puts() *{', 'bnw')<CR>
@@ -75,6 +73,8 @@ inoremap <buffer> <LocalLeader>assign
   \ eval_assign() { eval "$1"=\"$2\"; }
 
 " Naming modeled after the print commands in ruby
+inoremap <buffer> <LocalLeader>pln
+  \ printf %s\\n "$@"
 inoremap <buffer> <LocalLeader>puts
   \ puts() { printf %s\\n "$@"; }
 inoremap <buffer> <LocalLeader>prints
@@ -104,9 +104,10 @@ inorema <buffer> <LocalLeader>match
 
 
 imap <buffer> <LocalLeader>help
-  \ <LocalLeader>name<CR>
+  \ <C-o>:if ! search('\m^name="\$( basename "\$0"', 'bnw')<CR>
+  \  execute "normal i,name\n\n"<CR>
+  \endif<CR>
   \<C-o>:setlocal paste<CR>
-  \<CR>
   \show_help() {<CR>
   \  <<EOF cat - >&2<CR>
   \SYNOPSIS<CR>
@@ -216,12 +217,15 @@ imap <buffer> <LocalLeader>main3
 imap <buffer> <LocalLeader>init
   \ <LocalLeader>sbsh<CR>
   \<CR>
+  \<LocalLeader>name<CR>
+  \<CR>
   \<LocalLeader>help<CR>
   \<CR><CR><CR>
   \<LocalLeader>main3<CR>
   \<CR><CR><CR>
   \# Helpers<CR>
   \<LocalLeader>puts<CR>
+  \<LocalLeader>pute<CR>
   \<LocalLeader>die<CR>
   \<LocalLeader>escape<CR>
   \<CR>

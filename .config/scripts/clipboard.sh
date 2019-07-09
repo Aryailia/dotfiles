@@ -80,6 +80,8 @@ main() {
           tmux_on || die 1 'FATAL: tmux server not running'
       esac
 
+      notify.sh "📋"
+
       # Process the input to copy
       if   is_to_run 'termux-set'; then  <&0 termux-clipboard-set
       elif is_to_run 'xclip'; then       <&0 xclip -in -selection clipboard

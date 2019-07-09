@@ -5,8 +5,11 @@
 # `ion` does not support 2> or &1
 
 # ${HOME} directory cleanup
-export CARGO_HOME="${HOME}/.local/cargo"
-export RUSTUP_HOME="${HOME}/.local/rustup"
+export npm_config_userconfig="${HOME}/.config/npmrc"
+export npm_config_cache="${HOME}/.local/share/npm"
+export NODE_REPL_HISTORY=""
+export CARGO_HOME="${HOME}/.local/lib/cargo"
+export RUSTUP_HOME="${HOME}/.local/bin/rustup"
 export GNUPGHOME="${HOME}/.local/gnupg"
 export PYTHONSTARTUP="${HOME}/.config/pythonrc"
 export NOTMUCH_CONFIG="${HOME}/.config/notmuch-config"
@@ -16,7 +19,7 @@ export INPUTRC="${HOME}/.config/inputrc"
 
 # PATH
 export SCRIPTS="${HOME}/.config/scripts"
-export GOPATH="${HOME}/.local/go"
+export GOPATH="${HOME}/.local/lib/go"
 printf %s\\n ":${PATH}:" | grep -q ":${SCRIPTS}:" \
   || export PATH="${PATH}:${SCRIPTS}"
 printf %s\\n ":${PATH}:" | grep -q ":${HOME}/.local/bin:" \
