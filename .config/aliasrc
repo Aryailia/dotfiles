@@ -58,10 +58,10 @@ alias     v='nvim'
 
 alias c='cd_of sh -c '\''
   if [ -z "$1" ]; then
-    "${SCRIPTS}/namedpath.sh" --list-aliases >&2
-    return 1
+    namedpath.sh --interactive
+    #return 1
   else
-    "${SCRIPTS}/namedpath.sh" "$1"
+    namedpath.sh "$1"
   fi'\'' _ \
 '
 
@@ -88,8 +88,8 @@ alias f='cd_of sh -c '\''
 
 # Android has no sudo
 alias updateman='sh -c "sudo -V >/dev/null 2>&1" \
-  && makewhatis "${PREFIX}/usr/share/man" \
-  || sudo makewhatis "/usr/share/man"
+  && sudo makewhatis "${PREFIX}/usr/share/man" \
+  || makewhatis "/usr/share/man"
 '
 alias list-path='printf %s\\n "${PATH}" | tr ":" "\n" | sort'
 
