@@ -19,9 +19,9 @@ DESCRIPTION
 
 COMMAND
   menu       (alias: m) Specify the browser to use via fzf, enables use of -b
-  download   (alias: d) Use the default donwload method  (see linkhandler.sh)
-  terminal   (alias: t) Use the default terminal browser (see linkhandler.sh)
-  gui        (alias: g) Use the default gui browser (see linkhandler.sh)
+  download   (alias: d) Use the default donwload method (see handle.sh)
+  terminal   (alias: t) Use the default terminal browser \${BROWSER_CLI}
+  gui        (alias: g) Use the default gui browser \${BROWSER}
   edit       (alias: e) Add 'bookmark' or 'search'. Open the csv in \${EDITOR}
   run        (alias: r) Launches the browser with useful defaults
   list       (alias: l) List available browsers
@@ -100,7 +100,7 @@ main() {
     g|gui)       COMMAND="${ENUM_GUI}" ;;
     m|menu)      COMMAND="${ENUM_MENU}" ;;
     t|terminal)  COMMAND="${ENUM_TERMINAL}" ;;
-    e|edit)      require "${EDITOR}" || die2 1 'FATAL' "problem with \${EDITOR}"
+    e|edit)      require "${EDITOR}" || die 1 'FATAL' "problem with \${EDITOR}"
                  COMMAND="${ENUM_EDIT}" ;;
     r|run)       launch_browser "${target}" "$@"; exit 0 ;;
     l|list)      list_browsers; exit 0 ;;
@@ -114,7 +114,7 @@ main() {
     l|link|u|url)             process_link "$@" ;;
     b|bm|bookmark|bookmarks)  process_bookmarks "$@" ;;
     s|search)                 process_search "$@" ;;
-    *)  die2 1 'FATAL' "'${target}' is not a valid target, use -h for help" ;;
+    *)  die 1 'FATAL' "'${target}' is not a valid target, use -h for help" ;;
   esac
 }
 
@@ -122,7 +122,7 @@ main() {
 list_browsers() { puts "${browser_list}"; }
 launch_browser() {
   if "${FLAG_HELP}"; then
-    pute "Usage: ${name} run <BROWSER> [<URL>]" \
+    puterr "Usage: ${name} run <BROWSER> [<URL>]" \
       "  Open browser with my default settings" \
       "" \
       "Choose from:"
@@ -130,7 +130,8 @@ launch_browser() {
     exit 0
   else
     browser="$1"; shift 1
-    type "_run_${browser}" >/dev/null >&1 || die2 1 'FATAL' "invalid browser"
+    type "_run_${browser}" >/dev/null >&1 \
+      || die 1 'FATAL' "'${browser}' is not supported by this script"
     _run_"${browser}" "$@"
   fi
 }
@@ -173,19 +174,15 @@ process_link() {
   eval "set -- ${args}"
 
   # Main
-  case "${COMMAND}" in "${ENUM_DOWNLOAD}"|"${ENUM_TERMINAL}"|"${ENUM_GUI}")
-    require 'linkhandler.sh' || die2 1 'FATAL' "Require 'linkhandler.sh'" ;;
-  esac
-
   url="$(if [ "$#" -gt 0 ] && [ -n "$1" ]
     then prints "$1"
     else terminal_prompt "Enter url: "
   fi | prepend_https)"
 
   case "${COMMAND}" in
-    "${ENUM_DOWNLOAD}") linkhandler.sh -d "${url}" ;;
-    "${ENUM_TERMINAL}") linkhandler.sh -t "${url}" ;;
-    "${ENUM_GUI}")      linkhandler.sh -g "${url}" ;;
+    "${ENUM_DOWNLOAD}") handle.sh --download --link "${url}" ;;
+    "${ENUM_TERMINAL}") launch_browser "${BROWSER_CLI}" "${url}" ;;
+    "${ENUM_GUI}")      launch_browser "${BROWSER}" "${url}" ;;
     "${ENUM_EDIT}")     "${EDITOR}" "$0" ;;
     "${ENUM_MENU}")
       choice="$( list_browsers | prompt '1' 'Browser' '1' "${browser}" )" \
@@ -243,7 +240,7 @@ EOF
 }
 process_bookmarks() {
   # Dependencies
-  [ -r "${bookmarks_file}" ] || die2 1 'FATAL' "Requires '${bookmarks_file}'"
+  [ -r "${bookmarks_file}" ] || die 1 'FATAL' "Requires '${bookmarks_file}'"
 
   # Other branches
   [ "${COMMAND}" = "${ENUM_EDIT}" ] \
@@ -312,7 +309,7 @@ EOF
 }
 process_search() {
   # Dependencies
-  [ -r "${search_engines}" ] || die2 1 'FATAL' "Requires '${search_engines}'"
+  [ -r "${search_engines}" ] || die 1 'FATAL' "Requires '${search_engines}'"
 
   # Other branches
   [ "${COMMAND}" = "${ENUM_EDIT}" ] \
@@ -367,13 +364,13 @@ prompt() {
   match="$(<&0 csv_select_columns "0 $1" \
     | if [ -z "$4" ]
       then
-        require "fzf" || die2 1 'FATAL' "Requires 'fzf' for menu functionality."
+        require "fzf" || die 1 'FATAL' "Requires 'fzf' for menu functionality."
         fzf --no-sort --height='99%' --layout=reverse --select-1 \
             --prompt="$2> " --delimiter='\|' --with-nth='2..' --nth="$3" \
-          || die2 "$?" 'FATAL' "Exited out of $2 prompt"
+          || die "$?" 'FATAL' "Exited out of $2 prompt"
 
       # Max one
-      else grep "$4" -m 1 || die2 "$?" 'FATAL' "'$4' not found"
+      else grep "$4" -m 1 || die "$?" 'FATAL' "'$4' not found"
     fi
   )" || exit "$?"  # Stop here before sed'ing in case of any error
 
@@ -441,8 +438,8 @@ require() {
 }
 prints() { printf %s "$@"; }
 puts() { printf %s\\n "$@"; }
-pute() { printf %s\\n "$@" >&2; }
-die2() { c="$1"; pute "$2: '${name}' -- $3"; shift 3; pute "$@"; exit "$c"; }
+puterr() { printf %s\\n "$@" >&2; }
+die() { c="$1"; puterr "$2: '${name}' -- $3"; shift 3; puterr "$@"; exit "$c"; }
 eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 escape_all() { for a in "$@"; do printf ' '; prints "$a" | eval_escape; done; }
 
@@ -559,7 +556,7 @@ _run_surf() { print_or_launch "surf" "$@"; }
 epiphany --help >/dev/null 2>&1 && add_browser xorg 'epiphany'
 _run_epiphany() {
   eval "copy_paste epiphany $( escape_all_and_prepend_https "$@" )" || {
-    [ -n "${PROFILE}" ] && pute "WARN: \`epiphany\` does not support profiles"
+    [ -n "${PROFILE}" ] && puterr "WARN: \`epiphany\` does not support profiles"
 
     args='epiphany'
     "${FLAG_INCOGNITO}" && args="${args} --incognito"
@@ -571,7 +568,7 @@ _run_epiphany() {
 
 midori --version >/dev/null 2>&1 && add_browser xorg 'midori'
 _run_midori() {
-  [ -n "${PROFILE}" ] && pute "WARN: \`midori\` does not support profiles"
+  [ -n "${PROFILE}" ] && puterr "WARN: \`midori\` does not support profiles"
 
   args='midori'
   "${FLAG_INCOGNITO}" && args="${args} --private"
@@ -581,8 +578,8 @@ _run_midori() {
 
 w3m -version >/dev/null 2>&1 && add_browser both 'w3m'
 _run_w3m() {
-  "${FLAG_INCOGNITO}" && pute "WARN: \`w3m\` does not support incognito mode"
-  [ -n "${PROFILE}" ] && pute "WARN: \`w3m\` does not support profiles"
+  "${FLAG_INCOGNITO}" && puterr "WARN: \`w3m\` does not support incognito mode"
+  [ -n "${PROFILE}" ] && puterr "WARN: \`w3m\` does not support profiles"
 
   args="$( printf 'sh -c %sw3m "$1"; [ -f "%s" ] && rm "%s"%s _' \
     "'" "${HOME}/.w3m/cookie" "${HOME}/.w3m/cookie" "'"
@@ -590,7 +587,7 @@ _run_w3m() {
   [ "$#" = 0 ] && args="${args} ."
   args="${args}$( escape_all "$@" )"
   if "${FLAG_LAUNCH}" && "${is_xorg_on}"; then
-    require "${TERMINAL}" || die2 1 'FATAL' "\$TERMINAL is not set properly"
+    require "${TERMINAL}" || die 1 'FATAL' "\$TERMINAL is not set properly"
     args="$( puts "${args}" | eval_escape )"
     print_or_launch "${TERMINAL} -e tmux.sh open ${args}"
   else
@@ -600,8 +597,8 @@ _run_w3m() {
 
 termux-open-url >/dev/null 2>&1 && add_browser both 'termux_external'
 _run_termux_external() {
-  "${FLAG_INCOGNITO}" && pute 'WARN: termux does not support incognito mode'
-  [ -n "${PROFILE}" ] && pute 'WARN: termux does not support profiles'
+  "${FLAG_INCOGNITO}" && puterr 'WARN: termux does not support incognito mode'
+  [ -n "${PROFILE}" ] && puterr 'WARN: termux does not support profiles'
   print_or_eval "termux-open-url$(escape_all "$@")"
 }
 

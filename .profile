@@ -7,14 +7,15 @@
 # ${HOME} directory cleanup
 export npm_config_userconfig="${HOME}/.config/npmrc"
 export npm_config_cache="${HOME}/.local/share/npm"
-export NODE_REPL_HISTORY=""
+export NODE_REPL_HISTORY=''
 export CARGO_HOME="${HOME}/.local/lib/cargo"
 export RUSTUP_HOME="${HOME}/.local/bin/rustup"
+
 export GNUPGHOME="${HOME}/.local/gnupg"
 export PYTHONSTARTUP="${HOME}/.config/pythonrc"
 export NOTMUCH_CONFIG="${HOME}/.config/notmuch-config"
 export GTK2_RC_FILES="${HOME}/.config/gtk-2.0/gtkrc-2.0"
-export LESSHISTFILE="/dev/null"
+export LESSHISTFILE='/dev/null'
 export INPUTRC="${HOME}/.config/inputrc"
 
 # PATH
@@ -40,12 +41,14 @@ uname -o | grep -q 'MSYS' &&  export TMPDIR="${HOME}/AppData/Local/Temp"  # Win
 
 # Could use `which` but it is not POSIX
 # missing commands are required by POSIX to return 127 error
+# `ion` also does has different syntax for STDERR redirection
+export BROWSER_CLI='w3m'
 sh -c 'st -v >/dev/null 2>&1; [ "$?" = 1 ]'    && export TERMINAL='st'
 sh -c 'vim -v >/dev/null 2>&1'                 && export EDITOR='vim'
 sh -c 'nvim -v >/dev/null 2>&1'                && export EDITOR='nvim'
 sh -c 'termux-open-url "" >/dev/null 2>&1; [ "$?" = 1 ]' \
   && export BROWSER='termux-open-url'
-sh -c 'midori -V >/dev/null 2>&1'              && export BROWSER='midori'
+sh -c 'firefox -V >/dev/null 2>&1'              && export BROWSER='firefox'
 sh -c 'surf -v >/dev/null 2>&1; [ "$?" = 1 ]'  && export BROWSER='surf'
 sh -c 'zathura --version >/dev/null 2>&1'      && export READER='zathura'
 

@@ -1,0 +1,113 @@
+# Seems to refresh the config everytime you run the `lf` client
+#https://github.com/gokcehan/lf
+#https://godoc.org/github.com/gokcehan/lf
+
+set shell sh
+set shellopts '-eu'  # '-e' exit on error, '-u' error on unset variables
+set previewer ~/.config/lf/preview.sh
+
+# All pathnames seem to be given as absolute paths, thus
+set filesep "\n/."  # Make pathnames unique (www.etalabs.net/sh_tricks.html)
+set ifs "\n"        # Sets ${IFS} for shell commands
+set scrolloff 10    # Scroll offset, leave space at top/bottom of screen
+set hidden on
+
+
+
+# Commands
+cmd open ${{
+  case "$( file --mime-type --brief "${f}" )" in
+    text/troff*)  man ./ "${f}" ;;
+    text/*)       "${EDITOR}" "${f}" ;;
+    image/*)      dirname "${f}" | setsid sxiv -ai >/dev/null 2>&1& ;;
+    *)            printf %s "${fx}" | xargs-split.pl '\n/\./' '/' \
+                    handle.sh --file --gui ;;
+  esac
+}}
+
+# rename current file without overwrite
+cmd rename %[ -e "${1}" ] && printf "file exists" || mv "${f}" "${1}"
+cmd prompt-rename ${{
+   # Delete `basename` added "\n", add 'a' as awk deletes trailing input "\n"
+   name="$( basename "${f}"; printf a )"; name="${name%?a}"
+   newline="$( printf \\na )"; newline="${newline%a}"
+   if [ "${name}" != "${name#*${newline}*}" ]; then
+     lf -remote "send ${id} echoerr Contains newline(s), use 'R' instead"
+   else
+     name="$( printf %sa "${name}" | awk -v FS='' -v RS='' '
+       # One-line escape for dash/bash and probably others?
+       # lf-shell needs not single-quote and /[&"|*]/ escaped
+       { gsub(/[;]/, "'"'&'"'"); }  # Breaks lf-shell if backslashed
+       { gsub(/[\\]/, "\\\\&"); }  # \\\\& just needs four "\"
+       { gsub(/ /, "\\<space>"); }  # `push` needs " " converted to "<space>"
+       { printf("%s", $0); }
+     ')"
+     name="${name%a}"  # And remove the perserver character
+     lf -remote "send ${id} push :rename<space>${name}"
+   fi
+}}
+
+cmd jumpto $lf -remote "send ${id} cd '$( namedpath.sh -i )'"
+cmd delete ${{
+  #printf %s\\n "${fx}" | xargs-split.sh \
+  #  "$( printf \\n/./ )" sh -c 'trash "/$1"' _
+  printf %s "${fx}" | xargs-split.pl '\n/\./' '/' trash
+}}
+cmd copyto ${{
+  destination="$( PROMPT='Copy > ' print-shortcut.sh )" || exit 1
+  [ -d "${destination}" ] || exit 1
+  printf %s "${fx}" | xargs-split.pl '\n/\./' '/' \
+    sh -c 'for file in "$@"; do cp -ivr "${file}" "'"${destination}"'"; done' _
+  notify.sh "📋 File(s) copied to '${destination}'"
+}}
+cmd moveto ${{
+  destination="$( PROMPT='Move > ' print-shortcut.sh )" || exit 1
+  [ -d "${destination}" ] || exit 1
+  printf %s "${fx}" | xargs-split.pl "\n/\./" '/' \
+    sh -c 'for file in "$@"; do mv -iv "${file}" "'"${destination}"'"; done' _
+  notify.sh "🚚 File(s) moved to '${destination}'"
+}}
+
+#cmd paste %{{
+#   load=$(lf -remote 'load')
+#   mode=$(echo "$load" | sed -n '1p')
+#   list=$(echo "$load" | sed '1d')
+#   if [ $mode = 'copy' ]; then
+#       cp -R $list .
+#   elif [ $mode = 'move' ]; then
+#       mv $list .
+#   fi
+#   lf -remote 'send load'
+#   lf -remote 'send clear'
+#}}
+map t ${{
+  printf %s\\n "f : $f"
+  printf %s\\n "fs: $fs"
+  printf %s\\n "fx: $fx"
+}}
+
+#map Q ${{
+#  printf \\n >&2 # In case we printed something
+#  # Thanks to Rich (etalabs.net/sh_tricks.html)
+#  # Escape the value for interpretation by eval, the added newline after the
+#  # `printf` required, `sed` likes the ending newline
+#  printf %s\\n "${PWD}" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/" >&2
+#  lf -remote "send ${id} quit"
+#}}
+#map C $mv -i "$f" "$(print-shortcut.sh || exit 1)"
+
+# Bindings
+map <esc> clear
+map r prompt-rename
+# Prepend '/.' since ${filesep} acts like a join
+map R $batch-rename.sh "/.${fx}"
+map o $handle.sh --file --terminal "${f}"
+map O &handle.sh --file --gui "${f}"
+map D delete
+#map <c-l> $handle.sh --file --gui "${f}"
+map <enter> shell  # enter shell
+map x $${f}        # run executable
+map X !${f}        # run executable and wait for key press
+map Y copyto
+map c jumpto
+map M moveto

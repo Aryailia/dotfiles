@@ -47,6 +47,7 @@ alias   mks='sh -c '\''for x in "$@"; do
   touch -- "${name}"
   chmod 755 -- "${name}"
 done'\'' _'
+alias    mt='file --dereference --brief --mime-type --'
 alias    pm='package-manager.sh'
 alias    rb='trash'
 alias  rhkd='pkill -USR1 sxhkd'  # Sxhkd updates on receiving usr1 signal

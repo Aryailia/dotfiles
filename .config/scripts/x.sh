@@ -39,12 +39,12 @@ main() {
       # Process arguments properly now
       for x in ${opts}; do case "${x}" in
         -h|--help)  show_help; exit 0 ;;
-        -e|--example)  puts "-$2-"; shift 1 ;;
+        -e|--example)  puts "-${2}-"; shift 1 ;;
 
         # Put argument checks above this line (for error detection)
         # first '--' case already covered by first case statement
         -[!-]*)   show_help; die 1 "FATAL: invalid option '${x#-}'" ;;
-        *)        args="${args} $( puts "$1" | eval_escape )" ;;
+        *)        args="${args} $( puts "${1}" | eval_escape )" ;;
       esac done
     else
       args="${args} $( puts "$1" | eval_escape )"
@@ -56,21 +56,43 @@ main() {
   eval "set -- ${args}"
 
 
-  case "$1" in
-    wall|setwall|set-wallpaper)  set_wallpaper "$@" ;;
-    send|send-keys)  echo Send Keys WIP ;;
-    *) echo WIP ;;
+  case "${1}" in
+    wall|setwall|set-wallpaper)  shift 1; set_wallpaper "$@" ;;
+    send|send-keys)              shift 1; send_keys "${@}";;
+    *) echo did not match anything ;;
   esac
 
 }
 
 set_wallpaper() {
-  [ -n "$1" ] && cp "$1" ~/.config/wallpapper.png \
+  [ -n "${1}" ] && [ -r "${1}" ] && cp "${1}" ~/.config/wallpapper.png \
     && notify-send -i "${WALLPAPER}" "Wallpaper set."
   xwallpaper --zoom "${WALLPAPER}"
 }
 
 
+send_keys() {
+  program="${1}"; shift 1
+
+  # xdotool search always returns many (for reasons I do not know)
+  # Narrow to 
+  window_id="$(
+    xdotool search --pid "$( pgrep "${program}" )" | xargs -L 1 sh -c '
+      xprop -id "${1}" "WM_STATE" | grep -qv "not found" && echo "${1}"
+    ' _ #| sed 1q  # In case it appears more than once?
+  )"
+
+  # --onlyvisible works inconsistantly if window in different workspace
+  #xdotool search --pid "$( pgrep "${program}" )" --onlyvisible \
+  #  | xargs -I '{}' xdotool key --window "{}" "${@}"
+
+  xdotool key --window "${window_id}" "${@}"
+
+  # Epiphany for instances needs windowactivate first
+  # Perhaps handle those on an individual basis
+  #xdotool windowactivate "${window_id}" key "${@}"
+
+}
 
 
 # Helpers

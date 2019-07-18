@@ -17,5 +17,14 @@ case "$1" in
   dq|download-queue)  p "${TMPDIR}/download_queue" ;;
   env|environment)    p "${HOME}/.environment" ;;  # aka .env/
   scihub)             p 'http://sci-hub.tw' ;;  # changes frequently
+  # https://stackoverflow.com/questions/19306771/
+  current-user)       ps -o user= "$$" | awk '{ printf("%s", $1); }' ;;
+
+  # Also check '.profile', will never use `c.sh` in '.profile'
+  # Yes that means duplicate code
+  #is-macos)           uname -o | grep -q 'Linux' ;;
+  is-linux)           uname -o | grep -q 'Linux' ;;
+  is-windows)         uname -o | grep -q 'MSYS' ;;
+  is-android)         uname -o | grep -q 'Android' ;;
   *) exit 1;;
 esac

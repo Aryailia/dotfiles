@@ -115,6 +115,11 @@ imap <buffer> <LocalLeader>help
   \<CR>
   \DESCRIPTION<CR>
   \  <CR>
+  \<CR>
+  \OPTIONS<CR>
+  \  --<CR>
+  \    Special argument that prevents all following arguments from being
+  \    intepreted as options.<CR>
   \EOF<CR>
   \}
   \<C-o>:setlocal nopaste<CR>
