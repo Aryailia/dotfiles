@@ -83,6 +83,14 @@ inoremap <buffer> <LocalLeader>prints
 " Keeping to the analogy, this is ruby's p, but not really, so renamed
 inoremap <buffer> <LocalLeader>escape
   \ eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
+inoremap <buffer> <LocalLeader>awk_eval
+  \ awk_evalescape='<CR>
+  \   function evalEscape(target) {<CR>
+  \     gsub(/'\''/, "'\'\\\\\'\''", target);<CR>
+  \     #return target<CR>
+  \     return "'\''" target "'\''"<CR>
+  \   }<CR>
+  \ '
 inoremap <buffer> <LocalLeader>pute
   \ puterr() { printf %s\\n "$@" >&2; }
 inoremap <buffer> <LocalLeader>printe
@@ -118,7 +126,7 @@ imap <buffer> <LocalLeader>help
   \<CR>
   \OPTIONS<CR>
   \  --<CR>
-  \    Special argument that prevents all following arguments from being
+  \    Special argument that prevents all following arguments from being<CR>
   \    intepreted as options.<CR>
   \EOF<CR>
   \}

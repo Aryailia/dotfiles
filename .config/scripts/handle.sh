@@ -86,7 +86,7 @@ main() {
   # Cannot edit online files
   # Careful about boolean operator order
   if [ "${PATH_TYPE}" = "${ENUM_DEFAULT}" ] \
-    && [ -n "$( puts "${1}" | urlscan.sh )" ] \
+    && [ -n "$( puts "${1}" | uriscan.sh - )" ] \
     || [ "${PATH_TYPE}" = "${ENUM_HYPERTEXT}" ]
   then
     [ "${COMMAND}" = "${ENUM_EDIT}" ] \
@@ -178,6 +178,10 @@ local_handle_extension() {
     #  p odt2txt "${1}"
     #  exit "${ENUM_NOPREVIEW}" ;;
 
+    doc|docx|xls|xlsx)
+      g libreoffice "${1}"
+      exit "${ENUM_NOPREVIEW}" ;;
+
     # HTML
     htm|html|xhtml)
       p w3m -dump "${1}"
@@ -228,6 +232,7 @@ local_handle_mime() {
     # Video and audio
     video/* | audio/*|application/octet-stream)
       #p mediainfo "${1}"
+      g mpv "${1}"
       p exiftool "${1}"
       exit "${ENUM_NOPREVIEW}" ;;
 
