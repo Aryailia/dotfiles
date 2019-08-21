@@ -13,6 +13,7 @@ call plug#begin('~/.vim/extra')
   " VimWiki for markdown interlinks, (probably make my own, too much bloat)
   "Plug 'vimwiki/vimwiki', { 'branch': 'dev' } ", 'on': [] }
   ", 'for': 'markdown' }
+  Plug 'tpope/vim-fugitive'         " Git
   Plug 'tpope/vim-unimpaired'       " Setting toggles, back/next nav shortcuts
   Plug 'tpope/vim-surround'         " Adding quotes
   Plug 'aryailia/vim-markdown-toc'  " Table of contents woo
@@ -28,7 +29,7 @@ call plug#end()
 " General
 set nocompatible
 set foldmethod=manual
-"set bg=light          " Readable on light background
+set bg=light          " Readable on light background
 
 " Use UTF-8 if we can and env LANG didn't tell us not to
 if has('multi_byte') && !exists('$LANG') && &encoding ==# 'latin1'
