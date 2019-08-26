@@ -31,26 +31,26 @@ inoremap <buffer> <LocalLeader>sbpython
 
 inoremap <buffer> <LocalLeader>name
   \ name="$( basename "$0"; printf a )"; name="${name%?a}"
-inoremap <buffer> <LocalLeader>puts
-  \ puts() { printf %s\\n "$@"; }
+inoremap <buffer> <LocalLeader>soutln
+  \ soutln() { printf %s\\n "$@"; }
 imap <LocalLeader>die
-  \ <C-o>:if ! search('\m^puterr() *{', 'bnw')<CR>
-  \  execute "normal i,puterr\n"<CR>
+  \ <C-o>:if ! search('\m^serrln() *{', 'bnw')<CR>
+  \  execute "normal i,serrln\n"<CR>
   \endif<CR>
   \<C-o>:if ! search('\m^name="\$( basename', 'bnw')<CR>
   \  execute "normal i,name\n"<CR>
   \endif<CR>
   \<C-o>:setlocal paste<CR>
-  \die() { c="$1"; puterr "$2: '${name}' -- $3"; shift 3; puterr "$@"
+  \die() { c="$1"; serrln "$2: '${name}' -- $3"; shift 3; serrln "$@"
   \; exit "$c"; }<CR>
   \<C-o>:setlocal nopaste<CR>
 imap <LocalLeader>asdf
-  \ <C-o>:if ! search('\m^ *puts() *{', 'bnw')<CR>
-  \  execute "normal i,puts\n"<CR>
+  \ <C-o>:if ! search('\m^ *soutln() *{', 'bnw')<CR>
+  \  execute "normal i,soutln\n"<CR>
   \endif<CR>
   \die() {<CR>
-  \  c="$1"; puts "$2: '${name}' -- $3" >&2; shift 3<CR>
-  \  puts "$@" >&2; exit "$c"<CR>
+  \  c="$1"; soutln "$2: '${name}' -- $3" >&2; shift 3<CR>
+  \  soutln "$@" >&2; exit "$c"<CR>
   \}
   \<C-o>:setlocal nopaste<CR>
 
@@ -72,13 +72,23 @@ inoremap <buffer> <LocalLeader>req
 inoremap <buffer> <LocalLeader>assign
   \ eval_assign() { eval "$1"=\"$2\"; }
 
-" Naming modeled after the print commands in ruby
+" `p` is for /dev/tty, the `c` in `pc` represents colour
+inoremap <buffer> <LocalLeader>p
+  \ p() { printf %s "$@" >/dev/tty; }
 inoremap <buffer> <LocalLeader>pln
-  \ printf %s\\n "$@"
-inoremap <buffer> <LocalLeader>puts
-  \ puts() { printf %s\\n "$@"; }
-inoremap <buffer> <LocalLeader>prints
-  \ prints() { printf %s "$@"; }
+  \ pln() { printf %s\\n "$@" >/dev/tty; }
+inoremap <buffer> <LocalLeader>pc
+  \ pc() { printf %b "$@" >/dev/tty; }
+inoremap <buffer> <LocalLeader>pcln
+  \ pcln() { printf %b\\n "$@" >/dev/tty; }
+inoremap <buffer> <LocalLeader>sout
+  \ sout() { printf %s "$@"; }
+inoremap <buffer> <LocalLeader>soutln
+  \ soutln() { printf %s\\n "$@"; }
+inoremap <buffer> <LocalLeader>serr
+  \ serr() { printf %s "$@" >&2; }
+inoremap <buffer> <LocalLeader>serrln
+  \ serrln() { printf %s\\n "$@" >&2; }
 " Much thanks to Rich (https://www.etalabs.net/sh_tricks.html for eval_escape)
 " Keeping to the analogy, this is ruby's p, but not really, so renamed
 inoremap <buffer> <LocalLeader>escape
@@ -91,10 +101,6 @@ inoremap <buffer> <LocalLeader>awk_eval
   \     return "'\''" target "'\''"<CR>
   \   }<CR>
   \ '
-inoremap <buffer> <LocalLeader>pute
-  \ puterr() { printf %s\\n "$@" >&2; }
-inoremap <buffer> <LocalLeader>printe
-  \ printerr() { printf %s "$@" >&2; }
 
 inorema <buffer> <LocalLeader>match
   \ <C-o>:setlocal paste<CR>
@@ -141,12 +147,15 @@ imap <buffer> <LocalLeader>main1
   \  # Dependencies<CR>
   \<CR>
   \  # Options processing<CR>
-  \  args=''; no_options='false'<CR>
-  \  for arg in "$@"; do "${no_options}" <Bar><Bar> case "${arg}" in<CR>
-  \    --)  no_options='true' ;;<CR>
-  \    -h<Bar>--help)  show_help; exit 0 ;;<CR>
-  \    *)   args="${args} $( puts "${arg}" <Bar> eval_escape )" ;;<CR>
-  \  esac done<CR>
+  \  args=''; literal='false'<CR>
+  \  for arg in "$@"; do<CR>
+  \    "${literal}" <Bar><Bar> case "${arg}" in<CR>
+  \      --)  literal='true' ;;<CR>
+  \      -h<Bar>--help)  show_help; exit 0 ;;<CR>
+  \      *)   args="${args} $( soutln "${arg}" <Bar> eval_escape )" ;;<CR>
+  \    esac<CR>
+  \    "${literal}" && args="${args} $( soutln "${arg}" <Bar> eval_escape )"<CR>
+  \  done<CR>
   \<CR>
   \  [ -z "${args}" ] && { show_help; exit 1; }<CR>
   \  eval "set -- ${args}"<CR>
@@ -162,18 +171,18 @@ imap <buffer> <LocalLeader>main2
   \<CR>
   \  # Options processing<CR>
   \  args=''<CR>
-  \  no_options='false'<CR>
+  \  literal='false'<CR>
   \  while [ "$#" -gt 0 ]; do<CR>
-  \    "${no_options}" <Bar><Bar> case "$1" in<CR>
-  \      --)  no_options='true'; shift 1; continue ;;<CR>
+  \    "${literal}" <Bar><Bar> case "$1" in<CR>
+  \      --)  literal='true'; shift 1; continue ;;<CR>
   \      -h<Bar>--help)  show_help; exit 0 ;;<CR>
   \<CR>
   \      -f)  echo 'do not need to shift' ;;<CR>
-  \      -e<Bar>--example2)  puts "-$2-"; shift 1 ;;<CR>
+  \      -e<Bar>--example2)  soutln "-$2-"; shift 1 ;;<CR>
   \<CR>
-  \      *)   args="${args} $( puts "$1" <Bar> eval_escape )" ;;<CR>
+  \      *)   args="${args} $( soutln "$1" <Bar> eval_escape )" ;;<CR>
   \    esac<CR>
-  \    "${no_options}" && args="${args} $( puts "$1" <Bar> eval_escape )"<CR>
+  \    "${literal}" && args="${args} $( soutln "$1" <Bar> eval_escape )"<CR>
   \    shift 1<CR>
   \  done<CR>
   \<CR>
@@ -193,30 +202,31 @@ imap <buffer> <LocalLeader>main3
   \<CR>
   \  # Options processing<CR>
   \  args=''<CR>
-  \  no_options='false'<CR>
+  \  literal='false'<CR>
   \  while [ "$#" -gt 0 ]; do<CR>
-  \    if ! "${no_options}"; then<CR>
+  \    if ! "${literal}"; then<CR>
   \      # Split grouped single-character arguments up, and interpret '--'<CR>
   \      # Parsing '--' here allows "invalid option -- '-'" error later<CR>
   \      opts=''<CR>
   \      case "$1" in<CR>
-  \        --)      no_options='true'; shift 1; continue ;;<CR>
-  \        -[!-]*)  opts="${opts}$( puts "${1#-}" <Bar> sed 's/./ -&/g' )" ;;<CR>
+  \        --)      literal='true'; shift 1; continue ;;<CR>
+  \        -[!-]*)  opts="${opts}$( soutln "${1#-}" <Bar>
+  \ sed 's/./ -&/g' )" ;;<CR>
   \        *)       opts="${opts} $1" ;;<CR>
   \      esac<CR>
   \<CR>
   \      # Process arguments properly now<CR>
   \      for x in ${opts}; do case "${x}" in<CR>
   \        -h<Bar>--help)  show_help; exit 0 ;;<CR>
-  \        -e<Bar>--example)  puts "-$2-"; shift 1 ;;<CR>
+  \        -e<Bar>--example)  soutln "-$2-"; shift 1 ;;<CR>
   \<CR>
   \        # Put argument checks above this line (for error detection)<CR>
   \        # first '--' case already covered by first case statement<CR>
   \        -[!-]*)   show_help; die 1 "FATAL: invalid option '${x#-}'" ;;<CR>
-  \        *)        args="${args} $( puts "$1" <Bar> eval_escape )" ;;<CR>
+  \        *)        args="${args} $( soutln "$1" <Bar> eval_escape )" ;;<CR>
   \      esac done<CR>
   \    else<CR>
-  \      args="${args} $( puts "$1" <bar> eval_escape )"<CR>
+  \      args="${args} $( soutln "$1" <bar> eval_escape )"<CR>
   \    fi<CR>
   \    shift 1<CR>
   \  done<CR>
@@ -237,8 +247,8 @@ imap <buffer> <LocalLeader>init
   \<LocalLeader>main3<CR>
   \<CR><CR><CR>
   \# Helpers<CR>
-  \<LocalLeader>puts<CR>
-  \<LocalLeader>pute<CR>
+  \<LocalLeader>soutln<CR>
+  \<LocalLeader>serrln<CR>
   \<LocalLeader>die<CR>
   \<LocalLeader>escape<CR>
   \<CR>
