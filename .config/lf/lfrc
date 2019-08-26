@@ -81,9 +81,13 @@ cmd moveto ${{
 #   lf -remote 'send clear'
 #}}
 map t ${{
-  printf %s\\n "f : $f"
-  printf %s\\n "fs: $fs"
-  printf %s\\n "fx: $fx"
+  notify.sh "$(
+    printf %s\\n \
+      "f:  $f" \
+      "fs: $fs" \
+      "fx: $fx" \
+    | tee /dev/stderr
+  )"
 }}
 
 #map Q ${{
@@ -100,7 +104,7 @@ map t ${{
 map <esc> clear
 map r prompt-rename
 # Prepend '/.' since ${filesep} acts like a join
-map R $batch-rename.sh "/.${fx}"
+map R $batch-rename.sh --mass-mode --simplify-to-relative-path -- "/.${fx}"
 map o $handle.sh --file --terminal "${f}"
 map O &handle.sh --file --gui "${f}"
 map D delete
