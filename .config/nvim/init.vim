@@ -9,7 +9,7 @@ mapclear!
 
 " Automatically executes `filetype plugin indent on` and `syntax enable`
 " :PlugInstall to install
-call plug#begin('~/.vim/extra')
+call plug#begin('~/.config/nvim/extra')
   " VimWiki for markdown interlinks, (probably make my own, too much bloat)
   "Plug 'vimwiki/vimwiki', { 'branch': 'dev' } ", 'on': [] }
   ", 'for': 'markdown' }

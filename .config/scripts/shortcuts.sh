@@ -34,8 +34,8 @@ map="$(sh -c "$(<<EOF cat -
 EOF
 )" '_' "$@")"
 
-# Vifm
-FS="' *'|'"
-puts "${map}" | awk -v FS="${FS}" '(1) { print("mark " $2 " " $3); }' \
-  >"${vifm_shortcuts}"
+## Vifm
+#FS="' *'|'"
+#puts "${map}" | awk -v FS="${FS}" '(1) { print("mark " $2 " " $3); }' \
+#  >"${vifm_shortcuts}"
 

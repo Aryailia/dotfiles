@@ -25,7 +25,7 @@ killall fcitx; fcitx  # Restart fcitx
 #exec --no-startup-id compton --xrender-sync-fence --logpath /tmp/compton.log &
 xbacklight -set 40&            # Screen brightness
 x.sh set-wallpaper&            # Desktop Wallpaper
-compton --xrender-sync-fence&  # Window Transparency
+xcompmgr -c&                   # Window Transparency
 dunst&                         # Notifications
 sxhkd&                         # For hotkeys
 

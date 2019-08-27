@@ -4,9 +4,10 @@
 # eg. <'spaces'\'and quotes.txt' >  which will matches <spaces'and quotes.txt>
 out() { printf "'%s' " "$@"; }
 
-out "a" "${HOME}/.vim/after"
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-"${HOME}/.config"}"
+out "a" "${XDG_CONFIG_HOME}/nvim/after"
 out "b" "${HOME}/blog"
-out "c" "${HOME}/.config"
+out "c" "${XDG_CONFIG_HOME}"
 out "d" "$(c.sh downloads)"
 out "e" "${DOTENVIRONMENT}"
 out "f" "${HOME}/Documents"

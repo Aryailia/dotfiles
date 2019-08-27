@@ -89,8 +89,10 @@ super + alt + 5
 
 ## Recording
 ## Take screenshot
-#Print
-#  maim pic-full-$(date '+%y%m%d-%H%M-%S').png
+Print
+  flameshot gui
+#  maim -s | xclip -selection clipboard -target image/png
+#  maim -s pic-full-$(date '+%y%m%d-%H%M-%S').png
 ## Pick screenshot type
 #shift + Print
 #  maimpick

@@ -4,22 +4,29 @@
 # `ion` does not support `A=B` variable declaration (but supports `export A=B`)
 # `ion` does not support 2> or &1
 
-# ${HOME} directory cleanup
-export npm_config_userconfig="${HOME}/.config/npmrc"
+# ${HOME} directory cleanup, https://superuser.com/questions/874901/
+export XDG_CONFIG_HOME="${HOME}/.config"
+
+export npm_config_userconfig="${XDG_CONFIG_HOME}/rc/npmrc"
 export npm_config_cache="${HOME}/.local/share/npm"
 export NODE_REPL_HISTORY=''
 export CARGO_HOME="${HOME}/.local/lib/cargo"
 export RUSTUP_HOME="${HOME}/.local/bin/rustup"
 
 export GNUPGHOME="${HOME}/.local/gnupg"
-export PYTHONSTARTUP="${HOME}/.config/pythonrc"
-export NOTMUCH_CONFIG="${HOME}/.config/notmuch-config"
-export GTK2_RC_FILES="${HOME}/.config/gtk-2.0/gtkrc-2.0"
+export PASSWORD_STORE_DIR="${HOME}/.local/password-store"
+
+export VIMINIT='let $MYVIMRC="$XDG_CONFIG_HOME/nvim/init.vim" | source $MYVIMRC'
+export VIMDOTDIR="${XDG_CONFIG_HOME}/nvim"
+export WGETRC="${XDG_CONFIG_HOME}/rc/wgetrc"
+export PYTHONSTARTUP="${XDG_CONFIG_HOME}/rc/pythonrc"
+export NOTMUCH_CONFIG="${XDG_CONFIG_HOME}/rc/notmuch-config"
+export GTK2_RC_FILES="${XDG_CONFIG_HOME}/gtkrc-2.0"
 export LESSHISTFILE='/dev/null'
-export INPUTRC="${HOME}/.config/inputrc"
+export INPUTRC="${XDG_CONFIG_HOME}/rc/inputrc"
 
 # PATH
-export SCRIPTS="${HOME}/.config/scripts"
+export SCRIPTS="${XDG_CONFIG_HOME}/scripts"
 export GOPATH="${HOME}/.local/lib/go"
 printf %s\\n ":${PATH}:" | grep -q ":${SCRIPTS}:" \
   || export PATH="${PATH}:${SCRIPTS}"
