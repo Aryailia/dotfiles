@@ -59,12 +59,17 @@ main() {
 
 process() {
   # Checking all the paths before we open the editor
-  <&0 tee "${BEFORE}" "${CHECK}" "${AFTER}" >/dev/null
+  <&0 tee "${BEFORE}" "${CHECK}" >/dev/null
   mutate_check_if_exists "${CHECK}" || exit "$?"
-  "${FLAG_SIMPILY_TO_RELPATH}" && simplify_to_relpath "${BEFORE}" >"${AFTER}"
-  cp "${AFTER}" "${CHECK}"
+
+  # Check needs to be the final endpoint
+  if "${FLAG_SIMPILY_TO_RELPATH}"
+    then simplify_to_relpath "${BEFORE}" >"${CHECK}"
+    else cp "${BEFORE}" "${CHECK}"
+  fi
 
   # Print to the temp files (also easy to enter manual tests)
+  # Only want one pipe to ${BEFORE} and ${AFTER}, so use ${CHECK} for input
   { <<EOF cat - "${CHECK}"
 ${HEADER}
 
@@ -72,9 +77,10 @@ EOF
 } | tee "${BEFORE}" "${AFTER}" >/dev/null
 
   # The titular open in editor
-  #"${EDITOR}" "${AFTER}"
-  "${EDITOR}" -c "$( expr "$( soutln "${HEADER}" | wc -l )" + 2 )G" "${AFTER}"
-  #"${EDITOR}" -c '$' -- "${AFTER}"  # and move to last line
+  start="$( expr "$( soutln "${HEADER}" | wc -l )" + 2 )"
+  "${EDITOR:-vim}" -c "${start}" -- "${AFTER}"  # move to after header
+  #"${EDITOR:-vim}" -c '$' -- "${AFTER}"      # move to last line
+  #"${EDITOR:-vim}" -- "${AFTER}"
 
   mass_move "${BEFORE}" "${AFTER}"
 }
@@ -212,7 +218,7 @@ pop() {
 
   # Removes the first pathname. Exits with error if none found
   soutln "set wrapscan|1|?${EX_REGEXP}?,\$delete|write|quit" \
-    | ex "$1" >/dev/null
+    | ex -- "$1" >/dev/null
 }
 
 # Checks for unique absolute or unique relative paths
@@ -228,12 +234,31 @@ simplify_to_relpath() {
     else
       soutln "${path}"
     fi
-  done
+  done | reverse
+}
+
+# Reverse
+reverse() {
+  # Goal: Get all paths to exist one line by tokenising for feed to tac
+  # 1. Replace '@' -> '@a', then newline "\n" -> '@n' except when newlines
+  #    exists between path entries
+  # 2. `tac` to reverse order
+  # 3. Detokenise @a and @n
+
+  # Need trailing newline because UNIX utils need a trailing newline (or EOF)
+  # ':a;{N;$!ba}' append everything but last line into pattern space
+  # Then do all the substitutions after '}'
+  # BSD apparently needs labels to be separated
+  # https://stackoverflow.com/questions/1251999/ - Isaac for adding brackets
+  sed -e ':a' -e '{N;$!ba}' -e 's#@#@a#g' -e 's#\n#@n#g' \
+    -e 's#@n/./#\n/./#g' -e 's#@n././#\n././#g' \
+    | tac \
+    | sed -e 's#@n#\n#g' -e 's#@a#@#g'
 }
 
 normalise_path() {
-  base="$( basename "$1"; printf a )"; base="${base%?a}"
-  dir="$( dirname "$1"; printf a )";   dir="${dir%?a}"
+  base="$( basename -- "$1"; printf a )"; base="${base%?a}"
+  dir="$( dirname -- "$1"; printf a )";   dir="${dir%?a}"
 
   if [ "${dir}" = '/' ]; then
     if [ "${base}" = '/' ]
