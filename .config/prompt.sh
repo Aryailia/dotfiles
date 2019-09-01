@@ -1,13 +1,14 @@
 #!/usr/bin/env sh
   # for setting the indent
 # Depends on sudo and git
-# https://stackoverflow.com/questions/24839271 for using \001 and \002
 
   exitcode="${1:-"N/A"}" # I should be passed "$?"
      timer="${2:-0}"
 background="${3:-0}"     # I should be passed "$!"
 #backgroundpid="${3:-0}"
 
+# https://stackoverflow.com/questions/24839271 for using \001 and \002
+# They stop bash from restricting the width (typing after PS1 runs to see)
   black='\001\033[40m\002'
     red='\001\033[41m\002'
   green='\001\033[42m\002'
@@ -19,14 +20,14 @@ magenta='\001\033[45m\002'
 
   whitetext='\001\033[1;37m\002'
   blacktext='\001\033[1;30m\002'
-formatclear='\001\033[0m\002'
+formatclear='\001\033[0;00m\002'
 # If I ever wanted to toy with powerline character again
 #local powerline=$'\uE0B0'
 #local green2yellow=$'\[\033[32;43m\]'
 #local yellow2black=$'\[\033[33;40m\]'
 
-text="${whitetext}"
-add() { text="${text}$*"; }
+bout() { printf %b "$@"; }
+bout "${formatclear}${whitetext}"
 
 
 ###
@@ -35,15 +36,15 @@ add() { text="${text}$*"; }
 # Check if sudo still alive by sudo with error (nothing) as password
 # Returns empty if alive || lacks permissions / requires password
 if [ -z "$(sudo --non-interactive --validate 2>&1)" ]
-  then add "${magenta} ${USER} "
-  else add "${green} ${USER} "
+  then bout "${magenta} ${USER} "
+  else bout "${green} ${USER} "
 fi
 
 ###
 # Attach hostname to username with no space and trunk hostname to six
-#add "${yellow}\$(echo '\\h' | cut -c1-6) "
-#add "${yellow2black}${powerline}${whitetext}"
-add "${yellow}$(hostname | cut -c 1-6) "
+#bout "${yellow}\$(echo '\\h' | cut -c1-6) "
+#bout "${yellow2black}${powerline}${whitetext}"
+bout "${yellow}$(hostname | cut -c 1-6) "
 
 
 #
@@ -69,7 +70,7 @@ add "${yellow}$(hostname | cut -c 1-6) "
 
 ###
 # Add exit code of last command
-add "${black} ${exitcode} "
+bout "${black} ${exitcode} "
 
 
 ###
@@ -79,16 +80,16 @@ add "${black} ${exitcode} "
 if   [ "${PWD}" = "${HOME}" ]; then workingdir='~'
 elif [ "${PWD}" = "/" ];       then workingdir='/'
 else                           workingdir="/$(basename "${PWD}")"; fi
-add "${blue} ${workingdir} "
+bout "${blue} ${workingdir} "
 
 
 ###
 # Attach branch name and file revision count if in a git active directory
 # Source: Parth - https://github.com/Parth/dotfiles
 if git rev-parse --is-inside-work-tree 2>/dev/null | grep -q 'true'; then
-  add "${cyan} $(git rev-parse --abbrev-ref HEAD 2>/dev/null) "
+  bout "${cyan} $(git rev-parse --abbrev-ref HEAD 2>/dev/null) "
   change_count=$(git status --short | wc -l)
-  [ "${change_count}" -gt 0 ] && add "${red}+${change_count} "
+  [ "${change_count}" -gt 0 ] && bout "${red}+${change_count} "
 fi
 
 ###
@@ -97,17 +98,17 @@ fi
 # Look at trap 'timer' DEBUG if I want to skip delay timer, too hacky for me
 # If too much idle time, can just enter to set to 0 again
 if [ "${timer}" -gt 180 ]; then
-  add "${magenta} "
+  bout "${magenta} "
   if   [ "${timer}" -lt 250 ]; then
-    add "${timer}s"
+    bout "${timer}s"
   elif [ "${timer}" -lt 3600 ]; then
-    add "$((timer / 60))m$((timer % 60))s"
+    bout "$((timer / 60))m$((timer % 60))s"
   elif [ "${timer}" -lt 86400 ]; then
-    add "$((timer / 3600))s$((timer % 3600 / 60))m"
+    bout "$((timer / 3600))s$((timer % 3600 / 60))m"
   else
-    add "$((timer / 86400))d$((timer % 86400 / 3600))h"
+    bout "$((timer / 86400))d$((timer % 86400 / 3600))h"
   fi
-  add " "
+  bout " "
 fi
 
 ###
@@ -116,11 +117,9 @@ fi
 # `kill -0 ` errors if process not running or unable to send signals to process
 [ "${background}" != "" ] && [ "${background}" !=  "0" ] \
     && kill -0 "${background}" >/dev/null 2>&1 \
-  && add "${white}${blacktext} PID&:${background} "
+  && bout "${white}${blacktext} PID&:${background} "
 
-
-printf '%b%b' "${text}" "${formatclear} "
+# Six-em-space U+2006, makes searching for prompts simplier
+bout "${formatclear} "
 #printf '%b%b%b' "${text}" "${formatclear}" "\002"
-#printf '%b' "\001\033[32m\002cheese\001\033[0m\002"
-#echo -e "\[${text}${formartclear}\033[0m \]"
 
