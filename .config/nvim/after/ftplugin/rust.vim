@@ -1,10 +1,11 @@
 function! Build()
   write
-  execute("vertical T rustc % -o ${TMPDIR}/" . expand("%"))
+  " `%` is the full path, `expand("%")` is just the current file name
+  execute("vertical T rustc % -o \"${TMPDIR}/" . expand("%") . '"')
 endfunction
 
 function! Run()
-  execute("T ${TMPDIR}/" . expand("%"))
+  execute("vertical T \"${TMPDIR}/" . expand("%") . '"')
 endfunction
 
 "function! Lint()

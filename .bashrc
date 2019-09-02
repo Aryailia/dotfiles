@@ -41,5 +41,7 @@ EOF
 cd_of() {
   temp="$("$@"; err="$?"; printf x; exit "${err}")" || return "$?"
   temp="${temp%x}"
-  cd "${temp}" && ls --color=auto --group-directories-first -hA
+  if [ "${temp}" != "${PWD}" ]; then
+    cd "${temp}" && ls --color=auto --group-directories-first -hA
+  fi
 }

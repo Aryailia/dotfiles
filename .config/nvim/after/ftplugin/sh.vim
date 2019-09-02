@@ -29,6 +29,8 @@ inoremap <buffer> <LocalLeader>sbawk
 inoremap <buffer> <LocalLeader>sbpython
   \ #!/usr/bin/env python
 
+inoremap <buffer> <LocalLeader>glob * .[!.]* ..?*
+
 inoremap <buffer> <LocalLeader>name
   \ name="$( basename "$0"; printf a )"; name="${name%?a}"
 inoremap <buffer> <LocalLeader>soutln

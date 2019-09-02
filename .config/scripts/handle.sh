@@ -41,14 +41,14 @@ ENUM_PLAINTEXT='2'
 
 PATH_TYPE="${ENUM_DEFAULT}"
 ENUM_HYPERTEXT='1'
-ENUM_LOCAL='2'
+ENUM_FILE='2'
 
-COMMAND="${ENUM_DEFAULT}"
 ENUM_DOWNLOAD='1'
 ENUM_TERMINAL='2'
 ENUM_GUI='3'
 ENUM_PREVIEW='4'
 ENUM_EDIT='5'
+COMMAND="${ENUM_TERMINAL}"  # Select the default
 
 
 # Handles options that need arguments
@@ -64,7 +64,7 @@ main() {
       -h|--help)  show_help; exit 0 ;;
       -p|--print)     FLAG_PRINT='true' ;;
       -l|--link)      PATH_TYPE="${ENUM_HYPERTEXT}" ;;
-      -f|--file)      PATH_TYPE="${ENUM_LOCAL}" ;;
+      -f|--file)      PATH_TYPE="${ENUM_FILE}" ;;
 
       -d|--download)  COMMAND="${ENUM_DOWNLOAD}" ;;
       -t|--terminal)  COMMAND="${ENUM_TERMINAL}" ;;
@@ -85,14 +85,10 @@ main() {
   # Cannot download local files
   # Cannot edit online files
   # Careful about boolean operator order
-  if [ "${PATH_TYPE}" = "${ENUM_DEFAULT}" ] \
-    && [ -n "$( puts "${1}" | uriscan.sh - )" ] \
-    || [ "${PATH_TYPE}" = "${ENUM_HYPERTEXT}" ]
+  if  [ "${PATH_TYPE}" = "${ENUM_FILE}" ] || {
+      [ "${PATH_TYPE}" = "${ENUM_DEFAULT}" ] && [ -e "${1}" ] \
+    ; }
   then
-    [ "${COMMAND}" = "${ENUM_EDIT}" ] \
-      && die "${ENUM_NOPREVIEW}" 'FATAL' 'Cannot `--edit` hypertext links'
-    external_handle_link "${1}"
-  else
     [ "${COMMAND}" = "${ENUM_DOWNLOAD}" ] \
       && die "${ENUM_NOPREVIEW}" 'FATAL' 'Cannot `--download` local paths'
 
@@ -100,6 +96,10 @@ main() {
     local_handle_mime "${1}"
     local_handle_fallback "${1}"
     exit "${ENUM_NOPREVIEW}"
+  else
+    [ "${COMMAND}" = "${ENUM_EDIT}" ] \
+      && die "${ENUM_NOPREVIEW}" 'FATAL' 'Cannot `--edit` hypertext links'
+    external_handle_link "${1}"
   fi
 }
 
@@ -160,7 +160,8 @@ local_handle_extension() {
     # PDF
     pdf)
       # Preview as text conversion
-      t pdftotext -nopgbrk -q -- "${1}" - | "${EDITOR}"
+      t sh -c "pdftotext -nopgbrk -q -- '${1}' - | '${EDITOR}'"
+      t exit "${ENUM_SUCCESS}"
       g setsid zathura -- "${1}" >/dev/null 2>&1& g exit "${ENUM_SUCCESS}"
       #e sigil
       p pdftotext -l 10 -nopgbrk -q -- "${1}" -  # -l lines, -q quiet
@@ -179,7 +180,7 @@ local_handle_extension() {
     #  exit "${ENUM_NOPREVIEW}" ;;
 
     doc|docx|xls|xlsx)
-      g libreoffice "${1}"
+      g setsid libreoffice "${1}"
       exit "${ENUM_NOPREVIEW}" ;;
 
     # HTML
