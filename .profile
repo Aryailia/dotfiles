@@ -12,6 +12,8 @@ export npm_config_cache="${HOME}/.local/share/npm"
 export NODE_REPL_HISTORY=''
 export CARGO_HOME="${HOME}/.local/lib/cargo"
 export RUSTUP_HOME="${HOME}/.local/bin/rustup"
+export GEM_PATH="${HOME}/.local/lib/gem"
+export GEM_SPEC_CACHE="${HOME}/.cache/lib/gem"
 
 export GNUPGHOME="${HOME}/.local/gnupg"
 export PASSWORD_STORE_DIR="${HOME}/.local/password-store"

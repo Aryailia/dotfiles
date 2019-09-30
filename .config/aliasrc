@@ -31,25 +31,39 @@ alias    gs='git status'
 #  git submodule foreach '\''git checkout -b \"$1\"'\''
 #" _'
 #alias    gu='git submodule update --remote --merge'
-alias  grep='grep --color=auto'
-alias     l='ls --color=auto --group-directories-first -h'
-alias    ls='ls --color=auto'
-alias    la='ls --color=auto --group-directories-first -hA'
-alias   lal='ls --color=auto --group-directories-first -hAl'
-alias    ll='ls --color=auto --group-directories-first -hl'
+alias  grep='\grep --color=auto'
+alias     l='\ls --color=auto --group-directories-first -h'
+alias    la='\ls --color=auto --group-directories-first -hA'
+alias   lal='\ls --color=auto --group-directories-first -hAl'
+alias    ll='\ls --color=auto --group-directories-first -hl'
+alias    ls='\ls --color=auto'
 alias   mkf='sh -c '\''for x in "$@"; do
-  name="$(echo "" | sed "s/^/$x/"; printf a)"; name="${name%?a}"
+  [ "$1" != "${1#*|*}" ] && { echo "Do not use \"|\" in file name"; exit 1; }
+  # With `sed` can use escapes like "\n" in filenames
+  name="$(printf \\n | sed "s|^|$x|"; printf a)"; name="${name%?a}"
   touch -- "${name}"
   chmod 644 -- "${name}"
 done'\'' _'
 alias   mks='sh -c '\''for x in "$@"; do
-  name="$(echo "" | sed "s/^/$x/"; printf a)"; name="${name%?a}"
+  [ "$1" != "${1#*|*}" ] && { echo "Do not use \"|\" in file name"; exit 1; }
+  name="$(printf \\n | sed "s|^|$x|"; printf a)"; name="${name%?a}"
   touch -- "${name}"
   chmod 755 -- "${name}"
 done'\'' _'
 alias    mt='file --dereference --brief --mime-type --'
+alias  mnta='sh -c '\''
+  [ -e "/dev/$1" ] || { printf %s\\n "Device not found"; exit 1; }
+  [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; }
+  sudo simple-mtfps --device "$1" "$2"
+  #chown "$( id -u ):$( id -g )" "$2"
+'\'' _'
+alias  mntu='sh -c '\''
+  [ -e "/dev/$1" ] || { printf %s\\n "Device not found"; exit 1; }
+  [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; }
+  sudo mount -o "uid=$( id -u ),gid=$( id -g )" "/dev/$1" -- "$2"
+'\'' _'
 alias    pm='package-manager.sh'
-alias    rb='trash'
+alias     r='trash'
 alias  rhkd='pkill -USR1 sxhkd'  # Sxhkd updates on receiving usr1 signal
 alias    rx='xrdb ~/.Xresources'
 #alias  rrc=''  # In individual rc files, reminder to not re-alias this
