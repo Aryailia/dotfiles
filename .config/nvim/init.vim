@@ -143,15 +143,22 @@ vmap <unique> <C-l> <Esc><Plug>SelectNextURI
 "inoremap <unique> <C-m> <C-o>o
 
 " Build(), Run(), Lint() are defined in filetype for customisation
-noremap <unique> <silent> <Leader>1 :call Build()<CR>
-noremap <unique> <silent> <Leader>2 :call Run()<CR>
-noremap <unique> <silent> <Leader>3 :vertical T clear<CR>
-noremap <unique> <silent> <Leader>4 :vertical T exit<CR>:redraw<CR>
+function! Close()
+  vertical T exit
+  redraw
+endfunction
+
+noremap <unique> <silent> <Leader>1 :call BuildBackground()<CR>
+noremap <unique> <silent> <Leader>2 :call Build()<CR>
+noremap <unique> <silent> <Leader>3 :call Run()<CR>
+noremap <unique> <silent> <Leader>4 :vertical T clear<CR>
+noremap <unique> <silent> <Leader>5 :call Close()<CR>
 noremap <unique> <silent> <Leader>l :call Lint()<CR>
 imap <unique> <silent> <F1> <C-o><Leader>1
 imap <unique> <silent> <F2> <C-o><Leader>2
 imap <unique> <silent> <F3> <C-o><Leader>3
-imap <unique> <silent> <F4> <C-o><Leader>3
+imap <unique> <silent> <F4> <C-o><Leader>4
+imap <unique> <silent> <F5> <C-o><Leader>5
 
 
 " Plugin Development Debugging stuff
@@ -166,7 +173,19 @@ noremap <unique> <leader>rs :write! !parsemarkdown.awk<CR>
 nnoremap <unique> <F11> :call FollowCursorLink()<CR>
 nnoremap <unique> <F12> :call FollowBack()<CR>
 
+" Snippets
+" Insert two full-width spaces, '~' is nbps in latex
+" No problem using Japanese IMEs to insert full-width spaces
+inoremap <unique> <LocalLeader>~ 　　
+inoremap <unique> ，～ 　　
 
+
+
+" Filetype recognition
+" Blank *.tex files default to 'plain' (affects which ftplugin gets used)
+let g:tex_flavor = 'latex'  " See :h filetype-overrule
+" .tex files need a `\begin{document}`-`\end{document}` block to be detected
+"autocmd BufRead,BufNewFile *.tex set filetype=plaintex
 
 " Vimrc garbage
 function! SaveWindowPosition()
