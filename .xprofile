@@ -29,9 +29,5 @@ xcompmgr -c&                   # Window Transparency
 dunst&                         # Notifications
 sxhkd&                         # For hotkeys
 
-## Set Caps to Mod/Escape
-#setxkbmap -option caps:super && killall xcape 2>/dev/null
-#xcape -e 'Super_L=Escape' &
-## Properties button extra Mod/Escape
-#xmodmap -e 'keycode 135 = Super_R' &
-
+# Swap CapsLock and ControlR
+xmodmap ~/.config/xmodmap&

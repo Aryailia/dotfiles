@@ -76,3 +76,6 @@ export LESS_TERMCAP_ue="$(printf '%b' '[0m')"
 printf %s\\n "$0" | grep -q 'bash$' \
   && test -f "${HOME}/.bashrc" \
   && . "${HOME}/.bashrc"
+
+# Switch Escape and RControl
+sudo -n loadkeys ~/.config/remap-caps-rctrl.map 2>/dev/null
