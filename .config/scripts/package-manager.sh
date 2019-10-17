@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+# for npm: https://stackoverflow.com/questions/17937960/how-to-list-npm-user-installed-packages
+
 name="$( basename "$0"; printf a )"; name="${name%?a}"
 
 show_help() {

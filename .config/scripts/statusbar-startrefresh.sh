@@ -108,10 +108,12 @@ status() {
         *)           printf %s "$x " ;;
       esac
       case "$x" in
-        8[5-9]|9[0-4]) [ "$( cat /sys/class/power_supply/AC/online )" = '1' ] \
-             && notify.sh "$x charged" ;;
-        1[0-9]) [ "$( cat /sys/class/power_supply/AC/online )" = '0' ] \
-           notify.sh "$x left" ;;
+        8[5-9]|9[0-4])
+          [ "$( cat /sys/class/power_supply/AC/online )" = '1' ] \
+            && notify.sh "$x charged" ;;
+        [0-9]|1[0-9])
+          [ "$( cat /sys/class/power_supply/AC/online )" = '0' ] \
+            && notify.sh "$x left" ;;
       esac
     done
 
