@@ -78,4 +78,4 @@ printf %s\\n "$0" | grep -q 'bash$' \
   && . "${HOME}/.bashrc"
 
 # Switch Escape and RControl, have this enable in '/etc/sudoers' `visudo`
-sudo -n loadkeys "${XDG_CONFIG_HOME}/remap-caps-rctrl.map" 2>/dev/null
+sudo -n loadkeys "${XDG_CONFIG_HOME}/rc/remap-caps-rctrl.map" 2>/dev/null
