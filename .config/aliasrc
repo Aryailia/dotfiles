@@ -62,6 +62,7 @@ alias  mntu='sh -c '\''
   [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; }
   sudo mount -o "uid=$( id -u ),gid=$( id -g )" "/dev/$1" -- "$2"
 '\'' _'
+alias    nr='PATH="$( npm bin ):${PATH}" sh -c "\"\$@\"" _'  # npm run
 alias    pm='package-manager.sh'
 alias     r='trash'
 alias  rhkd='pkill -USR1 sxhkd'  # Sxhkd updates on receiving usr1 signal

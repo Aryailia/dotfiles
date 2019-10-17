@@ -30,4 +30,4 @@ dunst&                         # Notifications
 sxhkd&                         # For hotkeys
 
 # Swap CapsLock and ControlR
-xmodmap ~/.config/xmodmap&
+xmodmap "${XDG_CONFIG_HOME}xmodmap"&

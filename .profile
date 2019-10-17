@@ -4,9 +4,9 @@
 # `ion` does not support `A=B` variable declaration (but supports `export A=B`)
 # `ion` does not support 2> or &1
 
-# ${HOME} directory cleanup, https://superuser.com/questions/874901/
 export XDG_CONFIG_HOME="${HOME}/.config"
 
+# ${HOME} directory cleanup, https://superuser.com/questions/874901/
 export npm_config_userconfig="${XDG_CONFIG_HOME}/rc/npmrc"
 export npm_config_cache="${HOME}/.local/share/npm"
 export NODE_REPL_HISTORY=''
@@ -77,5 +77,5 @@ printf %s\\n "$0" | grep -q 'bash$' \
   && test -f "${HOME}/.bashrc" \
   && . "${HOME}/.bashrc"
 
-# Switch Escape and RControl
-sudo -n loadkeys ~/.config/remap-caps-rctrl.map 2>/dev/null
+# Switch Escape and RControl, have this enable in '/etc/sudoers' `visudo`
+sudo -n loadkeys "${XDG_CONFIG_HOME}/remap-caps-rctrl.map" 2>/dev/null
