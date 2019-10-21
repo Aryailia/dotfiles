@@ -63,6 +63,8 @@ super + BackSpace ; super + { w, e, r, BackSpace }
     'Reboot?' | grep -q 'Yes' && sudo reboot, \
     'Close Xorg?' | grep -q 'Yes' && killall Xorg \
   }
+super + BackSpace ; super + s
+  xlock -mode blank
 #super + x
 #  mpc pause; pauseallmpv; i3lock -e -f -c 1d2021; xset dpms force off
 #XF86Launch1

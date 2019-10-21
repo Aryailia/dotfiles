@@ -12,16 +12,26 @@ set ifs "\n"        # Sets ${IFS} for shell commands
 set scrolloff 10    # Scroll offset, leave space at top/bottom of screen
 set hidden on
 
-
-
 # Commands
 cmd open ${{
-  case "$( file --mime-type --brief "${f}" )" in
+  mimetype() { file --mime-type --brief "$1"; }
+  NEWLINE='
+'
+  case "$( mimetype "${f}" )" in
     text/troff*)  man ./ "${f}" ;;
-    text/*)       "${EDITOR}" "${f}" ;;
-    image/*)      dirname "${f}" | setsid sxiv -ai >/dev/null 2>&1& ;;
-    *)            printf %s "${fx}" | xargs-split.pl '\n/\./' '/' \
-                    handle.sh --file --gui ;;
+    image/* )
+      dir="$( dirname "$f"; printf a )"; dir="${dir%?a}"
+      for file in "${dir}"/* "${dir}"/.[!.]* "${dir}"/..?*; do
+        [ ! -e "${file}" ] && continue
+        # Skip files with newlines
+        [ "${file}" != "${file##*"${NEWLINE}"*}" ] && continue
+        # Skip non-images
+        case "$( mimetype "${file}" )" in image/* ) ;; *) continue ;; esac
+
+        printf %s\\n "${file}"
+      done | setsid sxiv -ai >/dev/null 2>&1& ;;
+
+    *) printf %s "${fx}" | xargs-split.pl '\n/\./' '/' handle.sh --file --gui ;;
   esac
 }}
 

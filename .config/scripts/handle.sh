@@ -224,9 +224,11 @@ local_handle_mime() {
     # Image
     image/*)
       #t ueberzug "${1}" && exit "${ENUM_SUCCESS}"
+      t chafa "${1}" && exit "${ENUM_SUCCESS}"
       g setsid sxiv -a "${1}" >/dev/null 2>&1& g exit "${ENUM_SUCCESS}"
       e setsid krita -- "${1}" >/dev/null 2>&1& e exit "${ENUM_SUCCESS}"
       #p img2txt --gamma=0.6 -- "${1}" && exit "${ENUM_SUCCESS}"
+      #p chafa --colors 16 --symbols=vhalf --bg="#000000" "${1}"
       p exiftool "${1}"
       exit "${ENUM_NOPREVIEW}" ;;
 
