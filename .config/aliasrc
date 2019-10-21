@@ -13,7 +13,12 @@ alias   bme='browser.sh menu search'
 alias   btl='browser.sh terminal link'
 alias   btb='browser.sh terminal bookmarks'
 alias   bte='browser.sh terminal search'
-alias    cw='cd_of sh -c '\''printf %s "$(dirname "$(command -v "$1")")"'\'' _'
+alias    ct='cd_of sh -c '\''
+  printf %s "$( tmux display-message -F "#{pane_current_path}" -p -t "$1" )"
+'\'' _'  # Change to same directory as another tmux pane
+alias    cw='cd_of sh -c '\''
+  printf %s "$( dirname "$( command -v "$1" )" )"
+'\'' _'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='browser.sh edit search'
 alias    es='browser.sh edit search'
@@ -71,7 +76,7 @@ alias    rx='xrdb ~/.Xresources'
 alias    od='handle.sh -d --'
 alias    oe='handle.sh -e --'
 alias    og='handle.sh -g --'
-alias    op='handle.sh -p --'
+alias    op='handle.sh -v --'
 alias    ot='handle.sh -t --'
 alias     t='tmux.sh'
 alias     w='weather.sh'
@@ -83,8 +88,8 @@ alias c='cd_of sh -c '\''
     #return 1
   else
     namedpath.sh "$1"
-  fi'\'' _ \
-'
+  fi
+'\'' _'
 
 # Need to `tac | rev` in case
 #alias f='cd_of sh -c '\''
@@ -102,8 +107,7 @@ alias f='cd_of sh -c '\''
   b="$(cat "${tmp}"; printf a)"; b="${b%a}"
   printf %s\\n "$b" >&2
   printf %s "$b"
-  '\'' _; \
-'
+'\'' _'
 
 #ffmpeg -i 'input' -1-6.mp4 -vn -acodec copy 'output'
 
