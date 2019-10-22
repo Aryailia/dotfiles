@@ -1,8 +1,10 @@
 #!/usr/bin/env sh
 # https://stackoverflow.com/questions/6429515
-stty -ixon -ixoff # Archaic with modern CPU/modem speeds. Reclaims C-q and C-s
+#stty -ixon -ixoff # Archaic with modern CPU/modem speeds. Reclaims C-q and C-s
 
-alias    ab='abook --datafile "${HOME}/.config/abook/addressbook"'
+# Because of the breaking across newlines, fish needs semicolons
+
+alias    ab='abook --datafile "$HOME/.config/abook/addressbook"'
 alias   bcb='browser.sh menu bookmarks --browser clipboard'
 alias   bgl='browser.sh gui link'
 alias   bgb='browser.sh gui bookmarks'
@@ -36,38 +38,37 @@ alias    gs='git status'
 #  git submodule foreach '\''git checkout -b \"$1\"'\''
 #" _'
 #alias    gu='git submodule update --remote --merge'
-alias  grep='\grep --color=auto'
+alias     g='\grep --color=auto'
 alias     l='\ls --color=auto --group-directories-first -h'
 alias    la='\ls --color=auto --group-directories-first -hA'
 alias   lal='\ls --color=auto --group-directories-first -hAl'
 alias    ll='\ls --color=auto --group-directories-first -hl'
-alias    ls='\ls --color=auto'
+#alias    ls='\ls --color=auto'
+# With `sed` can use escapes like "\n" in filenames
 alias   mkf='sh -c '\''for x in "$@"; do
-  [ "$1" != "${1#*|*}" ] && { echo "Do not use \"|\" in file name"; exit 1; }
-  # With `sed` can use escapes like "\n" in filenames
-  name="$(printf \\n | sed "s|^|$x|"; printf a)"; name="${name%?a}"
-  touch -- "${name}"
-  chmod 644 -- "${name}"
+  [ "$1" != "${1%%*|*}" ] && { echo "Do not use \"|\" in file name"; exit 1; };
+  name="$( printf \\n | sed "s|^|$x|"; printf a )"; name="${name%?a}";
+  touch -- "${name}";
+  chmod 644 -- "${name}";
 done'\'' _'
 alias   mks='sh -c '\''for x in "$@"; do
-  [ "$1" != "${1#*|*}" ] && { echo "Do not use \"|\" in file name"; exit 1; }
-  name="$(printf \\n | sed "s|^|$x|"; printf a)"; name="${name%?a}"
-  touch -- "${name}"
-  chmod 755 -- "${name}"
+  [ "$1" != "${1#*|*}" ] && { echo "Do not use \"|\" in file name"; exit 1; };
+  name="$(printf \\n | sed "s|^|$x|"; printf a)"; name="${name%?a}";
+  touch -- "${name}";
+  chmod 755 -- "${name}";
 done'\'' _'
 alias    mt='file --dereference --brief --mime-type --'
 alias  mnta='sh -c '\''
-  [ -e "/dev/$1" ] || { printf %s\\n "Device not found"; exit 1; }
-  [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; }
-  sudo simple-mtfps --device "$1" "$2"
-  #chown "$( id -u ):$( id -g )" "$2"
-'\'' _'
+  [ -e "/dev/$1" ] || { printf %s\\n "Device not found"; exit 1; };
+  [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; };
+  sudo simple-mtfps --device "$1" "$2";
+'\'' _'  #chown "$( id -u ):$( id -g )" "$2"
 alias  mntu='sh -c '\''
-  [ -e "/dev/$1" ] || { printf %s\\n "Device not found"; exit 1; }
-  [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; }
-  sudo mount -o "uid=$( id -u ),gid=$( id -g )" "/dev/$1" -- "$2"
+  [ -e "/dev/$1" ] || { printf %s\\n "Device not found"; exit 1; };
+  [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; };
+  sudo mount -o "uid=$( id -u ),gid=$( id -g )" "/dev/$1" -- "$2";
 '\'' _'
-alias    nr='PATH="$( npm bin ):${PATH}" sh -c "\"\$@\"" _'  # npm run
+alias    nr='sh -c "PATH=\"\$( npm bin ):\$PATH\" \"\$@\"" _'  # npm run
 alias    pm='package-manager.sh'
 alias     r='trash'
 alias  rhkd='pkill -USR1 sxhkd'  # Sxhkd updates on receiving usr1 signal
@@ -84,10 +85,9 @@ alias     v='nvim'
 
 alias c='cd_of sh -c '\''
   if [ -z "$1" ]; then
-    namedpath.sh --interactive
-    #return 1
+    namedpath.sh --interactive;
   else
-    namedpath.sh "$1"
+    namedpath.sh "$1";
   fi
 '\'' _'
 
@@ -99,24 +99,24 @@ alias c='cd_of sh -c '\''
 #  '\'' _; \
 #'
 
+# Shell removes the EOF character from `cat` on assignment I believe
 alias f='cd_of sh -c '\''
-  tmp="$(mktemp -p "${TMPDIR:-/tmp}")"
-  trap "rm \"${tmp}\"" EXIT
-  lf -last-dir-path="${tmp}" >&2
-  # Shell removes the EOF character from cat on assignment here I believe
-  b="$(cat "${tmp}"; printf a)"; b="${b%a}"
-  printf %s\\n "$b" >&2
-  printf %s "$b"
+  tmp="$(mktemp -p "${TMPDIR:-/tmp}")";
+  trap "rm \"${tmp}\"" EXIT;
+  lf -last-dir-path="${tmp}" >&2;
+  b="$(cat "${tmp}"; printf a)"; b="${b%a}";
+  printf %s\\n "$b" >&2;
+  printf %s "$b";
 '\'' _'
 
 #ffmpeg -i 'input' -1-6.mp4 -vn -acodec copy 'output'
 
 # Android has no sudo
 alias updateman='sh -c "sudo -V >/dev/null 2>&1" \
-  && sudo makewhatis "${PREFIX}/usr/share/man" \
+  && sudo makewhatis "$PREFIX/usr/share/man" \
   || makewhatis "/usr/share/man"
 '
-alias list-path='printf %s\\n "${PATH}" | tr ":" "\n" | sort'
+alias list-path='printf %s\\n "$PATH" | tr ":" "\n" | sort'
 
 # -i list all Internet and x.25 network files
 # -n prevents conversion of network numbers to host names (DNS translation)
@@ -126,10 +126,8 @@ uname -o | grep -q 'GNU/Linux' && alias list-open-ports='lsof -i -nlP \
   | awk "{print \$9, \$8, \$1}" | sed "s/.*://" | sort -u'
 uname -o | grep -q 'Android' && alias list-open-ports='lsof -i -nlP'
 alias list-imes='sed -n "/^EnabledIMList=/{ s/^.*=//p; }" \
-  ~/.config/fcitx/profile \
+  $XDG_CONFIG_HOME/fcitx/profile \
   | awk -v RS="," -v FS=":" "(\$2 ~ /True/){ print \$1; }"'
-alias pipugradeall='python -m pip install --upgrade $(
-  python -m pip list --outdated | awk "(NR > 2){ print \$0;}")'
-#alias npmexec='printf "%s/%s" "$(npm bin)"'
-alias rimeinstall='rime_frontend=fcitx-rime \
-  bash $HOME/ime/rime-plum/rime-install'
+#alias pipugradeall='python -m pip install --upgrade $(
+#  python -m pip list --outdated | awk "(NR > 2){ print \$0;}")'
+alias rimeinstall='c i; rime_frontend=fcitx-rime bash /rime-plum/rime-install'
