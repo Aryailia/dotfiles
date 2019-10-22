@@ -55,6 +55,8 @@ main() {
 
     case "${pathname##*.}" in
       tex)                      process_latex "${pathname}" "${target}" ;;
+      #tex)                      process_latex_with_tectonic "${pathname}" \
+      #  "${target}" ;;
       ad|adoc|asciidoctor|asc)  process_adoc "${pathname}" "${target}" ;;
     esac
   done
@@ -75,6 +77,10 @@ process_latex() {
     && "${cmd}" --output-directory="${dir}" "$1" \
     && "${cmd}" --output-directory="${dir}" "$1"
   soutln "$2.pdf"
+}
+
+process_latex_with_tectonic() {
+  tectonic "$1" --outdir "${2%/*}"
 }
 
 process_adoc() {

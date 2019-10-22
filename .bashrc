@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
   # Included shebang for shellcheck. Indent for autodetect indent
-# For interactive+login shells and subprocesses
+# This originally runs for non-login (terminals after X launched)
+# If sourced manually from '.profile', runs for all terminal instances
 
-stty -ixon       # Disable Ctrl-S and Ctrl-Q
 #shopt -s autocd  # cd without typing cd just typing name. Conflicts too much
 
 
@@ -45,3 +45,5 @@ cd_of() {
     cd "${temp}" && ls --color=auto --group-directories-first -hA
   fi
 }
+
+exec fish
