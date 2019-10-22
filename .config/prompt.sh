@@ -2,25 +2,27 @@
   # for setting the indent
 # Depends on sudo and git
 
-  exitcode="${1:-"N/A"}" # I should be passed "$?"
-     timer="${2:-0}"
-background="${3:-0}"     # I should be passed "$!"
+   exitcode="${1:-"N/A"}" # I should be passed "$?"
+      timer="${2:-0}"
+ background="${3:-0}"     # I should be passed "$!"
+ escapeopen="$4"
+escapeclose="$5"
 #backgroundpid="${3:-0}"
 
 # https://stackoverflow.com/questions/24839271 for using \001 and \002
 # They stop bash from restricting the width (typing after PS1 runs to see)
-  black='\001\033[40m\002'
-    red='\001\033[41m\002'
-  green='\001\033[42m\002'
- yellow='\001\033[43m\002'
-   blue='\001\033[44m\002'
-magenta='\001\033[45m\002'
-   cyan='\001\033[46m\002'
-  white='\001\033[47m\002'
+  black="${escapeopen}"'\001\033[40m\002'"${escapeclose}"
+    red="${escapeopen}"'\001\033[41m\002'"${escapeclose}"
+  green="${escapeopen}"'\001\033[42m\002'"${escapeclose}"
+ yellow="${escapeopen}"'\001\033[43m\002'"${escapeclose}"
+   blue="${escapeopen}"'\001\033[44m\002'"${escapeclose}"
+magenta="${escapeopen}"'\001\033[45m\002'"${escapeclose}"
+   cyan="${escapeopen}"'\001\033[46m\002'"${escapeclose}"
+  white="${escapeopen}"'\001\033[47m\002'"${escapeclose}"
 
-  whitetext='\001\033[1;37m\002'
-  blacktext='\001\033[1;30m\002'
-formatclear='\001\033[0;00m\002'
+  whitetext="${escapeopen}"'\001\033[1;37m\002'"${escapeclose}"
+  blacktext="${escapeopen}"'\001\033[1;30m\002'"${escapeclose}"
+formatclear="${escapeopen}"'\001\033[0;00m\002'"${escapeclose}"
 # If I ever wanted to toy with powerline character again
 #local powerline=$'\uE0B0'
 #local green2yellow=$'\[\033[32;43m\]'

@@ -72,8 +72,9 @@ main() {
 }
 
 grep_for_editor() { <&0 grep -q -e '/vim$' -e '^vim$' -e '/nvim$' -e '^nvim$'; }
+# TODO: Zsh is not working; name of the shell is usually 'tmux'
 grep_for_shell() {
-  <&0 grep -q -e '/bash$' -e '^bash$' \
+  <&0 grep -q -e '/bash$' -e '^bash$' -e '^zsh$' \
     -e '/sh$' -e '^sh$' -e '/dash$' -e '^dash$'
 }
 

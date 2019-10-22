@@ -139,7 +139,7 @@ imap <unique> <C-s> <C-o><Leader>s
 noremap <unique> <Leader>t<Tab> :Tab /\|<CR>
 noremap <unique> <Leader>t, :Tab /\,<CR>
 nnoremap <unique> <Leader>rc
-  \ :silent call system("    setsid reloadvim.sh '"
+  \ :silent call system("    setsid reloadvim.sh --ignore-checks '"
   \. line('w0') . "' '" . line('.') . "' '" . col('.') . "' '"
   \. expand('%') . "' &")<CR>
 
