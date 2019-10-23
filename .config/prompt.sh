@@ -9,27 +9,27 @@
 escapeclose="$5"
 #backgroundpid="${3:-0}"
 
-# https://stackoverflow.com/questions/24839271 for using \001 and \002
+# https://stackoverflow.com/questions/24839271 for using \001 and \002 for bash
 # They stop bash from restricting the width (typing after PS1 runs to see)
-  black="${escapeopen}"'\001\033[40m\002'"${escapeclose}"
-    red="${escapeopen}"'\001\033[41m\002'"${escapeclose}"
-  green="${escapeopen}"'\001\033[42m\002'"${escapeclose}"
- yellow="${escapeopen}"'\001\033[43m\002'"${escapeclose}"
-   blue="${escapeopen}"'\001\033[44m\002'"${escapeclose}"
-magenta="${escapeopen}"'\001\033[45m\002'"${escapeclose}"
-   cyan="${escapeopen}"'\001\033[46m\002'"${escapeclose}"
-  white="${escapeopen}"'\001\033[47m\002'"${escapeclose}"
+  black="${escapeopen}\\033[40m${escapeclose}"
+    red="${escapeopen}\\033[41m${escapeclose}"
+  green="${escapeopen}\\033[42m${escapeclose}"
+ yellow="${escapeopen}\\033[43m${escapeclose}"
+   blue="${escapeopen}\\033[44m${escapeclose}"
+magenta="${escapeopen}\\033[45m${escapeclose}"
+   cyan="${escapeopen}\\033[46m${escapeclose}"
+  white="${escapeopen}\\033[47m${escapeclose}"
 
-  whitetext="${escapeopen}"'\001\033[1;37m\002'"${escapeclose}"
-  blacktext="${escapeopen}"'\001\033[1;30m\002'"${escapeclose}"
-formatclear="${escapeopen}"'\001\033[0;00m\002'"${escapeclose}"
+  whitetext="${escapeopen}\\033[1;37m${escapeclose}"
+  blacktext="${escapeopen}\\033[1;30m${escapeclose}"
+      RESET="${escapeopen}\\033[0;0m${escapeclose}"
 # If I ever wanted to toy with powerline character again
 #local powerline=$'\uE0B0'
 #local green2yellow=$'\[\033[32;43m\]'
 #local yellow2black=$'\[\033[33;40m\]'
 
 bout() { printf %b "$@"; }
-bout "${formatclear}${whitetext}"
+bout "${RESET}${whitetext}"
 
 
 ###
@@ -121,7 +121,5 @@ fi
     && kill -0 "${background}" >/dev/null 2>&1 \
   && bout "${white}${blacktext} PID&:${background} "
 
-# Six-em-space U+2006, makes searching for prompts simplier
-bout "${formatclear} "
-#printf '%b%b%b' "${text}" "${formatclear}" "\002"
+bout "${RESET} "  # Six-em-space U+2006, makes searching for prompts simplier
 

@@ -36,6 +36,8 @@ rrc() {
 rrc 'Avoid infinite loop'
 
 # Use `cat` instead of a function so we do not pollute namespace
+# https://stackoverflow.com/questions/24839271 for using \001 and \002
+# They stop bash from restricting the width (typing after PS1 runs to see)
 PROMPT_COMMAND="$(<<EOF cat -
   errorcode="\$?"
   # More history syncing hackery (bash saves history once session closes)
@@ -45,13 +47,15 @@ PROMPT_COMMAND="$(<<EOF cat -
   history -a  # Append command immediately to history
   #history -c  # Clear current history for session
   #history -r  # Read history back into memory (get history from active bash's)
-  PS1="\$("${HOME}/.config/prompt.sh" "\$errorcode" "\$SECONDS" "\$!")"
+  PS1="\$( "${XDG_CONFIG_HOME}/prompt.sh" \
+    "\$errorcode" "\$SECONDS" "\$!" "\\001" "\\002"
+  )"
   SECONDS="0"
 EOF
 )"
 
 cd_of() {
-  temp="$("$@"; err="$?"; printf x; exit "${err}")" || return "$?"
+  temp="$( "$@"; err="$?"; printf x; exit "${err}" )" || return "$?"
   temp="${temp%x}"
   if [ "${temp}" != "${PWD}" ]; then
     cd "${temp}" && ls --color=auto --group-directories-first -hA

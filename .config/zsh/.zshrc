@@ -1,4 +1,5 @@
 
+
 function exists {
   for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
     [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && {
@@ -42,6 +43,30 @@ setopt HIST_IGNORE_DUPS          # Do not record repeated commands
 setopt HIST_IGNORE_SPACE         # Do not record commands starting with a space
 setopt HIST_REDUCE_BLANKS        # Remove superfluous whitespace from history
 
+export KEYTIMEOUT=1
+#bindkey -v
+
+# Change cursor shape for different vi modes.
+#function zle-keymap-select {
+#  if [[ ${KEYMAP} == vicmd ]] ||
+#     [[ $1 = 'block' ]]; then
+#    echo -ne '\e[1 q'
+#
+#  elif [[ ${KEYMAP} == main ]] ||
+#       [[ ${KEYMAP} == viins ]] ||
+#       [[ ${KEYMAP} = '' ]] ||
+#       [[ $1 = 'beam' ]]; then
+#    echo -ne '\e[5 q'
+#  fi
+#}
+#zle -N zle-keymap-select
+#
+#zle-line-init() {
+#    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
+#    echo -ne "\e[5 q"
+#}
+#zle -N zle-line-init
+
 function precmd() {
   local errorcode="$?"
   local SECONDS=0
@@ -58,10 +83,3 @@ function cd_of {
     cd "${temp}" && ls --color=auto --group-directories-first -hA
   fi
 }
-
-#function wh {
-#  for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
-#    [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && return 0
-#  done
-#  return 1
-#}

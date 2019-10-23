@@ -1,6 +1,7 @@
-if [ -z "$PATH" ]  # Runs test is built-in to fish, runs even if $PATH empty
-  set -U fish_user_paths /usr/local/sbin /usr/local/bin /usr/bin /sbin /bin
-end
+#if [ -z "$PATH" ]  # Runs test is built-in to fish, runs even if $PATH empty
+  set -U fish_user_paths /usr/local/sbin /usr/local/bin /usr/bin /sbin /bin \
+    /opt/texlive/2019/bin/x86_64-linux
+#end
 
 function exists
   set dirs $PATH  # fish splits $PATH automatically on colons
