@@ -1,14 +1,26 @@
 if [ -z "$PATH" ]  # Runs test is built-in to fish, runs even if $PATH empty
-  #set -U fish_user_paths /usr/local/sbin /usr/local/bin /usr/bin /sbin /bin
-  #set -U fish_user_paths /usr/local/bin /usr/bin
+  set -U fish_user_paths /usr/local/sbin /usr/local/bin /usr/bin /sbin /bin
+end
+
+function exists
+  set dirs $PATH  # fish splits $PATH automatically on colons
+  for dir in $dirs
+    if [ -f "$dir/$argv[1]" ] && [ -x "$dir/$argv[1]" ]
+      printf %s "$dir/$argv[1]"
+      return 0
+    end
+  end
+  return 1
 end
 
 function rrc
-  sed 's/"\$(\(.*\))"/(\1)/g' ~/.profile | source
+  [ (count $argv) = 0 ] && source "$XDG_CONFIG_HOME/fish/config.fish"
+  sed 's/"\$(\(.*\))"/(\1)/g' "$HOME/.profile" | source
+  source "$XDG_CONFIG_HOME/aliasrc"
+  source "$XDG_CONFIG_HOME/envrc"
   #source ~/.profile
-  source ~/.config/aliasrc
 end
-rrc
+rrc "Avoid infinite loop"
 
 
 # At the present, fish cannot store multiline inputs

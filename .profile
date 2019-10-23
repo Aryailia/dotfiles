@@ -59,23 +59,6 @@ uname -o | grep -q 'MSYS' &&  export TMPDIR="$HOME/AppData/Local/Temp"  # Win
 ## Working non sh version for both ion and bash
 #printf %s "$PATH" | xargs -n1 -d: -IZ test --e '/.Z/st' && export TEMRINAL=st
 
-# Could use `which` but it is not POSIX
-# missing commands are required by POSIX to return 127 error
-# `ion` also does has different syntax for STDERR redirection
-export BROWSER_CLI='w3m'
-sh -c 'st -v >/dev/null 2>&1; [ "$?" = 1 ]'    && export TERMINAL='st'
-sh -c 'vim -v >/dev/null 2>&1'                 && export EDITOR='vim'
-sh -c 'nvim -v >/dev/null 2>&1'                && export EDITOR='nvim'
-sh -c 'termux-open-url "" >/dev/null 2>&1; [ "$?" = 1 ]' \
-  && export BROWSER='termux-open-url'
-sh -c 'firefox -V >/dev/null 2>&1'              && export BROWSER='firefox'
-sh -c 'surf -v >/dev/null 2>&1; [ "$?" = 1 ]'  && export BROWSER='surf'
-sh -c 'zathura --version >/dev/null 2>&1'      && export READER='zathura'
-#export TERMINAL='st'
-#export EDITOR='nvim'
-#export BROWSER='firefox'
-#export READER='zathura'
-
 # Less/manpages colors, 'fish' uses `sed` to read these
 export LESS=-R
 export LESS_TERMCAP_mb="$( printf '%b' '[1;31m' )"
@@ -92,6 +75,3 @@ export LESS_TERMCAP_ue="$( printf '%b' '[0m' )"
 #printf %s\\n "$0" | grep -q 'bash$' \
 #  && test -f "$HOME/.bashrc" \
 #  && . "$HOME/.bashrc"
-
-# Switch Escape and RControl, have this enable in '/etc/sudoers' `visudo`
-#sudo -n loadkeys "$XDG_CONFIG_HOME/rc/remap-caps-rctrl.map" 2>/dev/null

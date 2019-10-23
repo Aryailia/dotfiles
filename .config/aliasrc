@@ -111,6 +111,8 @@ alias f='cd_of sh -c '\''
 
 #ffmpeg -i 'input' -1-6.mp4 -vn -acodec copy 'output'
 
+# Switch Escape and RControl, have this enable in '/etc/sudoers' `visudo`
+alias swapctrl='sudo loadkeys "$XDG_CONFIG_HOME/rc/remap-caps-rctrl.map"'
 # Android has no sudo
 alias updateman='sh -c "sudo -V >/dev/null 2>&1" \
   && sudo makewhatis "$PREFIX/usr/share/man" \

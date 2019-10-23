@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+# missing commands are required by POSIX to return 127 error
+# `ion` also does has different syntax for STDERR redirection
+exists 'w3m' >/dev/null && export BROWSER_CLI='w3m'
+exists 'st'              >/dev/null && export TERMINAL='st'
+exists 'vim'             >/dev/null && export   EDITOR='vim'
+exists 'nvim'            >/dev/null && export   EDITOR='nvim'
+exists 'termux-open-url' >/dev/null && export  BROWSER='termux-open-url'
+exists 'firefox'         >/dev/null && export  BROWSER='firefox'
+exists 'surf'            >/dev/null && export  BROWSER='surf'
+exists 'zathura'         >/dev/null && export   READER='zathura'
+

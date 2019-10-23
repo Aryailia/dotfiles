@@ -17,11 +17,23 @@ HISTIGNORE='ls:bg:fg:history'  # Do not log these commands
 shopt -s histappend            # History is added
 #shopt -s cmdhist               # Join multi-line commands onto a single line
 
-# Need to source this in the interactive shell
-[ -f "${HOME}/.config/aliasrc" ] && source "${HOME}/.config/aliasrc"
+exists() {
+  for temp in $( printf %s "${PATH}" | tr ':' '\n' ); do
+    [ -f "${temp}/$1" ] && [ -x "${temp}/$1" ] && {
+      printf %s "${temp}/$1"
+      return 0
+    }
+  done
+  return 1
+}
 
 # Bash specific stuff
-alias rrc='source ~/.bashrc ~/.bash_profile'
+rrc() {
+  [ "$#" = 0 ] && source "${HOME}/.bashrc" "${HOME}/.profile"
+  source "${XDG_CONFIG_HOME}/aliasrc"
+  source "${XDG_CONFIG_HOME}/envrc"
+}
+rrc 'Avoid infinite loop'
 
 # Use `cat` instead of a function so we do not pollute namespace
 PROMPT_COMMAND="$(<<EOF cat -
@@ -46,4 +58,3 @@ cd_of() {
   fi
 }
 
-exec fish
