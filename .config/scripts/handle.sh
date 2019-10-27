@@ -160,7 +160,8 @@ local_handle_extension() {
     # PDF
     pdf)
       # Preview as text conversion
-      t sh -c "pdftotext -nopgbrk -q -- '${1}' - | '${EDITOR}'"
+      t sh -c "pdftotext -nopgbrk -q -- '${1}' - | '${EDITOR}'" \
+        && exit "${ENUM_SUCCESS}"
       t exit "${ENUM_SUCCESS}"
       g setsid zathura -- "${1}" >/dev/null 2>&1& g exit "${ENUM_SUCCESS}"
       #e sigil
@@ -185,6 +186,7 @@ local_handle_extension() {
 
     # HTML
     htm|html|xhtml)
+      t w3m "${1}" && exit "${ENUM_SUCCESS}"
       p w3m -dump "${1}"
       p lynx -dump -- "${1}"
       p elinks -dump "${1}"

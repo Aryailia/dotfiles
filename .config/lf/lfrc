@@ -19,6 +19,7 @@ cmd open ${{
 '
   case "$( mimetype "${f}" )" in
     text/troff*)  man ./ "${f}" ;;
+    text/* ) "${EDITOR}" "${f}" ;;
     image/* )
       dir="$( dirname "$f"; printf a )"; dir="${dir%?a}"
       for file in "${dir}"/* "${dir}"/.[!.]* "${dir}"/..?*; do
@@ -73,7 +74,7 @@ cmd copyto ${{
 cmd moveto ${{
   destination="$( PROMPT='Move > ' print-shortcut.sh )" || exit 1
   [ -d "${destination}" ] || exit 1
-  printf %s "${fx}" | xargs-split.pl "\n/\./" '/' \
+  printf %s "${fx}" | xargs-split.pl '\n/\./' '/' \
     sh -c 'for file in "$@"; do mv -iv "${file}" "'"${destination}"'"; done' _
   notify.sh "🚚 File(s) moved to '${destination}'"
 }}
@@ -112,12 +113,15 @@ map t ${{
 
 # Bindings
 map <esc> clear
+map E $aunpack "${f}"
 map r prompt-rename
 # Prepend '/.' since ${filesep} acts like a join
 map R $batch-rename.sh --mass-mode --simplify-to-relative-path -- "/.${fx}"
 map o $handle.sh --file --terminal "${f}"
 map O &handle.sh --file --gui "${f}"
 map D delete
+# This cannot deal with files with newlines
+map L $for a in $( lf -remote load | sed -e '1d' ); do ln -s "$a" ./; done
 #map <c-l> $handle.sh --file --gui "${f}"
 map <enter> shell  # enter shell
 map x $${f}        # run executable
