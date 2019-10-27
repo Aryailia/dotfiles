@@ -21,6 +21,17 @@ alias    ct='cd_of sh -c '\''
 alias    cw='cd_of sh -c '\''
   printf %s "$( dirname "$( command -v "$1" )" )"
 '\'' _'
+alias     d='sdcv'
+alias    dc='sdcv --data-dir $STARDICT_DATA_DIR/ca'
+alias    de='sdcv --data-dir $STARDICT_DATA_DIR/en'
+alias    dj='sdcv --data-dir $STARDICT_DATA_DIR/jp'
+alias   dja='sdcv --data-dir $STARDICT_DATA_DIR/jpa'
+alias   djo='sdcv --data-dir $STARDICT_DATA_DIR/jpo'
+alias    dk='sdcv --data-dir $STARDICT_DATA_DIR/ko'
+alias   dkj='sdcv --data-dir $STARDICT_DATA_DIR/kanji'
+alias    dw='sdcv --data-dir $STARDICT_DATA_DIR/wy'
+alias    dz='sdcv --data-dir $STARDICT_DATA_DIR/zh'
+alias   dza='sdcv --data-dir $STARDICT_DATA_DIR/zha'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='browser.sh edit search'
 alias    es='browser.sh edit search'
@@ -59,11 +70,13 @@ alias   mks='sh -c '\''for x in "$@"; do
 done'\'' _'
 alias    mt='file --dereference --brief --mime-type --'
 alias  mnta='sh -c '\''
-  [ -e "/dev/$1" ] || { printf %s\\n "Device not found"; exit 1; };
+  [ "$#" = 0 ] && { echo "mnta <num> <path>"; simple-mtpfs -l; exit 1; }
+  simple-mtpfs -l | grep -q "^$1" || { echo "Device not found"; exit 1; };
   [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; };
-  sudo simple-mtfps --device "$1" "$2";
+  simple-mtpfs --device "$1" "$2";
 '\'' _'  #chown "$( id -u ):$( id -g )" "$2"
 alias  mntu='sh -c '\''
+  [ "$#" = 0 ] && { echo "mnta <num> <path>"; simple-mtpfs -l; exit 1; }
   [ -e "/dev/$1" ] || { printf %s\\n "Device not found"; exit 1; };
   [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; };
   sudo mount -o "uid=$( id -u ),gid=$( id -g )" "/dev/$1" -- "$2";
