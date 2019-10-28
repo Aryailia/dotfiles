@@ -2,6 +2,7 @@
 # NOTE: Need to fcitx environment variables set before sxhkd for its subprocess
 
 # The keys NOT bound here by sxhkd, left to the window manager (QWERTY layout)
+# The 'i' through 'o' keys on the home row
 # The 'h' through ';' keys on the home row
 
 # Basic binds
@@ -37,11 +38,13 @@ super + shift + c
 
 # Xclip seems to need setsid to perserve the copy after the launching terminal has closed
 super + g ; super + {s, b, g}
-  $TERMINAL -n 'overlay' -e browser.sh --launch menu {search, bookmark, link}
-super + c ; super + {s, b}
-  $TERMINAL -n 'overlay' -e browser.sh menu {search, bookmark} --browser "clipboard"
-super + c ; super + e
-  $TERMINAL -n 'overlay' -e sh -c 'setsid clipboard.sh -w "$(<~/.config/emoji fzf | cut -d " " -f 1)"'
+  $TERMINAL -t 'fullscreen_overlay' -e browser.sh --launch menu {search, bookmark, link}
+super + c ; supefullscreen_r + {s, b}
+  $TERMINAL -t 'fullscreen_overlay' -e browser.sh menu {search, bookmark} --browser "clipboard"
+super + c ; supefullscreen_r + e
+  $TERMINAL -t 'fullscreen_overlay' -e sh -c 'setsid clipboard.sh -w "$(<~/.config/emoji fzf | cut -d " " -f 1)"'
+super + g ; super + {a, p}
+  st -t 'fullscreen_overlay' -e sh -c '<{~/interim/ref/fcitx-table-extra/tables/zhengma-large.txt, "$DOTENVIRONMENT/notes/language/zhengma-parts.adoc"} fzf'
 
 
 
