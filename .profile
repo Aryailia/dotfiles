@@ -25,6 +25,7 @@ export GEM_SPEC_CACHE="$XDG_CACHE_HOME/lib/gem"
 export GNUPGHOME="$HOME/.local/gnupg"
 export PASSWORD_STORE_DIR="$HOME/.local/password-store"
 
+export HISTFILE="$XDG_CACHE_HOME/bash_history"
 export VIMINIT='let $MYVIMRC="$XDG_CONFIG_HOME/nvim/init.vim" | source $MYVIMRC'
 export VIMDOTDIR="$XDG_CONFIG_HOME/nvim"
 export WGETRC="$XDG_CONFIG_HOME/rc/wgetrc"
