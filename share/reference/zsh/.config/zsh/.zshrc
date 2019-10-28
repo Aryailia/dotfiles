@@ -43,29 +43,109 @@ setopt HIST_IGNORE_DUPS          # Do not record repeated commands
 setopt HIST_IGNORE_SPACE         # Do not record commands starting with a space
 setopt HIST_REDUCE_BLANKS        # Remove superfluous whitespace from history
 
-export KEYTIMEOUT=1
+# Prefer Vim shortcuts
 #bindkey -v
-
-# Change cursor shape for different vi modes.
-#function zle-keymap-select {
+#DEFAULT_VI_MODE=viins
+#export KEYTIMEOUT=1
+#
+## Change cursor shape for different vi modes.
+#zle-keymap-select() {
 #  if [[ ${KEYMAP} == vicmd ]] ||
 #     [[ $1 = 'block' ]]; then
-#    echo -ne '\e[1 q'
+#    #echo -ne '\e[1 q'
+#    print -n -- "\e[1 q"
 #
 #  elif [[ ${KEYMAP} == main ]] ||
 #       [[ ${KEYMAP} == viins ]] ||
 #       [[ ${KEYMAP} = '' ]] ||
 #       [[ $1 = 'beam' ]]; then
-#    echo -ne '\e[5 q'
+#    print -n -- "\e[5 q"
+#    #echo -ne '\e[5 q'
+#    #notify.sh 'hello'
 #  fi
 #}
-#zle -N zle-keymap-select
 #
 #zle-line-init() {
 #    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
 #    echo -ne "\e[5 q"
 #}
+#
 #zle -N zle-line-init
+#zle -N zle-keymap-select
+
+
+
+# Prefer vi shortcuts
+bindkey -v
+DEFAULT_VI_MODE=viins
+KEYTIMEOUT=1
+
+__set_cursor() {
+    local style
+    case $1 in
+        reset) style=0;; # The terminal emulator's default
+        blink-block) style=1;;
+        block) style=2;;
+        blink-underline) style=3;;
+        underline) style=4;;
+        blink-vertical-line) style=5;;
+        vertical-line) style=6;;
+    esac
+
+    [ $style -ge 0 ] && print -n -- "\e[${style} q"
+}
+
+# Set your desired cursors here...
+__set_vi_mode_cursor() {
+    case $KEYMAP in
+        vicmd)
+          __set_cursor block
+          ;;
+        main|viins)
+          __set_cursor vertical-line
+          ;;
+    esac
+}
+
+__get_vi_mode() {
+    local mode
+    case $KEYMAP in
+        vicmd)
+          mode=NORMAL
+          ;;
+        main|viins)
+          mode=INSERT
+          ;;
+    esac
+    print -n -- $mode
+}
+
+zle-keymap-select() {
+    __set_vi_mode_cursor
+    zle reset-prompt
+}
+
+zle-line-init() {
+    zle -K $DEFAULT_VI_MODE
+}
+
+zle -N zle-line-init
+zle -N zle-keymap-select
+
+# Optional: allows you to open the in-progress command inside of $EDITOR
+autoload -Uz edit-command-line
+bindkey -M vicmd 'v' edit-command-line
+zle -N edit-command-line
+
+# PROMPT_SUBST enables functions and variables to re-run everytime the prompt
+# is rendered
+setopt PROMPT_SUBST
+
+# Single quotes are important so that function is not run immediately and saved
+# in the variable
+RPROMPT='$(__get_vi_mode)'
+
+
 
 function precmd() {
   local errorcode="$?"

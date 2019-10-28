@@ -6,9 +6,9 @@
 
 # Basic binds
 super + {_, alt +, ctrl +} Return
-  {$TERMINAL, alacritty, sakura} -e tmux.sh open
+  {$TERMINAL, alacritty, sakura} -e tmux.sh open fish
 super + shift + {_, alt +, ctrl +} Return
-  {$TERMINAL, alacritty, sakura}
+  {$TERMINAL, alacritty, sakura} -e fish
 super + shift + q
   kill "$(xprop -id "$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)" '\t$0' _NET_WM_PID | cut -f 2)"
 super + d

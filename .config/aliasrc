@@ -84,7 +84,7 @@ alias  mntu='sh -c '\''
 alias    nr='sh -c "PATH=\"\$( npm bin ):\$PATH\" \"\$@\"" _'  # npm run
 alias    pm='package-manager.sh'
 alias     r='trash'
-alias  rhkd='pkill -USR1 sxhkd'  # Sxhkd updates on receiving usr1 signal
+alias   rhk='pkill -USR1 sxhkd; i3-msg reload'  # `sxhkd` updates on usr1 signal
 alias    rx='xrdb ~/.Xresources'
 #alias  rrc=''  # In individual rc files, reminder to not re-alias this
 alias    od='handle.sh -d --'
