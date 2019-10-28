@@ -25,7 +25,6 @@ export GEM_SPEC_CACHE="$XDG_CACHE_HOME/lib/gem"
 export GNUPGHOME="$HOME/.local/gnupg"
 export PASSWORD_STORE_DIR="$HOME/.local/password-store"
 
-export HISTFILE="$XDG_CACHE_HOME/bash_history"
 export VIMINIT='let $MYVIMRC="$XDG_CONFIG_HOME/nvim/init.vim" | source $MYVIMRC'
 export VIMDOTDIR="$XDG_CONFIG_HOME/nvim"
 export WGETRC="$XDG_CONFIG_HOME/rc/wgetrc"
@@ -38,6 +37,16 @@ export ZDOTDIR="$HOME/.config/zsh"
 
 export STARDICT_DATA_DIR="$XDG_DATA_HOME/stardict"
 export SDCV_HISTSIZE="0"
+
+# History modification, https://sanctum.geek.nz/arabesque/better-bash-history
+export HISTFILE="$XDG_CACHE_HOME/history"
+export HISTFILESIZE=10000        # Commands to save to disk (default 500)
+export HISTSIZE="$HISTFILESIZE"  # Portion of which to load into memory
+export HISTTIMEFORMAT='%F %T '   # Format to record time executed
+export HISTCONTROL='ignoreboth'  # 'ignoreboth' is the following:
+                                 # - 'ignorespace': commands preceded by spaces
+                                 # - 'ignoredups':  squash uninterrupted repeats
+export HISTIGNORE='ls:bg:fg:history'  # Do not log these commands
 
 # PATH
 export SCRIPTS="$XDG_CONFIG_HOME/scripts"
@@ -70,9 +79,9 @@ export LESS_TERMCAP_se="$( printf '%b' '[0m' )"
 export LESS_TERMCAP_us="$( printf '%b' '[1;32m' )"
 export LESS_TERMCAP_ue="$( printf '%b' '[0m' )"
 
+# Having 'envrc' sourced is mildly important for regular function
 # Source .bashrc to have the same environment in tty as in Xorg
 # Login shell starts with '-bash', test if it ends with bash
-#test -f "$XDG_CONFIG_HOME/aliasrc" && source ""
-#printf %s\\n "$0" | grep -q 'bash$' \
-#  && test -f "$HOME/.bashrc" \
-#  && . "$HOME/.bashrc"
+printf %s\\n "$0" | grep -q '^-bash$' \
+  && test -f "$HOME/.bashrc" && . "$HOME/.bashrc" \
+  && test -f "$XDG_CONFIG_HOME/envrc" && . "$XDG_CONFIG_HOME/envrc"

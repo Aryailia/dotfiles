@@ -1,12 +1,14 @@
 # Think about how this affects termux
 #$include /etc/inputrc
+
+# Set colours for tab completion
 set colored-stats on
+
 # Do not bell on tab-completion
 set bell-style none
 
-# display all possible matches for an ambiguous pattern at first tab
+# The common prefix of all completion suggestions is shown in a different color
+set colored-completion-prefix on
+
+# Partially complete word and show all combinations
 set show-all-if-ambiguous on
-# next tab(s) will cycle through matches
-TAB: menu-complete
-# shift tab cycles backward
-"\e[Z": menu-complete-backward

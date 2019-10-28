@@ -7,7 +7,8 @@
 
 # Basic binds
 super + {_, alt +, ctrl +} Return
-  {$TERMINAL, alacritty, sakura} -e tmux.sh open fish
+  {$TERMINAL, alacritty, sakura} -e env SHELL=/usr/bin/fish tmux.sh open
+#  {$TERMINAL, alacritty, sakura} -e tmux.sh open
 super + shift + {_, alt +, ctrl +} Return
   {$TERMINAL, alacritty, sakura} -e fish
 super + shift + q
@@ -16,6 +17,8 @@ super + d
   dmenu_run
 #super + shift + r
 #  $TERMINAL -e $FILE
+super + shift + e
+  $TERMINAL -e emacs
 #super + shift + e
 #  $TERMINAL -e tmux.sh open 'neomutt'
 #super + shift + m
@@ -39,9 +42,9 @@ super + shift + c
 # Xclip seems to need setsid to perserve the copy after the launching terminal has closed
 super + g ; super + {s, b, g}
   $TERMINAL -t 'fullscreen_overlay' -e browser.sh --launch menu {search, bookmark, link}
-super + c ; supefullscreen_r + {s, b}
+super + c ; super + {s, b}
   $TERMINAL -t 'fullscreen_overlay' -e browser.sh menu {search, bookmark} --browser "clipboard"
-super + c ; supefullscreen_r + e
+super + c ; super + e
   $TERMINAL -t 'fullscreen_overlay' -e sh -c 'setsid clipboard.sh -w "$(<~/.config/emoji fzf | cut -d " " -f 1)"'
 super + g ; super + {a, p}
   st -t 'fullscreen_overlay' -e sh -c '<{~/interim/ref/fcitx-table-extra/tables/zhengma-large.txt, "$DOTENVIRONMENT/notes/language/zhengma-parts.adoc"} fzf'

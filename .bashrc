@@ -7,13 +7,13 @@
 
 
 # History modification, https://sanctum.geek.nz/arabesque/better-bash-history
-HISTFILESIZE=10000             # Commands to save to disk (default 500)
-HISTSIZE="${HISTFILESIZE}"     # Portion of which to load into memory
-HISTTIMEFORMAT='%F %T '        # Format to record time executed
-HISTCONTROL='ignoreboth'       # 'ignoreboth' is the following:
+#HISTFILESIZE=10000             # Commands to save to disk (default 500)
+#HISTSIZE="${HISTFILESIZE}"     # Portion of which to load into memory
+#HISTTIMEFORMAT='%F %T '        # Format to record time executed
+#HISTCONTROL='ignoreboth'       # 'ignoreboth' is the following:
                                # - 'ignorespace': commands preceded by spaces
                                # - 'ignoredups':  squash uninterrupted repeats
-HISTIGNORE='ls:bg:fg:history'  # Do not log these commands
+#HISTIGNORE='ls:bg:fg:history'  # Do not log these commands
 shopt -s histappend            # History is added
 #shopt -s cmdhist               # Join multi-line commands onto a single line
 
@@ -29,9 +29,9 @@ exists() {
 
 # Bash specific stuff
 rrc() {
-  [ "$#" = 0 ] && source "${HOME}/.bashrc" "${HOME}/.profile"
-  source "${XDG_CONFIG_HOME}/aliasrc"
-  source "${XDG_CONFIG_HOME}/envrc"
+  [ "$#" = 0 ] && . "${HOME}/.bashrc" "${HOME}/.profile" \
+    && . "${XDG_CONFIG_HOME}/envrc"
+  . "${XDG_CONFIG_HOME}/aliasrc"
 }
 rrc 'Avoid infinite loop'
 
