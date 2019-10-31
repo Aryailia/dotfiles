@@ -13,29 +13,29 @@ super + shift + {_, alt +, ctrl +, ctrl + alt +} Return
   {$TERMINAL, alacritty, st, sakura}
 super + shift + q
   kill "$(xprop -id "$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)" '\t$0' _NET_WM_PID | cut -f 2)"
-super + d
-  dmenu_run
-#super + shift + r
-#  $TERMINAL -e $FILE
-super + shift + e
+super + e
   $TERMINAL -e emacs --no-init-file --no-site-file --load "${EMACSINIT}"
 #super + shift + e
 #  $TERMINAL -e tmux.sh open 'neomutt'
-#super + shift + m
-#  $TERMINAL -e ncmpcpp
+super + shift + a
+  $TERMINAL -e alsamixer; statusbar-startrefresh.sh
+super + shift + s
+  $TERMINAL -e syncthing -no-browser
+super + d
+  dmenu_run
 super + shift + w
   $TERMINAL -e sh -c 'echo "nmcli"; echo "====="; sudo nmtui'; statusbar-startrefresh.sh
-super + shift + n
-  $TERMINAL -e tmux.sh open 'newsboat'
 super + shift + z
   $TERMINAL -e htop
 #super + shift + c
 #  $TERMINAL -e calcurse -D ~/.config/calcurse
-super + shift + a
-  $TERMINAL -e alsamixer; statusbar-startrefresh.sh
 # Camera
 super + shift + c
   mpv --no-osc --no-input-default-bindings --input-conf=/dev/null --title='mpvfloat' /dev/video0
+super + shift + n
+  $TERMINAL -e tmux.sh open 'newsboat'
+#super + shift + m
+#  $TERMINAL -e ncmpcpp
 
 
 
