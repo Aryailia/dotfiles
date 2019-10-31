@@ -132,8 +132,8 @@ vnoremap <unique> < <gv
 
 " Saving
 nnoremap <unique> <leader>s :write<CR>
-nmap <unique> <C-s> <Leader>s
-imap <unique> <C-s> <C-o><Leader>s
+nnoremap <unique> <C-s> :write<CR>
+inoremap <unique> <C-s> <C-o><Leader>s
 
 " Misc
 noremap <unique> <Leader>t<Tab> :Tab /\|<CR>
@@ -205,6 +205,7 @@ imap <unique> <silent> <F5> <C-o><Leader>5
 " Language Server Protocol (LSP) and 'ale' plugin
 " ==============================================================================
 " Linters set in filetypes (or detected automatically)
+nnoremap <unique> <Leader>tl :ALEToggle<CR>
 let g:ale_lint_on_text_changed = 'never'  " Text change in insert or normal mode
 let g:ale_lint_on_insert_leave = 1        " Enter/leave insert mode
 let g:ale_lint_on_save = 1                " on :Write
@@ -242,9 +243,6 @@ set omnifunc=ale#completion#OmniFunc
 inoremap <expr> <Tab> pumvisible()
   \?(empty(v:completed_item)?"\<C-n>":"\<C-y>")
   \:"\<Tab>"
-inoremap <expr> <CR> pumvisible()
-  \?(empty(v:completed_item)?"\<CR>\<CR>":"\<C-y>")
-  \:"\<CR>"
 " Avoid completing with only one item. Causes problems when deleting
 set completeopt=menu,menuone,preview,noinsert,noselect
 
