@@ -7,20 +7,21 @@
 
 # prints in the format of escaped quotes, itself quoted, with a trailing space
 # eg. <'spaces'\'and quotes.txt' >  which will matches <spaces'and quotes.txt>
-out() { printf "'%s' " "$@"; }
+out() { printf "'././%s' " "$@"; }
 
 # Won't break, but you probably do not want these linked
-out './.linkerignore.sh'
-out './linker.sh'
-out './.config/scripts/*'
-out './.config/nvim/*'
-out './.git/*'
-out './.gitignore'
-out './.git_template/*'
+out 'new.sh'
+out '.linkerignore.sh'
+out 'linker.sh'
+out '.config/scripts/*'
+out '.config/nvim/*'
+out '.git/*'
+out '.gitignore'
+out '.git_template/*'
 out '*.swp'
 
 # Custom stuff
-out './share/*'
-out './install/*'
-out './README.md'
-out './LICENSE'
+out 'share/*'
+out 'install/*'
+out 'README.md'
+out 'LICENSE'

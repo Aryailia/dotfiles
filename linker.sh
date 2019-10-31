@@ -94,14 +94,24 @@ ow_force="2"
 
 
 
+# Handles options that need arguments
+main() {
+  # Dependencies
+
+  # Options processing
+
+  [ -z "${args}" ] && { show_help; exit 1; }
+  eval "set -- ${args}"
+
+}
 main() {
   ###
   # Constants
   # This script should be located at the outermost level of dotfiles directory
-  me="$(realpath "$0"; printf a)"; me="${me%??}"
-  dotfiles="$(dirname "${me}"; printf a)"; dotfiles="${dotfiles%??}"
+  me="$( realpath "$0"; printf a )"; me="${me%?a}"
+  dotfiles="$( dirname "${me}"; printf a )"; dotfiles="${dotfiles%?a}"
   # Load constants (but not too many times), useful on initial install
-  [ -z "${DOTENVIRONMENT}" ] && source "${dotfiles}/.config/shell_profile"
+  [ -z "${DOTENVIRONMENT}" ] && . "${dotfiles}/.config/shell_profile"
 
   # Global variables static to project (assume linker is ran in base directory)
   dotenv="${DOTENVIRONMENT}"
@@ -119,37 +129,21 @@ main() {
     --)         break ;;
   esac done
 
-  # Finite State Machine, all branches will exit
-  fsm_state="$1"
-  case "${fsm_state}" in
-    1)  shift 1; filter_for_ignore 2 "${dotfiles}" "${ignore}";  exit "$?" ;;
-    2)  shift 1; link_to_target    3 "${dotfiles}" "$@";         exit "$?" ;;
-    3)  [ ! -x "${ignore2}" ] && run_with_env "${me} 5"  # run_with_env exits
-        shift 1; filter_for_ignore 4 "${dotenv}"   "${ignore2}"; exit "$?" ;;
-    4)  shift 1; link_to_target    5 "${dotenv}"   "$@";         exit "$?" ;;
-    5)  shift 1; extras; exit ;;
-  esac
   # Default case (initial run), does the options preprocessing
-  set_options "$@"
-}
-
-################################################################################
-# Branches of FSM
-
-# Sets the environment variables to be used by `run_with_env`
-set_options() {
   # In case set by environment for some reason
   TARGET=""
   OVERWRITE=""
   VERBOSE=""
+
   while [ "$#" -gt 0 ]; do
     case "$1" in
+      -h|--help)  show_help; exit 0 ;;
+
       -c|--catious)  OVERWRITE="${ow_symlinks}" ;;
       -f|--force)    OVERWRITE="${ow_force}" ;;
       -i|--ignore)   OVERWRITE="${ow_do_not}" ;;
       -o|--output)   TARGET="$2"; shift 1 ;;
       -v|--verbose)  VERBOSE="true" ;;
-      --)            break ;;
     esac
     shift 1
   done
@@ -160,53 +154,64 @@ set_options() {
   VERBOSE="${VERBOSE:-false}"
 
   [ -d "${TARGET}" ] || die 1 "FATAL: Invalid output directory '${TARGET}'"
-  run_with_env "${me} 1"
+
+  list_relative_paths "${dotfiles}" "${ignore}" \
+    | from_link_to "${dotfiles}" "${TARGET}"
+  list_relative_paths "${dotenv}" "${ignore2}" \
+    | from_link_to "${dotenv}" "${TARGET}"
+  extras
 }
 
-# Searches the directory '${files}' ignoring the files specified by '${ignore}'
-filter_for_ignore() {
-  next_fsm="$1"
-  files="$2"
-  ignore="$3"
+################################################################################
+# Main subfunctions
 
-  # Use `test -x` instead of require since we know full path
-  [ -x "${ignore}" ] \
-    || die 1 "FATAL: Requires the shell script \"${ignore}\"." \
-    "This just has to output a shell-quoted string (which can be blank)." \
-    "Relative links and no unquoted newlines please"
-  eval "set -- $(${ignore})"
-
-  conditions=""
-  for arg in "$@"; do
-    conditions="${conditions} ! -path '${arg}'"
+is_ignore() {
+  ___target="$1"
+  eval "set -- $2"
+  for ___test in "$@"; do
+    case "${___target}" in  ${___test})  return 0 ;;  esac
   done
-  conditions="${conditions} \\( -type f -o -type l \\)"  # link or file
-
-  cd "${files}" || die 1 "FATAL: dotfiles specified does not exist"
-  run_with_env "find ./ ${conditions} -exec '${me}' '${next_fsm}' '{}' +"
-
-  # Some debugging stuff
-  #eval "find ./ ${conditions}" | awk '(1){print $0;} END{print NR;}'
-  #puts "${conditions}"
+  return 1
 }
 
-# Symlinks relative paths from their a source "${origin}" to "${TARGET}"
-link_to_target() {
-  next_fsm="$1"
-  origin="$2"   # BUG: Using 'source' as variable name + symlink using 'source'
-  shift 2       #      does an append rather than an assignment
+NEWLINE='
+'
+list_relative_paths() {
+  cd "$1" || die 1 "FATAL: \`list_relative_paths\` - \"$1\" does not exist"
+  __ignore="$( "$2" )"
+  __list="${NEWLINE}./."  # Prefix all the files with ././ (last hh)
+  while [ "${__list}" != "" ]; do  # Add limit to dodge infinite loop?
+    __dir="${__list#${NEWLINE}}"
+    __dir="${__dir%%${NEWLINE}././*}"
+    __list="${__list#"${NEWLINE}${__dir}"}"
 
-  [ -d "${origin}" ] || die 1 "FATAL: The source '${origin}' is invalid"
-  [ -d "${TARGET}" ] || die 1 "FATAL: The destination '${TARGET}' is invalid"
-
-  puts "${origin}" "===="
-  for relative_path in "$@"; do
-    rel="${relative_path#./}"
-    symlink "${origin}/${rel}" "${TARGET}/${rel}" "${rel}"
+    for __f in "${__dir}"/* "${__dir}"/.[!.]* "${__dir}"/..?*; do
+      [ ! -e "${__f}" ] && continue
+      is_ignore "${__f}" "${__ignore}" && continue
+      [ ! -L "${__f}" ] && [ -d "${__f}" ] && __list="${__list}${NEWLINE}${__f}"
+      [ -f "${__f}" ] && puts "${__f}"
+    done
   done
-  puts "$# files processed"  ""
+}
 
-  run_with_env "${me} ${next_fsm}"
+from_link_to() {
+  [ -d "$1" ] || die 1 "FATAL: The source '$1' is invalid"
+  [ -d "$2" ] || die 1 "FATAL: The destination '$2' is invalid"
+
+  puts "${dotfiles}" "===="
+
+  _list="${NEWLINE}$( cat - )"
+  _count=0
+  while [ "${_list}" != "" ]; do
+    _count="$(( _count + 1 ))"
+    _file="${_list#${NEWLINE}}"
+    _file="${_file%%${NEWLINE}././*}"
+    _list="${_list#"${NEWLINE}${_file}"}"
+    _file="${_file#././}"
+
+    symlink "$1/${_file}" "$2/${_file}" "${_file}"
+  done
+  puts "${_count} files processed"  ""
 }
 
 # The miscellaneous tasks
@@ -225,7 +230,6 @@ extras() {
 
   require "${make_shortcuts}" && { $("${make_shortcuts}"); }
 }
-
 
 ################################################################################
 # Helpers
@@ -249,6 +253,10 @@ symlink() {
   source="$1"
   target="$2"
   name="$3"
+  #if [ -d "${name}" ]
+  #  then name="$3/"
+  #  else name="$3"
+  #fi
 
   [ -e "${source}" ] || die 1 "✗ FAIL: \"${source}\" does not exist"
 
@@ -258,16 +266,17 @@ symlink() {
     rm -fr "${target}"
   fi
 
+
   if [ -e "${target}" ]; then
     # If is more safe than without (${VERBOSE} could be set by environment)
     if "${VERBOSE}"; then puts "! WARN: skipping without flags '${name}'"; fi
   else
     mkdir -p "${target%/*}"  # '/' is reserved on UNIX but not windows
-    if [ -L "${source}" ]; then  # just copy relative symbolic links
-      cp -P "${source}" "${target}" || die 1 "✗ FATAL: Unable to copy '${name}'"
-    else  # otherwise make an aboslute symbolic link
-      ln -s "${source}" "${target}" || die 1 "✗ FATAL: Unable to link '${name}'"
-    fi
+    #if [ -L "${source}" ]; then  # just copy relative symbolic links
+    #  cp -P "${source}" "${target}" || die 1 "✗ FATAL: Unable to copy '${name}'"
+    #else  # otherwise make an aboslute symbolic link
+    #  ln -s "${source}" "${target}" || die 1 "✗ FATAL: Unable to link '${name}'"
+    #fi
     puts "✓ SUCCESS: '${name}'"
   fi
 }
