@@ -4,6 +4,11 @@
 "noremap <silent> <leader>4 :call PreviewClose()<CR>
 "noremap <silent> <leader>l :call PreviewSendLine('shellcheck ' . expand('%:p'))<CR>
 
+let b:ale_lint_on_text_changed = 'never'
+let b:ale_lint_on_insert_leave = 0
+let b:ale_lint_on_save = 1
+let b:ale_lint_on_enter = 0
+
 function! Lint()
   "!clear && online-shellcheck.sh -i %
   vertical T if shellcheck -V >/dev/null 2>&1;

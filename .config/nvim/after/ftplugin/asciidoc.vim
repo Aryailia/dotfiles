@@ -5,7 +5,7 @@ endfunction
 
 function! BuildBackground()
   write
-  compile.sh --temp %
+  silent !compile.sh --temp %
 endfunction
 
 function! Run()
@@ -16,7 +16,7 @@ function! Run()
   endif
   " Do not want necessarily need setsid
   " `falkon` has live reload
-  call system('falkon --private-browsing --no-extensions "'
+  call system('falkon --private-browsing --no-extensions --new-window "'
     \ . l:path . '.html" >/dev/null 2>&1&')
 endfunction
 
