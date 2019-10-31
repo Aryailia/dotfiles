@@ -111,7 +111,7 @@ main() {
   me="$( realpath "$0"; printf a )"; me="${me%?a}"
   dotfiles="$( dirname "${me}"; printf a )"; dotfiles="${dotfiles%?a}"
   # Load constants (but not too many times), useful on initial install
-  [ -z "${DOTENVIRONMENT}" ] && . "${dotfiles}/.config/shell_profile"
+  [ -z "${DOTENVIRONMENT}" ] && . "${dotfiles}/.profile"
 
   # Global variables static to project (assume linker is ran in base directory)
   dotenv="${DOTENVIRONMENT}"
