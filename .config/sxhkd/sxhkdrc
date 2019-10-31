@@ -6,11 +6,11 @@
 # The 'h' through ';' keys on the home row
 
 # Basic binds
-super + {_, alt +, ctrl +} Return
-  {$TERMINAL, alacritty, sakura} -e env SHELL=/usr/bin/fish tmux.sh open
+super + {_, alt +, ctrl +, ctrl + alt +} Return
+  {$TERMINAL, alacritty, st, sakura} -e env SHELL=/usr/bin/fish tmux.sh open
 #  {$TERMINAL, alacritty, sakura} -e tmux.sh open
-super + shift + {_, alt +, ctrl +} Return
-  {$TERMINAL, alacritty, sakura} -e fish
+super + shift + {_, alt +, ctrl +, ctrl + alt +} Return
+  {$TERMINAL, alacritty, st, sakura}
 super + shift + q
   kill "$(xprop -id "$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)" '\t$0' _NET_WM_PID | cut -f 2)"
 super + d
@@ -18,7 +18,7 @@ super + d
 #super + shift + r
 #  $TERMINAL -e $FILE
 super + shift + e
-  $TERMINAL -e emacs
+  $TERMINAL -e emacs --no-init-file --no-site-file --load "${EMACSINIT}"
 #super + shift + e
 #  $TERMINAL -e tmux.sh open 'neomutt'
 #super + shift + m
