@@ -93,17 +93,6 @@ ow_force="2"
 
 
 
-
-# Handles options that need arguments
-main() {
-  # Dependencies
-
-  # Options processing
-
-  [ -z "${args}" ] && { show_help; exit 1; }
-  eval "set -- ${args}"
-
-}
 main() {
   ###
   # Constants
@@ -118,17 +107,14 @@ main() {
   ignore="${dotfiles}/.linkerignore.sh"
   ignore2="${dotenv}/.linkerignore.sh"
   scripts_relative_path=".config/scripts"
-  make_shortcuts="shortcutsrc"
-  # NOTE: Also see `run_with_env` for more global variables
+  make_shortcuts="${scripts_relative_path}/shortcuts.sh"
+  vim_plugin_manager_save_path="${XDG_CONFIG_HOME}/nvim/autoload/plug.vim"
+  vim_plugin_manager_link="$( puts \
+    'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  )"
 
   ###
   # Parameters processing
-  # Help check
-  for arg in "$@"; do case "${arg}" in
-    -h|--help)  show_help; exit 0 ;;
-    --)         break ;;
-  esac done
-
   # Default case (initial run), does the options preprocessing
   # In case set by environment for some reason
   TARGET=""
@@ -155,11 +141,62 @@ main() {
 
   [ -d "${TARGET}" ] || die 1 "FATAL: Invalid output directory '${TARGET}'"
 
-  list_relative_paths "${dotfiles}" "${ignore}" \
+
+
+  ###
+  # Main
+  puts "Special Case" "============"
+  count="0"
+  dotfile_ignore="$( "${ignore}" )"
+  . "${ignore}" >/dev/null
+
+  # Link some directories, just adding '/' at the end for clarity
+  for dir in \
+    "${scripts_relative_path}/" \
+    '.config/nvim/after/' \
+  ; do
+
+    # `escape` from "${ignore}"
+    dotfile_ignore="${dotfile_ignore}$( escape "${dir}*" )"
+    # Extra '/' gets added to printed message in `symlink_relative_path`
+    symlink_relative_path "${dir}" && count="$(( count + 1 ))"
+  done
+
+  find "${dotfiles}/${scripts_relative_path}" -exec chmod 755 '{}' +
+  if [ -x "${make_shortcuts}" ]; then
+    if "${VERBOSE}"
+      then "${make_shortcuts}"; puts "✓ Processed shortcuts"
+      else "${make_shortcuts}" >/dev/null
+    fi
+    count="$(( count + 1 ))"
+  else
+    puts "! Shortcuts script '${make_shortcuts}' not found/executable"
+  fi
+
+  # Download vim plugin manager
+  if [ -f "${vim_plugin_manager_save_path}" ]; then
+     "${VERBOSE}" && puts "✓ Already downloaded vim plugin manager"
+  else
+    curl --create-dirs -fLo "${vim_plugin_manager_save_path}" \
+      "${vim_plugin_manager_link}"
+    puts "✓ Downloaded vim plugin manager"
+  fi
+  count="$(( count + 1 ))"
+  puts "${count} files processed"  ""
+
+
+  ###
+  # Link other files
+  puts "${dotfiles}" "======="
+  list_relative_paths "${dotfiles}" "${dotfile_ignore}" \
     | from_link_to "${dotfiles}" "${TARGET}"
-  list_relative_paths "${dotenv}" "${ignore2}" \
+
+  # For personal files not to be uploaded to github
+  puts "${dotenv}" "======="
+  list_relative_paths "${dotenv}" "$( "${ignore2}" )" \
     | from_link_to "${dotenv}" "${TARGET}"
-  extras
+
+  # To add more folders, just mimic this section and add the ignore file
 }
 
 ################################################################################
@@ -168,9 +205,12 @@ main() {
 is_ignore() {
   ___target="$1"
   eval "set -- $2"
-  for ___test in "$@"; do
-    case "${___target}" in  ${___test})  return 0 ;;  esac
-  done
+  #puts "test ${___target}"
+  #printf 'yo |%s|\n' "${@}"
+  for ___test in "$@"; do case "${___target}" in
+    ${___test})  return 0 ;;
+    ${___test}/)  return 0 ;;   # Since `list_relative_paths` adds '/'
+  esac done
   return 1
 }
 
@@ -178,17 +218,17 @@ NEWLINE='
 '
 list_relative_paths() {
   cd "$1" || die 1 "FATAL: \`list_relative_paths\` - \"$1\" does not exist"
-  __ignore="$( "$2" )"
-  __list="${NEWLINE}./."  # Prefix all the files with ././ (last hh)
+  __list="${NEWLINE}././"  # Prefix all the files with ././ (last hh)
   while [ "${__list}" != "" ]; do  # Add limit to dodge infinite loop?
     __dir="${__list#${NEWLINE}}"
     __dir="${__dir%%${NEWLINE}././*}"
     __list="${__list#"${NEWLINE}${__dir}"}"
 
-    for __f in "${__dir}"/* "${__dir}"/.[!.]* "${__dir}"/..?*; do
+    for __f in "${__dir}"* "${__dir}".[!.]* "${__dir}"..?*; do
       [ ! -e "${__f}" ] && continue
-      is_ignore "${__f}" "${__ignore}" && continue
-      [ ! -L "${__f}" ] && [ -d "${__f}" ] && __list="${__list}${NEWLINE}${__f}"
+      is_ignore "${__f}" "$2" && continue
+      [ ! -L "${__f}" ] && [ -d "${__f}" ] \
+        && __list="${__list}${NEWLINE}${__f}/"
       [ -f "${__f}" ] && puts "${__f}"
     done
   done
@@ -197,8 +237,6 @@ list_relative_paths() {
 from_link_to() {
   [ -d "$1" ] || die 1 "FATAL: The source '$1' is invalid"
   [ -d "$2" ] || die 1 "FATAL: The destination '$2' is invalid"
-
-  puts "${dotfiles}" "===="
 
   _list="${NEWLINE}$( cat - )"
   _count=0
@@ -214,35 +252,15 @@ from_link_to() {
   puts "${_count} files processed"  ""
 }
 
-# The miscellaneous tasks
-extras() {
-  puts "Special Case" "============"
-  symlink_relative_path "${scripts_relative_path}"
-  find "${dotfiles}/${scripts_relative_path}" -exec chmod 755 '{}' +
-
-  # Download it
-  vim_plug="${HOME}/.config/nvim/autoload/plug.vim"
-  [ -f "${vim_plug}" ] || curl -fLo "${vim_plug}" --create-dirs \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  symlink_relative_path ".config/nvim/init.vim"
-  symlink_relative_path ".config/nvim/vimrc"  # file structure links to init.vim
-  symlink_relative_path ".config/nvim/after"
-
-  require "${make_shortcuts}" && { $("${make_shortcuts}"); }
-}
-
 ################################################################################
 # Helpers
 puts() { printf %s\\n "$@"; }
 die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
-require() { command -v "$1" >/dev/null 2>&1; }
-
-run_with_env() {
-  exec env \
-    TARGET="${TARGET}" \
-    OVERWRITE="${OVERWRITE}" \
-    VERBOSE="${VERBOSE}" \
-    sh -c "$*";
+require() {
+  for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
+    [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && return 0
+  done
+  return 1
 }
 
 symlink_relative_path() {
@@ -274,7 +292,7 @@ symlink() {
     mkdir -p "${target%/*}"  # '/' is reserved on UNIX but not windows
     #if [ -L "${source}" ]; then  # just copy relative symbolic links
     #  cp -P "${source}" "${target}" || die 1 "✗ FATAL: Unable to copy '${name}'"
-    #else  # otherwise make an aboslute symbolic link
+    #else  # otherwise make an absolute symbolic link
     #  ln -s "${source}" "${target}" || die 1 "✗ FATAL: Unable to link '${name}'"
     #fi
     puts "✓ SUCCESS: '${name}'"
