@@ -157,7 +157,7 @@ main() {
   ; do
 
     # `escape` from "${ignore}"
-    dotfile_ignore="${dotfile_ignore}$( escape "${dir}*" )"
+    dotfile_ignore="${dotfile_ignore}$( escape "${dir}" )"
     # Extra '/' gets added to printed message in `symlink_relative_path`
     symlink_relative_path "${dir}" && count="$(( count + 1 ))"
   done
@@ -193,8 +193,12 @@ main() {
 
   # For personal files not to be uploaded to github
   puts "${dotenv}" "======="
-  list_relative_paths "${dotenv}" "$( "${ignore2}" )" \
-    | from_link_to "${dotenv}" "${TARGET}"
+  if [ -e "${dotenv}" ]; then
+    list_relative_paths "${dotenv}" "$( "${ignore2}" )" \
+      | from_link_to "${dotenv}" "${TARGET}"
+  else
+    puts '✗ ${DOTENVIRONMENT} does not exist'
+  fi
 
   # To add more folders, just mimic this section and add the ignore file
 }
@@ -208,8 +212,10 @@ is_ignore() {
   #puts "test ${___target}"
   #printf 'yo |%s|\n' "${@}"
   for ___test in "$@"; do case "${___target}" in
-    ${___test})  return 0 ;;
-    ${___test}/)  return 0 ;;   # Since `list_relative_paths` adds '/'
+    ${___test})   return 0 ;;
+    ${___test}/)  return 0 ;;  # `list_relative_paths` adds '/' to ${___target}
+    # When ${___test} has trailing slash but ${___target does not}
+    ${___test}*)  [ "${___test}" != "${___test%/}" ] && return 0 ;;
   esac done
   return 1
 }
