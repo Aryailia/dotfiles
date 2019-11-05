@@ -2,7 +2,7 @@
 # NOTE: Need to fcitx environment variables set before sxhkd for its subprocess
 
 # The keys NOT bound here by sxhkd, left to the window manager (QWERTY layout)
-# The 'i' through 'o' keys on the home row
+# The 'r' 'i' 'o' keys
 # The 'h' through ';' keys on the home row
 
 # Basic binds
