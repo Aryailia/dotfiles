@@ -133,9 +133,12 @@ vnoremap <unique> < <gv
 " Saving
 nnoremap <unique> <leader>s :write<CR>
 nnoremap <unique> <C-s> :write<CR>
-inoremap <unique> <C-s> <C-o><Leader>s
+inoremap <unique> <C-s> <C-o>:write<CR>
 
 " Misc
+noremap <unique> <Leader>wc :echo
+  \ "words: " . system('wc -w "' . expand('%') . '"')
+  \ . "chars: ". system('wc -m "' . expand('%') . '"')<CR>
 noremap <unique> <Leader>t<Tab> :Tab /\|<CR>
 noremap <unique> <Leader>t, :Tab /\,<CR>
 nnoremap <unique> <Leader>rc

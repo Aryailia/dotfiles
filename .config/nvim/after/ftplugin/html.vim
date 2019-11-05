@@ -1,5 +1,6 @@
 function Run()
-  silent !falkon --private-browsing --no-extensions --new-window "%"
+  silent !falkon --private-browsing --no-extensions --new-window
+    \ "%" >/dev/null 2>&1&
 endfunction
 
 " https://www.w3.org/QA/2002/04/valid-dtd-list.html
