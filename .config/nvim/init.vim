@@ -136,9 +136,12 @@ nnoremap <unique> <C-s> :write<CR>
 inoremap <unique> <C-s> <C-o>:write<CR>
 
 " Misc
-noremap <unique> <Leader>wc :echo
+nnoremap <unique> <Leader>wc :echo
   \ "words: " . system('wc -w "' . expand('%') . '"')
   \ . "chars: ". system('wc -m "' . expand('%') . '"')<CR>
+vnoremap <unique> <Leader>wc y:echo
+  \ "words: " . system('wc -w ', @")
+  \ . "chars: ". system('wc -m ', @")<CR>
 noremap <unique> <Leader>t<Tab> :Tab /\|<CR>
 noremap <unique> <Leader>t, :Tab /\,<CR>
 nnoremap <unique> <Leader>rc
