@@ -38,26 +38,26 @@ inoremap <buffer> <LocalLeader>glob * .[!.]* ..?*
 
 inoremap <buffer> <LocalLeader>name
   \ name="$( basename "$0"; printf a )"; name="${name%?a}"
-inoremap <buffer> <LocalLeader>soutln
-  \ soutln() { printf %s\\n "$@"; }
+inoremap <buffer> <LocalLeader>outln
+  \ outln() { printf %s\\n "$@"; }
 imap <LocalLeader>die
-  \ <C-o>:if ! search('\m^serrln() *{', 'bnw')<CR>
-  \  execute "normal i,serrln\n"<CR>
+  \ <C-o>:if ! search('\m^errln() *{', 'bnw')<CR>
+  \  execute "normal i,errln\n"<CR>
   \endif<CR>
   \<C-o>:if ! search('\m^name="\$( basename', 'bnw')<CR>
   \  execute "normal i,name\n"<CR>
   \endif<CR>
   \<C-o>:setlocal paste<CR>
-  \die() { c="$1"; serrln "$2: '${name}' -- $3"; shift 3; serrln "$@"
+  \die() { c="$1"; errln "$2: '${name}' -- $3"; shift 3; errln "$@"
   \; exit "$c"; }<CR>
   \<C-o>:setlocal nopaste<CR>
 imap <LocalLeader>asdf
-  \ <C-o>:if ! search('\m^ *soutln() *{', 'bnw')<CR>
-  \  execute "normal i,soutln\n"<CR>
+  \ <C-o>:if ! search('\m^ *outln() *{', 'bnw')<CR>
+  \  execute "normal i,outln\n"<CR>
   \endif<CR>
   \die() {<CR>
-  \  c="$1"; soutln "$2: '${name}' -- $3" >&2; shift 3<CR>
-  \  soutln "$@" >&2; exit "$c"<CR>
+  \  c="$1"; outln "$2: '${name}' -- $3" >&2; shift 3<CR>
+  \  outln "$@" >&2; exit "$c"<CR>
   \}
   \<C-o>:setlocal nopaste<CR>
 
@@ -88,14 +88,14 @@ inoremap <buffer> <LocalLeader>pc
   \ pc() { printf %b "$@" >/dev/tty; }
 inoremap <buffer> <LocalLeader>pcln
   \ pcln() { printf %b\\n "$@" >/dev/tty; }
-inoremap <buffer> <LocalLeader>sout
-  \ sout() { printf %s "$@"; }
-inoremap <buffer> <LocalLeader>soutln
-  \ soutln() { printf %s\\n "$@"; }
-inoremap <buffer> <LocalLeader>serr
-  \ serr() { printf %s "$@" >&2; }
-inoremap <buffer> <LocalLeader>serrln
-  \ serrln() { printf %s\\n "$@" >&2; }
+inoremap <buffer> <LocalLeader>out
+  \ out() { printf %s "$@"; }
+inoremap <buffer> <LocalLeader>outln
+  \ outln() { printf %s\\n "$@"; }
+inoremap <buffer> <LocalLeader>err
+  \ err() { printf %s "$@" >&2; }
+inoremap <buffer> <LocalLeader>errln
+  \ errln() { printf %s\\n "$@" >&2; }
 " Much thanks to Rich (https://www.etalabs.net/sh_tricks.html for eval_escape)
 " Keeping to the analogy, this is ruby's p, but not really, so renamed
 inoremap <buffer> <LocalLeader>escape
@@ -109,7 +109,7 @@ inoremap <buffer> <LocalLeader>awk_eval
   \   }<CR>
   \ '
 
-inorema <buffer> <LocalLeader>match
+inoremap <buffer> <LocalLeader>match
   \ <C-o>:setlocal paste<CR>
   \match_any() {<CR>
   \  matchee="$1"; shift 1<CR>
@@ -159,9 +159,9 @@ imap <buffer> <LocalLeader>main1
   \    "${literal}" <Bar><Bar> case "${arg}" in<CR>
   \      --)  literal='true' ;;<CR>
   \      -h<Bar>--help)  show_help; exit 0 ;;<CR>
-  \      *)   args="${args} $( soutln "${arg}" <Bar> eval_escape )" ;;<CR>
+  \      *)   args="${args} $( outln "${arg}" <Bar> eval_escape )" ;;<CR>
   \    esac<CR>
-  \    "${literal}" && args="${args} $( soutln "${arg}" <Bar> eval_escape )"<CR>
+  \    "${literal}" && args="${args} $( outln "${arg}" <Bar> eval_escape )"<CR>
   \  done<CR>
   \<CR>
   \  [ -z "${args}" ] && { show_help; exit 1; }<CR>
@@ -185,11 +185,11 @@ imap <buffer> <LocalLeader>main2
   \      -h<Bar>--help)  show_help; exit 0 ;;<CR>
   \<CR>
   \      -f)  echo 'do not need to shift' ;;<CR>
-  \      -e<Bar>--example2)  soutln "-$2-"; shift 1 ;;<CR>
+  \      -e<Bar>--example2)  outln "-$2-"; shift 1 ;;<CR>
   \<CR>
-  \      *)   args="${args} $( soutln "$1" <Bar> eval_escape )" ;;<CR>
+  \      *)   args="${args} $( outln "$1" <Bar> eval_escape )" ;;<CR>
   \    esac<CR>
-  \    "${literal}" && args="${args} $( soutln "$1" <Bar> eval_escape )"<CR>
+  \    "${literal}" && args="${args} $( outln "$1" <Bar> eval_escape )"<CR>
   \    shift 1<CR>
   \  done<CR>
   \<CR>
@@ -214,26 +214,26 @@ imap <buffer> <LocalLeader>main3
   \    if ! "${literal}"; then<CR>
   \      # Split grouped single-character arguments up, and interpret '--'<CR>
   \      # Parsing '--' here allows "invalid option -- '-'" error later<CR>
-  \      opts=''<CR>
   \      case "$1" in<CR>
   \        --)      literal='true'; shift 1; continue ;;<CR>
-  \        -[!-]*)  opts="${opts}$( soutln "${1#-}" <Bar>
+  \        -[!-]*)  opts="$( outln "${1#-}" <Bar>
   \ sed 's/./ -&/g' )" ;;<CR>
-  \        *)       opts="${opts} $1" ;;<CR>
+  \        --?*)    opts="$1"
+  \        *)       opts="regular" ;;  # Any non-hyphen value will do<CR>
   \      esac<CR>
   \<CR>
   \      # Process arguments properly now<CR>
-  \      for x in ${opts}; do case "${x}" in<CR>
+  \      for x in ${opts}; do case "$x" in<CR>
   \        -h<Bar>--help)  show_help; exit 0 ;;<CR>
-  \        -e<Bar>--example)  soutln "-$2-"; shift 1 ;;<CR>
+  \        -e<Bar>--example)  outln "-$2-"; shift 1 ;;<CR>
   \<CR>
   \        # Put argument checks above this line (for error detection)<CR>
   \        # first '--' case already covered by first case statement<CR>
-  \        -[!-]*)   show_help; die 1 "FATAL: invalid option '${x#-}'" ;;<CR>
-  \        *)        args="${args} $( soutln "$1" <Bar> eval_escape )" ;;<CR>
+  \        -[!-]*)   show_help; die 1 FATAL "invalid option '${x#-}'" ;;<CR>
+  \        *)        args="${args} $( outln "$1" <Bar> eval_escape )" ;;<CR>
   \      esac done<CR>
   \    else<CR>
-  \      args="${args} $( soutln "$1" <bar> eval_escape )"<CR>
+  \      args="${args} $( outln "$1" <bar> eval_escape )"<CR>
   \    fi<CR>
   \    shift 1<CR>
   \  done<CR>
@@ -254,8 +254,8 @@ imap <buffer> <LocalLeader>init
   \<LocalLeader>main3<CR>
   \<CR><CR><CR>
   \# Helpers<CR>
-  \<LocalLeader>soutln<CR>
-  \<LocalLeader>serrln<CR>
+  \<LocalLeader>outln<CR>
+  \<LocalLeader>errln<CR>
   \<LocalLeader>die<CR>
   \<LocalLeader>escape<CR>
   \<CR>

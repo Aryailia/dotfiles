@@ -116,7 +116,7 @@ map <esc> clear
 map E $aunpack "${f}"
 map r prompt-rename
 # Prepend '/.' since ${filesep} acts like a join
-map R $batch-rename.sh --mass-mode --simplify-to-relative-path -- "/.${fx}"
+map R $batch-rename.sh --relative-path-to '.' --direct "/.${fx}"
 map o $handle.sh --file --terminal "${f}"
 map O &handle.sh --file --gui "${f}"
 map D delete
