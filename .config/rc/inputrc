@@ -11,4 +11,8 @@ set bell-style none
 set colored-completion-prefix on
 
 # Partially complete word and show all combinations
-set show-all-if-ambiguous on
+#set show-all-if-ambiguous on
+set show-all-if-unmodified on
+
+# Cycle backward: Shift-Tab
+"\e[Z": menu-complete-backward

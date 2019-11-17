@@ -7,8 +7,8 @@
 
 # Basic binds
 super + {_, alt +, ctrl +, ctrl + alt +} Return
-  {$TERMINAL, alacritty, st, sakura} -e env SHELL=/usr/bin/fish tmux.sh open
-#  {$TERMINAL, alacritty, sakura} -e tmux.sh open
+  {$TERMINAL, alacritty, st, sakura} -e tmux.sh open
+  #{$TERMINAL, alacritty, st, sakura} -e env SHELL=/usr/bin/fish tmux.sh open
 super + shift + {_, alt +, ctrl +, ctrl + alt +} Return
   {$TERMINAL, alacritty, st, sakura}
 super + shift + q

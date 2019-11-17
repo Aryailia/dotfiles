@@ -22,6 +22,7 @@ export RUSTUP_HOME="$HOME/.local/bin/rustup"
 export GEM_PATH="$HOME/.local/lib/gem"
 export GEM_SPEC_CACHE="$XDG_CACHE_HOME/lib/gem"
 
+export GPG_TTY="$( tty )"
 export GNUPGHOME="$HOME/.local/gnupg"
 export PASSWORD_STORE_DIR="$HOME/.local/password-store"
 
