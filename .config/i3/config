@@ -83,7 +83,7 @@ bindsym $mod+o gaps outer current plus 5
 bindsym $mod+Shift+o gaps outer current minus 5
 
 # enter fullscreen mode for the focused container
-bindsym $mod+f fullscreen toggle
+bindsym $mod+shift+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
 #bindsym $mod+s layout stacking
@@ -130,7 +130,7 @@ bindsym $mod+Shift+0 move container to workspace 10
 #bindsym $mod+Shift+c reload
 
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
-bindsym $mod+Shift+r restart
+#bindsym $mod+Shift+r restart
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
@@ -157,7 +157,7 @@ mode "resize" {
   bindsym Escape mode "default"
 }
 
-bindsym $mod+r mode "resize"
+bindsym $mod+shift+r mode "resize"
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
