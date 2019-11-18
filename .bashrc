@@ -5,6 +5,7 @@
 
 #shopt -s autocd  # cd without typing cd just typing name. Conflicts too much
 
+export GPG_TTY="$( tty )"
 
 # History modification, https://sanctum.geek.nz/arabesque/better-bash-history
 #HISTFILESIZE=10000             # Commands to save to disk (default 500)

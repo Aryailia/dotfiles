@@ -2,6 +2,7 @@
   set -U fish_user_paths /usr/local/sbin /usr/local/bin /usr/bin /sbin /bin \
     /opt/texlive/2019/bin/x86_64-linux
 #end
+export GPG_TTY=( tty )
 
 function exists
   set dirs $PATH  # fish splits $PATH automatically on colons

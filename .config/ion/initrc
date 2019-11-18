@@ -2,6 +2,7 @@
 source "$HOME/.profile"
 source "$HOME/.config/aliasrc"
 #export timer = "$(date +%s)"
+export GPG_TTY="$( tty )"
 
 # Do not `lx` if directory change failed
 #fn c target; cd "$(namedpath "$target")" && ls .;  end

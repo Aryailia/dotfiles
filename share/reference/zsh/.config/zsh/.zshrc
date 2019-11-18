@@ -1,4 +1,4 @@
-
+export GPG_TTY="$( tty )"
 
 function exists {
   for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
