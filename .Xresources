@@ -1,88 +1,89 @@
-!! One Light Theme
-*.foreground: #2a2b32
-*.foreground_bold: #a8a19f
-*.background: #d8d8d8
-*.cursor: #2a2b32
+! Base16 One Light
+! Scheme: Daniel Pfeifer (http://github.com/purpleKarrot)
 
-! black
-*.color0: #000000
-*.color8: #2a2b32
-!*.color0: #cccccc
-!*.color8: #fffefe
-!! red
-*.color1: #da3e39
-*.color9: #da3e39
-!! green
-*.color2: #41933e
-*.color10: #41933e
-!! yellow
-*.color3: #855504
-*.color11: #855504
-!! blue
-*.color4: #315eee
-*.color12: #315eee
-!! magenta
-*.color5: #930092
-*.color13: #930092
-!! cyan #0e6fad 34c284
-*.color6: #0db6d8
-*.color14: #0db6d8
-!! white
-*.color7: #eeefe6
-*.color15: #cfcece
-!*.color7: #000000
-!*.color15: #2a2b32
+!#define base00 #fafafa
+!#define base01 #f0f0f1
+!#define base02 #e5e5e6
+!#define base03 #a0a1a7
+!#define base04 #696c77
+!#define base05 #383a42
+!#define base06 #202227
+!#define base07 #090a0b
+!#define base08 #ca1243
+!#define base09 #d75f00
+!#define base0A #c18401
+!#define base0B #50a14f
+!#define base0C #0184bc
+!#define base0D #4078f2
+!#define base0E #a626a4
+!#define base0F #986801
 
-! opacity==255 means what terminal will be not transparent, 0 - fully transparent
-st.alpha:       230
-!! These options only take effect on startup.
-!st.termname: st-256color
-! if you do not set shell, precedence is: -e arg, utmp option, SHELL env var, /etc/passwd shell
-!st.shell:    /bin/bash
+!One Light bastardizatoin
+!#define base00 #bbbbbb
+!#define base03 #ffffff
+!#define base08 #de3e35
+!#define base09 #de3e35
+!#define base0B #3f953a
+!#define base01 #3f953a
+!#define base0A #d2b67c
+!#define base02 #d2b67c
+!#define base0D #2f5af3
+!#define base04 #2f5af3
+!#define base0E #950095
+!#define base06 #a00095
+!#define base0C #3f953a
+!#define base0F #3f953a
+!#define base05 #000000
+!#define base07 #000000
 
-! Th following options options can be reloaded via USR1 signal.
-st.font:              mono:size=9:antialias=true:autohint=true;
-st.borderpx:          4
-! Available cursor values: 2 4 6 7 = █ _ | ☃ ( 1 3 5 are blinking versions)
-!st.cursorshape:       2
-!st.cursorthickness:   2
-! 0: normal blinking, 1: leave cursor border and blink with cursors background
-!st.cursorblinkstyle:  0
-! 0: cursor blinks with a constant interval; 1: blinking cycle resets on key input
-!st.cursorblinkontype: 1
-!st.bold_font:         0
-!st.xfps:              120
-!st.actionfps:         30
-! Kerning / character bounding-box height multiplier
-!st.chscale:           1.0
-! Kerning / character bounding-box width multiplier
-!st.cwscale:           1.0
-! blinking timeout for terminal and cursor blinking (0 disables)
-!st.blinktimeout:      800
-! bell volume. Value between -100 and 100. (0 disables)
-!st.bellvolume:        100
-! this is a char that is exposed like so: `printf '\033[z'`
-!st.prompt_char:       $
+! --- set ~ automatically replaced by 'colours.sh' ---
+#define base00 #fafafa
+#define base01 #487329
+#define base02 #c18401
+#define base03 #9e9e9e
+#define base04 #526fff
+#define base05 #000000
+#define base06 #c2c2c3
+#define base07 #494b53
+#define base08 #ca1243
+#define base09 #e45649
+#define base0A #986801
+#define base0B #50a14f
+#define base0C #0184bc
+#define base0D #4078f2
+#define base0E #a626a4
+#define base0F #56b6c2
+! --- end ~ automatically replaced by 'colours.sh' ---
 
-! Defaults taken from base16-twilight colorscheme.
-!st.color1:       #cf6a4c
-!st.color2:       #8f9d6a
-!st.color3:       #f9ee98
-!st.color4:       #7587a6
-!st.color5:       #9b859d
-!st.color6:       #afc4db
-!st.color7:       #a7a7a7
-!st.color8:       #5f5a60
-!st.color9:       #cf6a4c
-!st.color10:      #8f9d6a
-!st.color11:      #f9ee98
-!st.color12:      #7587a6
-!st.color13:      #9b859d
-!st.color14:      #afc4db
-!st.color15:      #ffffff
-!st.color16:      #cda869
-!st.color17:      #9b703f
-!st.color18:      #323537
-!st.color19:      #464b50
-!st.color20:      #838184
-!st.color21:      #c3c3c3
+*foreground:   base05
+#ifdef background_opacity
+*background:   [background_opacity]base00
+#else
+*background:   base00
+#endif
+*cursorColor:  base05
+
+*color0:       base05
+*color1:       base08
+*color2:       base0B
+*color3:       base0A
+*color4:       base0D
+*color5:       base0E
+*color6:       base0C
+*color7:       base00
+
+*color8:       base07
+*color9:       base09
+*color10:      base01
+*color11:      base02
+*color12:      base04
+*color13:      base06
+*color14:      base0F
+*color15:      base03
+
+! Can look through history for more exhausitive list of possible options
+st.alpha:      230
+st.font:       mono:size=9:antialias=true:autohint=true;
+st.borderpx:   4
+
+

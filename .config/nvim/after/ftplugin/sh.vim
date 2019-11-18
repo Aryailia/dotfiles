@@ -218,7 +218,7 @@ imap <buffer> <LocalLeader>main3
   \        --)      literal='true'; shift 1; continue ;;<CR>
   \        -[!-]*)  opts="$( outln "${1#-}" <Bar>
   \ sed 's/./ -&/g' )" ;;<CR>
-  \        --?*)    opts="$1"
+  \        --?*)    opts="$1" ;;<CR>
   \        *)       opts="regular" ;;  # Any non-hyphen value will do<CR>
   \      esac<CR>
   \<CR>

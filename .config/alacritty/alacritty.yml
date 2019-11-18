@@ -173,47 +173,78 @@ draw_bold_text_with_bright_colors: false
 # Base16 One Light - alacritty color config
 # Daniel Pfeifer (http://github.com/purpleKarrot)
 colors:
-  # Default colors
+# --- set ~ automatically replaced by 'colours.sh' ---
   primary:
     background: '0xfafafa'
-    foreground: '0x383a42'
+    foreground: '0x000000'
 
-    # Bright and dim foreground colors
-    #
-    # The dimmed foreground color is calculated automatically if it is not present.
-    # If the bright foreground color is not set, or `draw_bold_text_with_bright_colors`
-    # is `false`, the normal foreground color will be used.
-    #dim_foreground: '0x9a9a9a'
-    #bright_foreground: '0xffffff'
-
-  # Colors the cursor will use if `custom_cursor_colors` is true
-  # Colors which should be used to draw the terminal cursor. If these are unset,
-  # the cursor color will be the inverse of the cell color.
   cursor:
-    text: '0xfafafa'
-    cursor: '0x383a42'
+    text:       '0xfafafa'
+    cursor:     '0x000000'
 
-  # Normal colors
   normal:
-    black:   '0xfafafa'
+    black:   '0x000000'
     red:     '0xca1243'
     green:   '0x50a14f'
-    yellow:  '0xc18401'
+    yellow:  '0x986801'
     blue:    '0x4078f2'
     magenta: '0xa626a4'
     cyan:    '0x0184bc'
-    white:   '0x383a42'
+    white:   '0xfafafa'
 
-  # Bright colors
   bright:
-    black:   '0xa0a1a7'
-    red:     '0xd75f00'
-    green:   '0xf0f0f1'
-    yellow:  '0xe5e5e6'
-    blue:    '0x696c77'
-    magenta: '0x202227'
-    cyan:    '0x986801'
-    white:   '0x090a0b'
+    black:   '0x494b53'
+    red:     '0xe45649'
+    green:   '0x487329'
+    yellow:  '0xc18401'
+    blue:    '0x526fff'
+    magenta: '0xc2c2c3'
+    cyan:    '0x56b6c2'
+    white:   '0x9e9e9e'
+# --- end ~ automatically replaced by 'colours.sh' ---
+#  # Default colors
+#  primary:
+#    background: '0xfafafa'
+#    foreground: '0x383a42'
+#
+#    # Bright and dim foreground colors
+#    #
+#    # The dimmed foreground color is calculated automatically if it is not present.
+#    # If the bright foreground color is not set, or `draw_bold_text_with_bright_colors`
+#    # is `false`, the normal foreground color will be used.
+#    #dim_foreground: '0x9a9a9a'
+#    #bright_foreground: '0xffffff'
+#
+#  # Colors the cursor will use if `custom_cursor_colors` is true
+#  # Colors which should be used to draw the terminal cursor. If these are unset,
+#  # the cursor color will be the inverse of the cell color.
+#  cursor:
+#    text: '0xfafafa'
+#    cursor: '0x383a42'
+#
+#  # Normal colors
+#  normal:
+#    black:   '0x090a0b'
+#    #black:   '0x383a42'
+#    red:     '0xca1243'
+#    green:   '0x50a14f'
+#    yellow:  '0xc18401'
+#    blue:    '0x4078f2'
+#    magenta: '0xa626a4'
+#    cyan:    '0x0184bc'
+#    white:   '0xeaeaea'
+#
+#  # Bright colors
+#  bright:
+#    black:   '0x383a42'
+#    black:   '0x000000'
+#    red:     '0xd75f00'
+#    green:   '0xf0f0f1'
+#    yellow:  '0xe5e5e6'
+#    blue:    '0x696c77'
+#    magenta: '0x202227'
+#    cyan:    '0x986801'
+#    white:   '0xa0a1a7'
 
   # Selection colors
   #
@@ -280,7 +311,7 @@ visual_bell:
 #
 # Window opacity as a floating point number from `0.0` to `1.0`.
 # The value `0.0` is completely transparent and `1.0` is opaque.
-background_opacity: 1.0
+background_opacity: 0.9
 
 # Mouse bindings
 #

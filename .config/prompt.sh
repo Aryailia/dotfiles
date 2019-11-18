@@ -20,8 +20,8 @@ magenta="${escapeopen}\\033[45m${escapeclose}"
    cyan="${escapeopen}\\033[46m${escapeclose}"
   white="${escapeopen}\\033[47m${escapeclose}"
 
-  whitetext="${escapeopen}\\033[1;37m${escapeclose}"
-  blacktext="${escapeopen}\\033[1;30m${escapeclose}"
+  whitetext="${escapeopen}\\033[0;37m${escapeclose}"
+  blacktext="${escapeopen}\\033[0;30m${escapeclose}"
       RESET="${escapeopen}\\033[0;0m${escapeclose}"
 # If I ever wanted to toy with powerline character again
 #local powerline=$'\uE0B0'
