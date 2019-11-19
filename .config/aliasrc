@@ -15,6 +15,10 @@ alias   bme='browser.sh menu search'
 alias   btl='browser.sh terminal link'
 alias   btb='browser.sh terminal bookmarks'
 alias   bte='browser.sh terminal search'
+alias  cgph='cd_of sh -c '\''
+  a="$( git rev-parse --show-toplevel; printf a )" || exit "$?"; a="${a%?a}"
+  printf %s "${a}"
+'\'' _'
 alias    ct='cd_of sh -c '\''
   printf %s "$( tmux display-message -F "#{pane_current_path}" -p -t "$1" )"
 '\'' _'  # Change to same directory as another tmux pane
@@ -36,21 +40,25 @@ alias     e='emacs --no-init-file --no-site-file --load "$EMACSINIT"'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='browser.sh edit search'
 alias    es='browser.sh edit search'
+alias     g='\grep --color=auto'
 alias    ga='git add'
 alias    gc='git commit --message'
+alias   gca='git commit --amend'
 alias   gdc='git diff --word-diff=color --word-diff-regex=.'
 alias   gdl='git diff --color-moved=plain'
 alias   gdw='git diff --word-diff=color'
 alias    gn='git clone --recursive'
-alias   glg="git log --graph --abbrev-commit --decorate --oneline --all"
+alias   glg="git log --graph --abbrev-commit --decorate --oneline"
+alias   glf='git log --follow'
+alias glsst="git log | grep git-subtree-dir | sed 's/.*: //'"
 alias    gp='git push --recurse-submodules=on-demand'
+alias   grc='git rev-list --count'
 alias    gs='git status'
 #alias  gcb='sh -c "
 #  git checkout -b \"$1\"
 #  git submodule foreach '\''git checkout -b \"$1\"'\''
 #" _'
 #alias    gu='git submodule update --remote --merge'
-alias     g='\grep --color=auto'
 alias     l='\ls --color=auto --group-directories-first -h'
 alias    la='\ls --color=auto --group-directories-first -hA'
 alias   lal='\ls --color=auto --group-directories-first -hAl'
