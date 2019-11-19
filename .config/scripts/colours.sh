@@ -78,24 +78,25 @@ bF="#56b6c2" # cn 1  s br: deprecated, open/close embedded tags eg. <?php ?>
 #*color15:      base03
 
 main() {
-  #run "${HOME}/.Xresources" "!" "$( outln \
-  #  "#define base00 ${b0}" \
-  #  "#define base01 ${b1}" \
-  #  "#define base02 ${b2}" \
-  #  "#define base03 ${b3}" \
-  #  "#define base04 ${b4}" \
-  #  "#define base05 ${b5}" \
-  #  "#define base06 ${b6}" \
-  #  "#define base07 ${b7}" \
-  #  "#define base08 ${b8}" \
-  #  "#define base09 ${b9}" \
-  #  "#define base0A ${bA}" \
-  #  "#define base0B ${bB}" \
-  #  "#define base0C ${bC}" \
-  #  "#define base0D ${bD}" \
-  #  "#define base0E ${bE}" \
-  #  "#define base0F ${bF}" \
-  #)"
+  run "${HOME}/.Xresources" "!" "$( outln \
+    "#define base00 ${b0}" \
+    "#define base01 ${b1}" \
+    "#define base02 ${b2}" \
+    "#define base03 ${b3}" \
+    "#define base04 ${b4}" \
+    "#define base05 ${b5}" \
+    "#define base06 ${b6}" \
+    "#define base07 ${b7}" \
+    "#define base08 ${b8}" \
+    "#define base09 ${b9}" \
+    "#define base0A ${bA}" \
+    "#define base0B ${bB}" \
+    "#define base0C ${bC}" \
+    "#define base0D ${bD}" \
+    "#define base0E ${bE}" \
+    "#define base0F ${bF}" \
+  )"
+
   run "${XDG_CONFIG_HOME:-~/.config}/alacritty/alacritty.yml" "#" "$( outln \
     "  primary:" \
     "    background: '0x${b0#'#'}'" \
@@ -124,6 +125,30 @@ main() {
     "    magenta: '0x${b6#'#'}'" \
     "    cyan:    '0x${bF#'#'}'" \
     "    white:   '0x${b3#'#'}'" \
+  )"
+
+  # TODO: color16-21
+  run "${DOTENVIRONMENT}/.termux/colors.properties" "#" "$( outln \
+    "foreground=${b5}" \
+    "background=${b0}" \
+    "cursor=${b5}" \
+    "" \
+    "color0=${b5}" \
+    "color1=${b8}" \
+    "color2=${bB}" \
+    "color3=${bA}" \
+    "color4=${bD}" \
+    "color5=${bE}" \
+    "color6=${bC}" \
+    "color7=${b0}" \
+    "color8=${b7}" \
+    "color9=${b9}" \
+    "color10=${b1}" \
+    "color11=${b2}" \
+    "color12=${b4}" \
+    "color13=${b6}" \
+    "color14=${bF}" \
+    "color15=${b3}" \
   )"
 }
 
