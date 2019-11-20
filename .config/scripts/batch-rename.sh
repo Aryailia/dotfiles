@@ -1,1 +1,1 @@
-/home/rai/interim/dotfiles/share/batch-rename/batch-rename.sh
+/home/rai/dotfiles/share/batch-rename/batch-rename.sh
