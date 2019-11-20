@@ -1,0 +1,4 @@
+[remote "origin"]
+	url = https://github.com/Aryailia/batch-rename.git
+[push]
+	default = master
