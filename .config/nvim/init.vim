@@ -36,6 +36,8 @@ call plug#end()
 set nocompatible
 set foldmethod=manual
 set bg=light          " Readable on light background
+"hi Visual term=reverse cterm=reverse guibg=Grey
+highlight Visual cterm=NONE ctermbg=LightYellow ctermfg=NONE
 
 " Use UTF-8 if we can and env LANG didn't tell us not to
 if has('multi_byte') && !exists('$LANG') && &encoding ==# 'latin1'
@@ -47,10 +49,12 @@ if ! has("gui_running")
   set guicursor=
 endif
 
+autocmd FileType * setlocal formatoptions-=cro formatoptions+=j
 set nrformats-=octal  " Leading 0s are not recognised as octals
 set formatoptions+=j  " Delete comment leaders when joining lines
-"set formatoptions-=r  " Do not auto add comments on <Enter>
 set formatoptions-=c  " Do not auto-wrap comments when exceeding textwidth
+set formatoptions-=o  " Do not auto add comments on normal 'o' or 'O'
+set formatoptions-=r  " Do not auto add comments on <Enter>
 set ignorecase
 
 set number " setting relativenumber was killing performance

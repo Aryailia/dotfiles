@@ -68,14 +68,14 @@ bF="#56b6c2" # cn 1  s br: deprecated, open/close embedded tags eg. <?php ?>
 #*color5:       base0E ! magenta
 #*color6:       base0C ! cyan
 #*color7:       base00 ! white
-#*color8:       base07
-#*color9:       base09
-#*color10:      base01
-#*color11:      base02
-#*color12:      base04
-#*color13:      base06
-#*color14:      base0F
-#*color15:      base03
+#*color8:       base07 ! light black
+#*color9:       base09 ! light red
+#*color10:      base01 ! light green
+#*color11:      base02 ! light yellow
+#*color12:      base04 ! light blue
+#*color13:      base06 ! light magenta
+#*color14:      base0F ! light cyan
+#*color15:      base03 ! light white
 
 main() {
   run "${HOME}/.Xresources" "!" "$( outln \

@@ -27,44 +27,48 @@ endfunction
 
 
 " Snippets
-inoremap <buffer> <LocalLeader>sbsh
+inoremap <unique> <buffer> <LocalLeader>sbsh
   \ #!/usr/bin/env sh
-inoremap <buffer> <LocalLeader>sbawk
+inoremap <unique> <buffer> <LocalLeader>sbawk
   \ #!/usr/bin/awk -f
-inoremap <buffer> <LocalLeader>sbpython
+inoremap <unique> <buffer> <LocalLeader>sbpython
   \ #!/usr/bin/env python
 
-inoremap <buffer> <LocalLeader>glob * .[!.]* ..?*
-
-inoremap <buffer> <LocalLeader>name
+inoremap <unique> <buffer> <LocalLeader>glob * .[!.]* ..?*
+inoremap <unique> <buffer> <LocalLeader>name
   \ name="$( basename "$0"; printf a )"; name="${name%?a}"
-inoremap <buffer> <LocalLeader>outln
-  \ outln() { printf %s\\n "$@"; }
-imap <LocalLeader>die
-  \ <C-o>:if ! search('\m^errln() *{', 'bnw')<CR>
-  \  execute "normal i,errln\n"<CR>
-  \endif<CR>
-  \<C-o>:if ! search('\m^name="\$( basename', 'bnw')<CR>
-  \  execute "normal i,name\n"<CR>
+
+" Using print color `pc` function
+imap <unique> <buffer> <LocalLeader>prompt1
+  \ <C-o>:if ! search('\m^ *pc() *{', 'bnw')<CR>
+  \  execute "normal i<LocalLeader>pc\n"<CR>
   \endif<CR>
   \<C-o>:setlocal paste<CR>
-  \die() { c="$1"; errln "$2: '${name}' -- $3"; shift 3; errln "$@"
-  \; exit "$c"; }<CR>
+  \prompt() {<CR>
+  \  pc "${2}"; read -r value; pc "${CLEAR}"<CR>
+  \  while outln "${value}" <bar> grep -qve "$1"; do<CR>
+  \    pc "${3:-"$2"}"; read -r value<CR>
+  \    pc "${CLEAR}"<CR>
+  \  done<CR>
+  \  printf %s "${value}"<CR>
+  \}<CR>
   \<C-o>:setlocal nopaste<CR>
-imap <LocalLeader>asdf
-  \ <C-o>:if ! search('\m^ *outln() *{', 'bnw')<CR>
-  \  execute "normal i,outln\n"<CR>
-  \endif<CR>
-  \die() {<CR>
-  \  c="$1"; outln "$2: '${name}' -- $3" >&2; shift 3<CR>
-  \  outln "$@" >&2; exit "$c"<CR>
+" Without colors and through STDERR (part of '<LocalLeader>init')
+inoremap <unique> <buffer> <LocalLeader>prompt2
+  \ <C-o>:setlocal paste<CR>
+  \prompt() {<CR>
+  \  errln "${2}"; read -r value<CR>
+  \  while outln "${value}" <bar> grep -qve "$1"; do<CR>
+  \    errln "${3:-"$2"}"; read -r value<CR>
+  \  done<CR>
+  \  printf %s "${value}"<CR>
   \}
   \<C-o>:setlocal nopaste<CR>
 
 " Neither `which` nor `command -v` are defined in POSIX
 " Some systems do not have `which` or it does not error code
 " For some shells (like 'dash') `command -v` works more like `test -e`
-inoremap <buffer> <LocalLeader>req
+inoremap <unique> <buffer> <LocalLeader>req
   \ <C-o>:setlocal paste<CR>
   \require() {<CR>
   \  for dir in $( printf %s "${PATH}" <Bar> tr ':' '\n' ); do<CR>
@@ -76,31 +80,43 @@ inoremap <buffer> <LocalLeader>req
 
 
 " Defends against malicious $2 but not malicious $1. $1 must be valid varname
-inoremap <buffer> <LocalLeader>assign
+inoremap <unique> <buffer> <LocalLeader>assign
   \ eval_assign() { eval "$1"=\"$2\"; }
 
 " `p` is for /dev/tty, the `c` in `pc` represents colour
-inoremap <buffer> <LocalLeader>p
+inoremap <unique> <buffer> <LocalLeader>p
   \ p() { printf %s "$@" >/dev/tty; }
-inoremap <buffer> <LocalLeader>pln
+inoremap <unique> <buffer> <LocalLeader>pln
   \ pln() { printf %s\\n "$@" >/dev/tty; }
-inoremap <buffer> <LocalLeader>pc
+inoremap <unique> <buffer> <LocalLeader>pc
   \ pc() { printf %b "$@" >/dev/tty; }
-inoremap <buffer> <LocalLeader>pcln
+inoremap <unique> <buffer> <LocalLeader>pcln
   \ pcln() { printf %b\\n "$@" >/dev/tty; }
-inoremap <buffer> <LocalLeader>out
+inoremap <unique> <buffer> <LocalLeader>out
   \ out() { printf %s "$@"; }
-inoremap <buffer> <LocalLeader>outln
+inoremap <unique> <buffer> <LocalLeader>outln
   \ outln() { printf %s\\n "$@"; }
-inoremap <buffer> <LocalLeader>err
+inoremap <unique> <buffer> <LocalLeader>err
   \ err() { printf %s "$@" >&2; }
-inoremap <buffer> <LocalLeader>errln
+inoremap <unique> <buffer> <LocalLeader>errln
   \ errln() { printf %s\\n "$@" >&2; }
+imap <LocalLeader>die
+  \ <C-o>:if ! search('\m^ *errln() *{', 'bnw')<CR>
+  \  execute "normal i<LocalLeader>errln\n"<CR>
+  \endif<CR>
+  \<C-o>:if ! search('\m^ *name="\$( basename', 'bnw')<CR>
+  \  execute "normal i<LocalLeader>name\n"<CR>
+  \endif<CR>
+  \<C-o>:setlocal paste<CR>
+  \die() { c="$1"; errln "$2: '${name}' -- $3"; shift 3; errln "$@"
+  \; exit "$c"; }<CR>
+  \<C-o>:setlocal nopaste<CR>
+
 " Much thanks to Rich (https://www.etalabs.net/sh_tricks.html for eval_escape)
 " Keeping to the analogy, this is ruby's p, but not really, so renamed
-inoremap <buffer> <LocalLeader>escape
+inoremap <unique> <buffer> <LocalLeader>escape
   \ eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
-inoremap <buffer> <LocalLeader>awk_eval
+inoremap <unique> <buffer> <LocalLeader>awk_eval
   \ awk_evalescape='<CR>
   \   function evalEscape(target) {<CR>
   \     gsub(/'\''/, "'\'\\\\\'\''", target);<CR>
@@ -109,7 +125,7 @@ inoremap <buffer> <LocalLeader>awk_eval
   \   }<CR>
   \ '
 
-inoremap <buffer> <LocalLeader>match
+inoremap <unique> <buffer> <LocalLeader>match
   \ <C-o>:setlocal paste<CR>
   \match_any() {<CR>
   \  matchee="$1"; shift 1<CR>
@@ -121,12 +137,25 @@ inoremap <buffer> <LocalLeader>match
   \}
   \<C-o>:setlocal nopaste<CR>
 
+inoremap <unique> <buffer> <LocalLeader>abs
+  \ <C-o>:setlocal paste<CR>
+  \absolute_path() (<CR>
+  \  dir="$( dirname "${1}"; printf a )"; dir="${dir%?a}"<CR>
+  \  cd "${dir}" <bar><bar> exit "$?"<CR>
+  \  wdir="$( pwd -P; printf a )"; wdir="${wdir%?a}"<CR>
+  \  base="$( basename "${1}"; printf a )"; base="${base%?a}"<CR>
+  \  output="${wdir}/${base}"<CR>
+  \  [ "${output}" = "///" ] && output="/"<CR>
+  \  printf %s "${output%/.}"<CR>
+  \)
+  \<C-o>:setlocal nopaste<CR>
 
 
 
-imap <buffer> <LocalLeader>help
+
+imap <unique> <buffer> <LocalLeader>help
   \ <C-o>:if ! search('\m^name="\$( basename "\$0"', 'bnw')<CR>
-  \  execute "normal i,name\n\n"<CR>
+  \  execute "normal i<LocalLeader>name\n\n"<CR>
   \endif<CR>
   \<C-o>:setlocal paste<CR>
   \show_help() {<CR>
@@ -148,7 +177,7 @@ imap <buffer> <LocalLeader>help
 
 " Program setup inspired by C
 " Different levels of complication for main
-imap <buffer> <LocalLeader>main1
+imap <unique> <buffer> <LocalLeader>main1
   \ <C-o>:setlocal paste<CR>
   \main() {<CR>
   \  # Dependencies<CR>
@@ -170,7 +199,7 @@ imap <buffer> <LocalLeader>main1
   \}
   \<C-o>:setlocal nopaste<CR>
 
-imap <buffer> <LocalLeader>main2
+imap <unique> <buffer> <LocalLeader>main2
   \ <C-o>:setlocal paste<CR>
   \# Handles options that need arguments<CR>
   \main() {<CR>
@@ -199,7 +228,7 @@ imap <buffer> <LocalLeader>main2
   \}
   \<C-o>:setlocal nopaste<CR>
 
-imap <buffer> <LocalLeader>main3
+imap <unique> <buffer> <LocalLeader>main3
   \ <C-o>:setlocal paste<CR>
   \# Handles single character-options joining (eg. pacman -Syu)<CR>
   \main() {<CR>
@@ -244,7 +273,37 @@ imap <buffer> <LocalLeader>main3
   \}
   \<C-o>:setlocal nopaste<CR>
 
-imap <buffer> <LocalLeader>init
+" Interactive menu main
+imap <unique> <buffer> <LocalLeader>mainm
+  \ <C-o>:setlocal paste<CR>
+  \RED='\001\033[31m\002'<CR>
+  \GREEN='\001\033[32m\002'<CR>
+  \YELLOW='\001\033[33m\002'<CR>
+  \BLUE='\001\033[34m\002'<CR>
+  \MAGENTA='\001\033[35m\002'<CR>
+  \CYAN='\001\033[36m\002'<CR>
+  \CLEAR='\001\033[0m\002'<CR>
+  \<CR>
+  \main() {<CR>
+  \  [ "$#" = 0 ] && eval "set -- $( prompt '.*' "$( outln \<CR>
+  \    "${CYAN}help${CLEAR}" \<CR>
+  \    "${CYAN}example${CLEAR} <arg> [<arg2>]" \<CR>
+  \    "${CYAN}example2${CLEAR} <dir> <arg2> ..." \<CR>
+  \    "Enter one of the options: ${CYAN}" \<CR>
+  \  )" )"<CR>
+  \  cmd="${1}"; shift 1<CR>
+  \  case "${cmd}" in<CR>
+  \    h*)  show_help; exit 0 ;;<CR>
+  \<CR>
+  \    e*)  echo 1 ;;<CR>
+  \    2)   echo 2 ;;<CR>
+  \<CR>
+  \    *)   show_help; exit 1 ;;<CR>
+  \  esac<CR>
+  \}
+  \<C-o>:setlocal nopaste<CR>
+
+imap <unique> <buffer> <LocalLeader>init
   \ <LocalLeader>sbsh<CR>
   \<CR>
   \<LocalLeader>name<CR>
