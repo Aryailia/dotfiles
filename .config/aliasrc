@@ -40,19 +40,22 @@ alias     e='emacs --no-init-file --no-site-file --load "$EMACSINIT"'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='browser.sh edit search'
 alias    es='browser.sh edit search'
-alias     g='\grep --color=auto'
+alias     g='git.sh'
 alias    ga='git add'
 alias    gc='git commit --message'
 alias   gca='git commit --amend'
 alias   gdc='git diff --word-diff=color --word-diff-regex=.'
 alias   gdl='git diff --color-moved=plain'
 alias   gdw='git diff --word-diff=color'
-alias    gn='git clone --recursive'
+alias    gn='git clone --recursive'  # For submodules
 alias   glg="git log --graph --abbrev-commit --decorate --oneline"
 alias   glf='git log --follow'
 alias glsst="git log | grep git-subtree-dir | sed 's/.*: //'"
 alias    gp='git push --recurse-submodules=on-demand'
-alias   grc='git rev-list --count'
+alias   grc='sh -c '\''  # Revision count
+  branch="${1:-"$( git branch | grep "^\\*" | cut -d " " -f 2 )"}"
+  git rev-list --count "${branch}"
+'\'' _'
 alias    gs='git status'
 #alias  gcb='sh -c "
 #  git checkout -b \"$1\"
