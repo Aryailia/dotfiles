@@ -9,7 +9,7 @@ mapclear!
 
 " Automatically executes `filetype plugin indent on` and `syntax enable`
 " :PlugInstall to install
-call plug#begin('~/.config/nvim/extra')
+call plug#begin('~/.config/nvim/package')
   Plug 'tpope/vim-unimpaired'       " Setting toggles, back/next nav shortcuts
   Plug 'tpope/vim-surround'         " Adding quotes
   Plug 'aryailia/vim-markdown-toc'  " Table of contents woo
@@ -19,6 +19,7 @@ call plug#begin('~/.config/nvim/extra')
 
   "Plug 'dpelle/vim-LanguageTool'    " Cannot figure out how to use ale for this
   " Microsoft's Language Server Protocol, for autocompletion etc.
+  Plug 'ap/vim-css-color'           " Color hex colour values
   Plug 'rust-lang/rust.vim'         " Rust syntax hilighting
   Plug 'dense-analysis/ale'         " Autocomplete, LSP integration, and linting
 call plug#end()

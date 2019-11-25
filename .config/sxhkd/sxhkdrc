@@ -49,7 +49,13 @@ super + c ; super + {s, b}
 super + c ; super + e
   $TERMINAL -t 'fullscreen_overlay' -e sh -c 'setsid clipboard.sh -w "$(<~/.config/emoji fzf | cut -d " " -f 1)"'
 super + g ; super + {a, p}
-  st -t 'fullscreen_overlay' -e sh -c '<{~/interim/ref/fcitx-table-extra/tables/zhengma-large.txt, "$DOTENVIRONMENT/notes/language/zhengma-parts.adoc"} fzf'
+  st -t 'fullscreen_overlay' -e sh -c ' \
+  sleep 0.1; \
+  fcitx-remote -s pinyin; \
+    <{~/interim/ref/fcitx-table-extra/tables/zhengma-large.txt, \
+    "$DOTENVIRONMENT/notes/language/zhengma-parts.adoc"} \
+      fzf'; \
+  fcitx-remote -s zhengma
 
 
 

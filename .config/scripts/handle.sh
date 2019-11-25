@@ -135,7 +135,6 @@ external_handle_link() {
   d queue.sh direct "${1}"
   t browser.sh run "${BROWSER_CLI}" -- "${1}"
   g browser.sh run "${BROWSER}" -- "${1}"
-  p echo WIP
   exit "${ENUM_SUCCESS}"
 }
 
@@ -165,7 +164,8 @@ local_handle_extension() {
       t exit "${ENUM_SUCCESS}"
       g setsid zathura -- "${1}" >/dev/null 2>&1& g exit "${ENUM_SUCCESS}"
       #e sigil
-      p pdftotext -l 10 -nopgbrk -q -- "${1}" -  # -l lines, -q quiet
+      # pdftotext is too slow for my tastes
+      #p pdftotext -l 2 -nopgbrk -q -- "${1}" -  # -l lines, -q quiet
       #p mutool draw -F txt -i -- "${1}" 1-10
       p exiftool "${1}"
       exit "${ENUM_NOPREVIEW}" ;;

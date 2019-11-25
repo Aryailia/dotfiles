@@ -296,11 +296,11 @@ symlink() {
     if "${VERBOSE}"; then puts "! WARN: skipping without flags '${name}'"; fi
   else
     mkdir -p "${target%/*}"  # '/' is reserved on UNIX but not windows
-    #if [ -L "${source}" ]; then  # just copy relative symbolic links
-    #  cp -P "${source}" "${target}" || die 1 "✗ FATAL: Unable to copy '${name}'"
-    #else  # otherwise make an absolute symbolic link
-    #  ln -s "${source}" "${target}" || die 1 "✗ FATAL: Unable to link '${name}'"
-    #fi
+    if [ -L "${source}" ]; then  # just copy relative symbolic links
+      cp -P "${source}" "${target}" || die 1 "✗ FATAL: Unable to copy '${name}'"
+    else  # otherwise make an absolute symbolic link
+      ln -s "${source}" "${target}" || die 1 "✗ FATAL: Unable to link '${name}'"
+    fi
     puts "✓ SUCCESS: '${name}'"
   fi
 }
