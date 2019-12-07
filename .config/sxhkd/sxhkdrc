@@ -41,14 +41,19 @@ super + space ; super + n
 
 
 
+################################################################################
+# Cheat sheets and copy
 # Xclip seems to need setsid to perserve the copy after the launching terminal has closed
 super + g ; super + {s, b, g}
   $TERMINAL -t 'fullscreen_overlay' -e browser.sh --launch menu {search, bookmark, link}
+# Let dmenu finish first before piping its output
+super + c ; super + c
+  asdf="$( dmenu -p "Write to clipboard:" )"; printf %s "${asdf}" | clipboard.sh --write
 super + c ; super + {s, b}
   $TERMINAL -t 'fullscreen_overlay' -e browser.sh menu {search, bookmark} --browser "clipboard"
 super + c ; super + e
   $TERMINAL -t 'fullscreen_overlay' -e sh -c 'setsid clipboard.sh -w "$(<~/.config/emoji fzf | cut -d " " -f 1)"'
-super + g ; super + {a, p}
+super + g ; super + {m, p}
   st -t 'fullscreen_overlay' -e sh -c ' \
   sleep 0.1; \
   fcitx-remote -s pinyin; \
@@ -56,7 +61,10 @@ super + g ; super + {a, p}
     "$DOTENVIRONMENT/notes/language/zhengma-parts.adoc"} \
       fzf'; \
   fcitx-remote -s zhengma
-
+super + g ; super + {a, e}
+  file="$DOTENVIRONMENT/notes/cheatsheets/{asciidoc-syntax-quick-reference.pdf,emacs_cheatsheet.pdf}"; \
+  handle.sh --gui --file "$file"; \
+  sleep 0.3; i3-msg "[title=\"$file\"] fullscreen"
 
 
 super + grave

@@ -18,51 +18,55 @@ EOF
 
 # Handles single character-options joining (eg. pacman -Syu)
 main() {
-  # Flags
-
-  # Dependencies
-
-  # Options processing
-  args=''
-  no_options='false'
-  while [ "$#" -gt 0 ]; do
-    if ! "${no_options}"; then
-      # Split grouped single-character arguments up, and interpret '--'
-      # Parsing '--' here allows "invalid option -- '-'" error later
-      opts=''
-      case "$1" in
-        --)      no_options='true'; shift 1; continue ;;
-        -[!-]*)  opts="${opts}$( puts "${1#-}" | sed 's/./ -&/g' )" ;;
-        *)       opts="${opts} $1" ;;
-      esac
-
-      # Process arguments properly now
-      for x in ${opts}; do case "${x}" in
-        -h|--help)  show_help; exit 0 ;;
-        -e|--example)  puts "-${2}-"; shift 1 ;;
-
-        # Put argument checks above this line (for error detection)
-        # first '--' case already covered by first case statement
-        -[!-]*)   show_help; die 1 "FATAL: invalid option '${x#-}'" ;;
-        *)        args="${args} $( puts "${1}" | eval_escape )" ;;
-      esac done
-    else
-      args="${args} $( puts "$1" | eval_escape )"
-    fi
-    shift 1
-  done
-
-  [ -z "${args}" ] && { show_help; exit 1; }
-  eval "set -- ${args}"
-
-
   case "${1}" in
+    run-and-return-pid)          shift 1; run_and_return_pid "$@" ;;
     wall|setwall|set-wallpaper)  shift 1; set_wallpaper "$@" ;;
     send|send-keys)              shift 1; send_keys "${@}";;
     *) echo did not match anything ;;
   esac
 
 }
+
+# Does a diff of the `pgrep` of ${1} before and after running "$@{1 ..}"
+run_and_return_pid() {
+  # $1: command to pgrep
+  # $2 $3 ...: command to launch whatever program
+  grep_by="$1"; shift 1
+  before="$( pgrep "${grep_by}" )"  # Do not think we need to sort
+  [ "$#" -gt 0 ] || die 1 FATAL 'Provide shellscript to run'
+  "$@" >/dev/null 2>&1
+  after="$( pgrep "${grep_by}" )"
+  [ "${before}" != "${after}" ] || die 1 FATAL \
+    "Your shellscript does not seem to launch \`$1\`" \
+    "or \`pgrep\` is not finding it"
+
+  printf %s\\n "${before}" | awk -v after="${after}" '
+    BEGIN {
+      len = split(after, list, "\n *");
+      for (i = 1; i <= len; i += 1) {
+        uniqued[list[i]] = 1;
+      }
+    }
+    {
+      if (uniqued[$0]) {
+        uniqued[$0] = 0;
+      } else {
+        len += 1;
+        list[len] = $0;
+        uniqued[$0] = 1;
+      }
+    }
+    END {
+      for (i = 1; i <= len; i += 1) {
+        if (uniqued[list[i]]) {
+          print list[i];
+        }
+      }
+    }
+  '
+}
+
+
 
 set_wallpaper() {
   [ -n "${1}" ] && [ -r "${1}" ] && cp "${1}" ~/.config/wallpapper.png \
@@ -97,8 +101,9 @@ send_keys() {
 
 # Helpers
 puts() { printf %s\\n "$@"; }
-puterr() { printf %s\\n "$@" >&2; }
-die() { c="$1"; puterr "$2: '${name}' -- $3"; shift 3; puterr "$@"; exit "$c"; }
+errln() { printf %s\\n "$@" >&2; }
+die() { c="$1"; errln "$2: '${name}' -- $3"; shift 3; errln "$@"; exit "$c"; }
+
 
 eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 
