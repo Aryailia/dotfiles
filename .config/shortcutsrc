@@ -6,7 +6,7 @@ out() { printf "'%s' " "$@"; }
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-"${HOME}/.config"}"
 out "a"  "${XDG_CONFIG_HOME}/nvim/after"
-out "b"  "${HOME}/blog"
+out "b"  "${DOTENVIRONMENT}/notes/blog"
 out "dc" "${HOME}/dotfiles/.config"
 out "c"  "${XDG_CONFIG_HOME}"
 out "d"  "$(c.sh downloads)"

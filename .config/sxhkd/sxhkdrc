@@ -18,7 +18,8 @@ super super + d
 
 
 super + space ; super + e
-  $TERMINAL -e emacs --no-init-file --no-site-file --load "${EMACSINIT}"
+  $TERMINAL -e emacs-sandbox.sh -P -O -d "${EMACSINIT}"
+#  $TERMINAL -e emacs --no-init-file --no-site-file --load "${EMACSINIT}"
 super + space ; super + a
   $TERMINAL -e alsamixer; statusbar-startrefresh.sh
 super + space ; super + s
