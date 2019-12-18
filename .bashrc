@@ -30,10 +30,17 @@ exists() {
 
 # Bash specific stuff
 rrc() {
-  [ "$#" = 0 ] && . "${HOME}/.bashrc" "${HOME}/.profile" \
-    && . "${XDG_CONFIG_HOME}/envrc"
-  . "${XDG_CONFIG_HOME}/aliasrc"
+  if [ "$#" = 0 ]; then
+    source "${HOME}/.bashrc"
+    source "${HOME}/.profile"
+  fi
+  source "${XDG_CONFIG_HOME}/envrc"
+  source "${XDG_CONFIG_HOME}/aliasrc"
 }
+
+# Android Termux: Bash never ran as login shell, thus '.profile' never sourced
+[ -z "${XDG_CONFIG_HOME}" ] && source "${HOME}/.profile"
+# Nee
 rrc 'Avoid infinite loop'
 
 # Use `cat` instead of a function so we do not pollute namespace

@@ -101,6 +101,7 @@ main() {
   dotfiles="$( dirname "${me}"; printf a )"; dotfiles="${dotfiles%?a}"
   # Load constants (but not too many times), useful on initial install
   [ -z "${DOTENVIRONMENT}" ] && . "${dotfiles}/.profile"
+  mkdir -p "${XDG_CONFIG_HOME}" "${XDG_CACHE_HOME}"
 
   # Global variables static to project (assume linker is ran in base directory)
   dotenv="${DOTENVIRONMENT}"
@@ -150,15 +151,14 @@ main() {
   dotfile_ignore="$( "${ignore}" )"
   . "${ignore}" >/dev/null
 
-  # Link some directories, just adding '/' at the end for clarity
+  # Link some directories
+  # Add trailing '/' for output message clarity
+  # Also build up ${ignore}
   for dir in \
     "${scripts_relative_path}/" \
     '.config/nvim/after/' \
   ; do
-
-    # `escape` from "${ignore}"
     dotfile_ignore="${dotfile_ignore}$( escape "${dir}" )"
-    # Extra '/' gets added to printed message in `symlink_relative_path`
     symlink_relative_path "${dir}" && count="$(( count + 1 ))"
   done
 
@@ -273,14 +273,17 @@ symlink_relative_path() {
   symlink "${dotfiles}/$1" "${TARGET}/$1" "$1"
 }
 
+# Really all I care about is removing trailing slashes
+# And also protects from '/' -> '' case
+# For use in `ln -s`, trailing slash is tacit keep same name (want to avoid)
+normalise_path() {
+  printf %s/%s "$( dirname "${1}" )" "$( basename "${1}" )"
+}
+
 symlink() {
-  source="$1"
-  target="$2"
-  name="$3"
-  #if [ -d "${name}" ]
-  #  then name="$3/"
-  #  else name="$3"
-  #fi
+  source="$( normalise_path "${1}"; printf a )"; source="${source%?"a}"
+  target="$( normalise_path "${2}"; printf a )"; target="${target%?"a}"
+  name="${3}"
 
   [ -e "${source}" ] || die 1 "✗ FAIL: \"${source}\" does not exist"
 
@@ -289,7 +292,6 @@ symlink() {
   then
     rm -fr "${target}"
   fi
-
 
   if [ -e "${target}" ]; then
     # If is more safe than without (${VERBOSE} could be set by environment)

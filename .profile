@@ -85,6 +85,5 @@ export LESS_TERMCAP_ue="$( printf '%b' '[0m' )"
 # Login shell starts with '-bash', test if it ends with bash
 printf %s\\n "$0" | grep -q '^-bash$' \
   && test -f "$HOME/.bashrc" && . "$HOME/.bashrc" \
-  && test -f "$XDG_CONFIG_HOME/envrc" && . "$XDG_CONFIG_HOME/envrc" \
   && sudo loadkeys "$XDG_CONFIG_HOME/rc/remap-caps-rctrl.map"
 
