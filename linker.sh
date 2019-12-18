@@ -277,12 +277,13 @@ symlink_relative_path() {
 # And also protects from '/' -> '' case
 # For use in `ln -s`, trailing slash is tacit keep same name (want to avoid)
 normalise_path() {
-  printf %s/%s "$( dirname "${1}" )" "$( basename "${1}" )"
+  _dir="$( dirname "${1}"; printf a )"; _dir="${_dir%?a}"
+  printf %s/%s\\n "${_dir}" "$( basename "${1}" )"
 }
 
 symlink() {
-  source="$( normalise_path "${1}"; printf a )"; source="${source%?"a}"
-  target="$( normalise_path "${2}"; printf a )"; target="${target%?"a}"
+  source="$( normalise_path "${1}"; printf a )"; source="${source%?a}"
+  target="$( normalise_path "${2}"; printf a )"; target="${target%?a}"
   name="${3}"
 
   [ -e "${source}" ] || die 1 "✗ FAIL: \"${source}\" does not exist"
