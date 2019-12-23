@@ -23,13 +23,12 @@ endfunction
 function! Run()
   write
   call RunCmdlineOverload('#run: ',
-    \function('s:RunDefault'), function('s:RunWithArguments'))
-
+    \ function('s:RunDefault'), function('s:RunWithArguments'))
 endfunction
+
 function! Build()
   call Run()
 endfunction
-
 
 " Snippets
 inoremap <unique> <buffer> <LocalLeader>sbsh
