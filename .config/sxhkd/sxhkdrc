@@ -17,7 +17,6 @@ super + shift + q
 super super + d
   dmenu_run
 
-
 super + space ; super + e
   $TERMINAL -e emacs-sandbox.sh -P -O -d "${EMACSINIT}"
 #  $TERMINAL -e emacs --no-init-file --no-site-file --load "${EMACSINIT}"
@@ -71,8 +70,6 @@ super + g ; super + {a, e}
   sleep 0.3; i3-msg "[title=\"$file\"] fullscreen"
 
 
-super + grave
-  $TERMINAL -n 'overlay' -e setsid clipboard.sh -w "$(date +%s)"
 #super + Scroll_Lock
 #  killall screenkey || screenkey
 super + shift + Insert
@@ -91,8 +88,6 @@ super + BackSpace ; super + { w, e, r, BackSpace }
   }
 super + BackSpace ; super + s
   xlock -mode blank
-#super + x
-#  mpc pause; pauseallmpv; i3lock -e -f -c 1d2021; xset dpms force off
 #XF86Launch1
 #  xset dpms force off
 XF86TouchpadToggle
@@ -102,18 +97,27 @@ XF86TouchpadOff
 XF86TouchpadOn
   synclient TouchpadOff=0
 
-# Language
-super + {alt +, control +, alt + control +} 1
-  fcitx-remote -s {fcitx-keyboard-us-alt-intl-unicode, fcitx-keyboard-cn-altgr-pinyin, ipa-x-sampa}
-super + {alt +, control +, alt + control +} 2
-  fcitx-remote -s {mozc, anthy, kkc}
-super + {alt +, control +, alt + control +} 3
-  fcitx-remote -s {zhengma-large, pinyin, wbpy}
-super + {alt +, control +, alt + control +} 4
-  fcitx-remote -s {jyutping, rime, chewing}
-super + alt + 5
-  fcitx-remote -s hangul
 
+################################################################################
+# Main Keybinds
+
+# Stuff
+super + grave
+  $TERMINAL -n 'overlay' -e setsid clipboard.sh -w "$(date +%s)"
+super + {1,2,3,4,5,6,7,8,9,0}
+  i3-msg 'workspace {1,2,3,4,5,6,7,8,9,10}'
+super + shift + {1,2,3,4,5,6,7,8,9,0}
+  i3-msg 'move container to workspace {1,2,3,4,5,6,7,8,9,10}'
+super + shift + q
+  kill "$(xprop -id "$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)" '\t$0' _NET_WM_PID | cut -f 2)"
+super + r ; super + r
+  pkill -USR1 sxhkd; i3-msg reload
+super + r ; super + {h, Left, k, Up}
+  i3-msg 'resize shrink {width, width, height, height} 10 px or 10 ppt'
+super + r ; super + {j, Down, l, Right, semicolon}
+  i3-msg 'resize grow {height, height, width, width, width} 10 px or 10 ppt'
+
+# Language
 super + u ; super + q ; super + {q, w, e}
   fcitx-remote -s {fcitx-keyboard-us-alt-intl-unicode, fcitx-keyboard-cn-altgr-pinyin, ipa-x-sampa}
 super + u ; super + w ; super + {q, w, e}
@@ -124,6 +128,28 @@ super + u ; super + r ; super + {q, w, e}
   fcitx-remote -s {jyutping, rime, chewing}
 super + u ; super + t ; super + {q, w, e}
   fcitx-remote -s hangul
+
+# And continuing
+super + {i, shift + i}
+  i3-msg 'gaps inner current {plus, minus} 5'
+super + {o, shift + o}
+  i3-msg 'gaps outer current {plus, minus} 5'
+super + d
+  dmenu_run
+super + shift + f
+  i3-msg 'fullscreen toggle'
+#super + g
+#  Bunch of chords for quick
+super + {h, Left, j, Down, k, Up, l, Right, semicolon}
+  i3-msg 'focus {left, left, down, down, up, up, right, right, right}'
+super + shift + {h, Left, j, Down, k, Up, l, Right, semicolon}
+  i3-msg 'move {left, left, down, down, up, up, right, right, right}'
+#super + c
+#  Bunch of chords
+super + shift + space
+  i3-msg 'floating toggle'
+
+
 
 ## Recording
 ## Take screenshot
