@@ -148,7 +148,9 @@ vnoremap <unique> <Leader>wc y:echo
   \ "words: " . system('wc -w ', @")
   \ . "chars: ". system('wc -m ', @")<CR>
 noremap <unique> <Leader>ta<Tab> :%Tab /\|<CR>
-noremap <unique> <Leader>t<Tab> :Tab /\|<CR>
+nnoremap <unique> <Leader>tp 0yt<Bar>f<Bar>a
+  \<C-r>=system("language.sh pinyin \"" . @" . '"')<CR>
+  \<C-h><Bar><Esc>0j
 noremap <unique> <Leader>t, :Tab /\,<CR>
 nnoremap <unique> <Leader>rc
   \ :silent call system("    setsid reloadvim.sh --ignore-checks '"
