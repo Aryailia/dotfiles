@@ -88,7 +88,7 @@ alias  mnta='sh -c '\''
   simple-mtpfs --device "$1" "$2";
 '\'' _'  #chown "$( id -u ):$( id -g )" "$2"
 alias  mntu='sh -c '\''
-  [ "$#" = 0 ] && { echo "mnta <num> <path>"; simple-mtpfs -l; exit 1; }
+  [ "$#" = 0 ] && { echo "mntu <sd??> <path>"; lsblk; exit 1; }
   [ -e "/dev/$1" ] || { printf %s\\n "Device not found"; exit 1; };
   [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; };
   sudo mount -o "uid=$( id -u ),gid=$( id -g )" "/dev/$1" -- "$2";
@@ -98,7 +98,6 @@ alias     r='trash'
 alias   rhk='pkill -USR1 sxhkd; i3-msg reload'  # `sxhkd` updates on usr1 signal
 alias    rx='xrdb ~/.Xresources'
 #alias  rrc=''  # In individual rc files, reminder to not re-alias this
-alias  sudo='sudo '  # Enable aliases in sudo commands
 alias    od='handle.sh -d --'
 alias    oe='handle.sh -e --'
 alias    og='handle.sh -g --'
@@ -107,6 +106,10 @@ alias    ot='handle.sh -t --'
 alias     t='tmux.sh'
 alias     w='weather.sh'
 alias     v='nvim'
+
+# Enable aliases in sudo commands
+alias   sudo='sudo '
+alias setsid='setsid '
 
 alias c='cd_of sh -c '\''
   if [ -z "$1" ]; then
