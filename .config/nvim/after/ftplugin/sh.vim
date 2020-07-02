@@ -10,19 +10,24 @@ let b:ale_lint_on_save = 1
 let b:ale_lint_on_enter = 0
 
 function! Lint()
-  "!clear && online-shellcheck.sh -i %
-  vertical T if shellcheck -V >/dev/null 2>&1;
-    \  then shellcheck %;
-    \  else online-shellcheck.sh -i %;
-    \fi
+endfunction
+
+function! s:RunDefault()
+  vertical T sh -c %
+endfunction
+
+function! s:RunWithArguments(cmdline)
+  execute('vertical T ' . a:cmdline)
 endfunction
 
 function! Run()
-  vertical T sh -c %
+  write
+  call RunCmdlineOverload('#run: ',
+    \function('s:RunDefault'), function('s:RunWithArguments'))
+
 endfunction
 function! Build()
-  write
-  vertical T sh -c %
+  call Run()
 endfunction
 
 

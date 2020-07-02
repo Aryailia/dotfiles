@@ -1,7 +1,6 @@
 let s:cmdline_prefix_regexp = '//run:'
 
 function! Build()
-  write
   " `%` is the full path, `expand("%")` is just the current file name
   "execute("vertical T rustc % -o \"${TMPDIR}/" . expand("%") . '"')
   vertical T cargo build
@@ -19,7 +18,6 @@ function! s:RunWithArguments(cmdline)
 endfunction
 
 function! Run()
-  write
   call RunCmdlineOverload(s:cmdline_prefix_regexp,
     \function('s:RunDefault'), function('s:RunWithArguments'))
 endfunction
@@ -42,3 +40,5 @@ let b:ale_rust_rls_config = {
 \ }
 let b:ale_rust_rls_toolchain = ''
 let b:ale_linters = {'rust': ['rls']}
+"let b:ale_rust_rls_executable = 'rust-analyzer'
+let b:ale_fixers = ['rustfmt']

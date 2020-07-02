@@ -147,6 +147,7 @@ nnoremap <unique> <Leader>wc :echo
 vnoremap <unique> <Leader>wc y:echo
   \ "words: " . system('wc -w ', @")
   \ . "chars: ". system('wc -m ', @")<CR>
+noremap <unique> <Leader>ta<Tab> :%Tab /\|<CR>
 noremap <unique> <Leader>t<Tab> :Tab /\|<CR>
 noremap <unique> <Leader>t, :Tab /\,<CR>
 nnoremap <unique> <Leader>rc
@@ -196,6 +197,7 @@ function! RunCmdlineOverload(prefix, notfound, found)
   endif
 endfunction
 
+
 function! Lint()
   ALELint
 endfunction
@@ -224,15 +226,15 @@ let g:ale_lint_on_enter = 0               " When entering the file
 let g:ale_virtualtext_cursor = 1          " Neovim: Display linter text on side
 
 
-" LanguageTool integration only seems to execute on manual :ALELint
-let b:ale_languagetool_executable = 'java'
-let b:ale_languagetool_options = '-jar ${XDG_DATA_HOME}/LanguageTool-4.7
-  \/languagetool-commandline.jar -l zh'
-"let g:ale_linters = { 'tex': ['languagetool','proselint'] }
-"let g:ale_linter_aliases = { 'tex': ['tex', 'text']}
-"let g:ale_linters = {'tex': ['languagetool'], 'text': ['languagetool']}
-"let g:ale_linters_explicit = 0
-
+"" LanguageTool integration only seems to execute on manual :ALELint
+"let b:ale_languagetool_executable = 'java'
+"let b:ale_languagetool_options = '-jar ${XDG_DATA_HOME}/LanguageTool-4.7
+"  \/languagetool-commandline.jar -l zh'
+""let g:ale_linters = { 'tex': ['languagetool','proselint'] }
+""let g:ale_linter_aliases = { 'tex': ['tex', 'text']}
+""let g:ale_linters = {'tex': ['languagetool'], 'text': ['languagetool']}
+""let g:ale_linters_explicit = 0
+"
 call ale#linter#Define('css', {
   \ 'name':       'vscode-css',
   \ 'lsp':        'stdio',
@@ -248,13 +250,12 @@ call ale#linter#Define('hmtl', {
   \ 'project_root': '.',
 \ })
 
-" Auto complete
+"" Auto complete
 let g:ale_completion_enabled = 1
 set omnifunc=ale#completion#OmniFunc
-inoremap <expr> <Tab> pumvisible()
-  \?(empty(v:completed_item)?"\<C-n>":"\<C-y>")
-  \:"\<Tab>"
-" Avoid completing with only one item. Causes problems when deleting
+inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
+"" Avoid completing with only one item. Causes problems when deleting
 set completeopt=menu,menuone,preview,noinsert,noselect
 
 " Keymaps
