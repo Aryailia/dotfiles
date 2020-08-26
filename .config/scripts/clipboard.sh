@@ -1,12 +1,14 @@
 #!/usr/bin/env sh
-  # >/dev/stdin $0 <type> <?content1> <?content2> ...
+
 # Intended to be a portable clipboard interface
 # Useful tmux as clipboard info: https://unix.stackexchange.com/questions/56477/
+
+NAME="$( basename "$0"; printf a )"; NAME="${NAME%?a}"
 
 show_help() {
   <<EOF cat - >&2
 SYNOPSIS
-  [<STDIN] ${name} OPTIONS [INPUTS ...]
+  [<STDIN] ${NAME} <option> [<input1> [<input2> [ ... ]]]
 
 DESCRIPTION
   Wrapper for the clipboard across different environments
@@ -18,7 +20,7 @@ OPTIONS
   -r, --read
     Copy from the clipboard to STDOUT
 
-  -w, --write INPUTS <STDIN
+  -w, --write
     Copy either STDIN or <inputs> to the clipboard
     Specifying <inputs> will ignore STDIN
 
@@ -29,167 +31,186 @@ OPTIONS
     Displays what clipboard is being used to STDERR
 
 EXAMPLES
-  \$ ${name} --write 'hello' 'world'                # helloworld
-  \$ printf '%s\n' 'hello world' | ${name} --write  # hello world\n
-  \$ ${name} --read
-  \$ ${name} --help
+  \$ ${NAME} --w 'hello' 'world'
+    => helloworld
+  \$ printf %s\\\\n 'hello world' | ${NAME} --write
+    => hello world\\n
+  \$ ${NAME} --read
+  \$ ${NAME} --help
 EOF
 }
 
+# TODO: change this to .local
+FILE_CLIPBOARD="${XDG_CONFIG_HOME:-"${HOME}/.config"}/clipboard"
+NL='
+'
 
-##############################################################################
+# Handles options that need arguments
 main() {
-  name="$(basename "$0"; printf x)"; name="${name%??}"
+  # Flags
+  READ='false'
+  WRITE='false'
+  CLIPBOARD_CHOICE=''
+  VERBOSE='false'
 
-  # Dependencies
-  READ=""
-  CHOICE="$(map_to '' ${ENUM_ID})"
-  VERBOSE="false"
 
   # Options processing
-  args=""; no_options="false"
+  args=''; literal='false'
   while [ "$#" -gt 0 ]; do
-    "${no_options}" || case "$1" in
-      --)  no_options="true"; shift 1; continue ;;
-      -h|--help)  show_help; exit 0 ;;
-      -x|--clipboard)  CHOICE="$(map_to "$2" "${ENUM_ID}")"; shift 1 ;;
-      -r|--read)       READ="true" ;;
-      -w|--write)      READ="false" ;;
-      -v|--verbose)    VERBOSE="true" ;;
-      *)   args="${args} $(puts "$1" | eval_escape)" ;;
+    "${literal}" || case "${1}"
+      in --)  no_options="true"; shift 1; continue
+      ;; -h|--help)  show_help; exit 0
+      ;; -x|--clipboard)  CLIPBOARD_CHOICE="${2}"; shift 1
+      ;; -r|--read)       READ="true"
+      ;; -w|--write)      WRITE="true"
+      ;; -v|--verbose)    VERBOSE="true"
+      ;; *)   args="${args} $( outln "${1}" | eval_escape )"
     esac
-    "${no_options}" && args="${args} $(puts "$1" | eval_escape)"
+    "${literal}" && args="${args} $( outln "${1}" | eval_escape )"
     shift 1
   done
 
   eval "set -- ${args}"
-  xdg_config="${XDG_CONFIG_HOME:-"${HOME}/.config"}"
-  clipboard_file="${xdg_config}/clipboard"
 
-  # Main
-  if [ "${READ}" = 'false' ]; then
-    # Like GNU utils, ignore STDIN if parameter-specified input given
-    { if [ "$#" -eq 0 ]
-      then <&0 cat -
-      else prints "$@"
-    fi; } | {
-      # Additional checks
-      case "${CHOICE}" in
-        # Without this, choosing '-x tmux' will not complain if tmux server off
-        "$(map_to 'tmux' "${ENUM_ID}")")
-          tmux_on || die 1 'FATAL: tmux server not running'
-      esac
+  if   "${READ}"; then
+    c="$( find_clipboard "${CLIPBOARD_CHOICE}" "read" )" || exit "$?"
+    case "${c}"
+      in xclip)                "${c}" -out -selection clipboard
+      ;; termux-clipboard-get) "${c}"
+      #;; tmux)                 "${c}" save-buffer -b clipboard -
+      ;; "${FILE_READ}")       "${c}" "${FILE_CLIPBOARD}"
+      ;; *) die DEV 1 "Probably forgot to implement clipboard '${clipboard}'"
+    esac
+  elif "${WRITE}"; then
+    c="$( find_clipboard "${CLIPBOARD_CHOICE}" "write" )" || exit "$?"
+    notify.sh "📋" &
+    read_stdin_if_no_parameters "$@" | case "${c}"
+      in xclip)                "${c}" -in -selection clipboard
+      ;; termux-clipboard-set) "${c}"
+      #;; tmux)                 "${c}" save-buffer -b clipboard -
+      ;; "${FILE_WRITE}")       "${c}" - >"${FILE_CLIPBOARD}"
+      ;; *) die DEV 1 "Probably forgot to implement clipboard '${clipboard}'"
+    esac
+  else
+    show_help
+    die FATAL 1 "Specify either --write or --read"
+  fi
+}
 
-      notify.sh "📋"
+FILE_READ='cat'
+FILE_WRITE='cat'
 
-      # Process the input to copy
-      if   is_to_run 'termux-set'; then  <&0 termux-clipboard-set
-      elif is_to_run 'xclip'; then       <&0 xclip -in -selection clipboard
+# Order by first presidence to last
+# 'file' is a terminating condition
+CLIPBOARD_LIST="
+xclip	read	xclip
+xclip	write	xclip
+termux	read	termux-clipboard-get
+termux	write	termux-clipboard-set
+file	read	${FILE_READ}
+file	write	${FILE_WRITE}
+	read	
+	write	
+"
+CMD_LIST="$( printf %s "${CLIPBOARD_LIST}" | {
+  while IFS= read -r line; do
+    [ "${line}" !=  "${line#file}" ] && break
+    printf %s\\n "${line##*	}"
+  done
+})"
 
-      # Command will complain if no tmux server is running
-      # `tmux_on` first so --verbose does not print
-      elif tmux_on && is_to_run 'tmux'; then
-        echo yo
-        <&0 tmux load-buffer -b 'clipboard' -
+find_clipboard() {
+  [ "${1}" != "${1#*[!a-z]}" ] && die FATAL 1 \
+    "The clipboard option specified '${1}' contains non a-z characters"
 
-      # Use `is_to_run` instead of else for '--verbose'
-      elif is_to_run 'file'; then
-        [ -w "${xdg_config}" ] || die 1 "FATAL: '${xdg_config}' not writeable"
-        <&0 cat - >"${clipboard_file}"
-        # Also insert into the buffer
-        #require tmux && tmux_on && tmux -b 'clipboard' "${clipboard_file}"
+  clip=''
+  choice_error=''
+  if [ "${CLIPBOARD_LIST}" != "${CLIPBOARD_LIST#*"${NL}${1}	"}" ]; then
+    clip="${CLIPBOARD_LIST#*"${NL}${1}	${2}	"}"
+    clip="${clip%%${NL}*}"
+  else
+    choice_error="Clipboard '${1}' is not supported by \`${NAME}\`."
+  fi
+
+  if [ -z "${choice_error}" ] \
+    && [ -n "${clip}" ] \
+    && [ "${clip}" != 'file' ] \
+    && ! require "${clip}" \
+  ; then
+    choice_error="Clipboard '${clip}' was not found on the current system."
+  fi
+
+  #TODO Benchmark, also benchmark with `command -v` for `require`
+  # Default is the longest
+  if [ -z "${choice_error}" ]; then
+    for cmd in $( outln "${CMD_LIST}" | uniq ); do
+    #[ -z "${choice_error}" ] && for cmd in ${CMD_LIST}; do
+      if require "${cmd}"; then
+        #if [ "${cmd}" = 'tmux' ] && tmux_on; then
+          clip="${cmd}"
+          break
+        #fi
       fi
-    }
+    done
 
-  elif [ "${READ}" = 'true' ]; then
-    if   is_to_run 'termux-get'; then       termux-clipboard-get
-    elif is_to_run 'xclip'; then            xclip -out -selection clipboard
-    elif is_to_run 'tmux' && tmux_on; then  tmux save-buffer -b clipboard -
-    elif is_to_run 'file'; then             cat "${clipboard_file}"
-    fi
-  else
-    die 1 "FATAL: \`${name}\` requires '-r' or '-w'" "\`${name} -h\` for help"
+    # DESIGN: File copy must be done explicitly, keep below commented
+    #if [ -z "${clip}" ]; then
+    #  if [ "${2}" = "read" ]
+    #    then clip='cat'
+    #  else
+    #    else clip='printf'
+    #  fi
+    #fi
   fi
 
+  if [ -n "${choice_error}" ]; then
+    die FATAL 1 "${choice_error} Available clipboards:" "$(
+      outln "${CLIPBOARD_LIST}" | cut -f 1 | uniq
+    )"
+  fi
+
+
+  if [ -z "${clip}" ]; then
+    die 1 "No valid clipboards found"
+  elif [ "${clip}" = "${FILE_READ}" ]; then
+    [ ! -r "${FILE_CLIPBOARD}" ] && die FATAL 1 \
+      "Cannot read '${FILE_CLIPBOARD}'"
+  elif [ "${clip}" = "${FILE_WRITE}" ]; then
+    [ ! -w "${FILE_CLIPBOARD}" ] && die FATAL 1 \
+      "Cannot write to '${FILE_CLIPBOARD}'"
+  fi
+
+
+  outln "${clip}"
 }
 
-
-
-##############################################################################
-# Associative array implementation for choice lookups
-
-# Makes it easier to add more aliases for the different clipboards
-# map_to is where the aliases are controlled
-ENUM_COMMAND="1"
-ENUM_ID="2"
-
-select_enum() {
-  case "$1" in
-    "${ENUM_ID}")       prints "$2" ;;  # An enum id
-    "${ENUM_COMMAND}")  prints "$3" ;;  # The associated command
-    *)  die 1 "DEV: Mistyped enum or did not give one" ;;
-  esac
-}
-
-map_to() {
-  # $1 is an alias
-  # $2 is the index (fed to select_enum()) to print out
-  case "$1" in
-    xclip)              select_enum "$2" "1" "xclip" ;;
-    termux|termux-set)  select_enum "$2" "2" "termux-clipboard-set" ;;
-    termux-get)         select_enum "$2" "2" "termux-clipboard-get" ;;
-    tmux)               select_enum "$2" "3" "tmux" ;;
-    file)               select_enum "$2" "4" ":" ;;
-    ?*)  die 1 "FATAL: Clipboard program '$1' is not supported" ;;
-    *)                  select_enum "$2" "0" ":" ;;
-  esac
-}
-
-is_to_run() {
-  tmp_is_to_run="$(map_to "$1" "${ENUM_COMMAND}")"
-  if [ "${CHOICE}" = "$(map_to '' "${ENUM_ID}")" ] \
-    || [ "${CHOICE}" = "$(map_to "$1" "${ENUM_ID}")" ] \
-    && require "${tmp_is_to_run}"
-  then
-    "${VERBOSE}" && puts "${name} - using $(
-      if [ "${tmp_is_to_run}" = ":" ]
-        then prints "'${clipboard_file}'"
-        else prints "${tmp_is_to_run}"
-      fi) as the clipboard" >&2
-    return 0
+# Like GNU utils, ignore STDIN if parameter-specified input given
+read_stdin_if_no_parameters() {
+  if [ "$#" = 0 ]; then
+    <&0 cat -
+  elif [ "$#" = 1 ]; then
+    out "${1}"
   else
-    return 1
+    out "${1}"
+    shift 1
+    printf \\n%s "$@"
   fi
 }
 
+#tmux_on() { tmux info >/dev/null 2>&1; }
 
-##############################################################################
 # Helpers
-prints() { printf '%s' "$@"; }
-puts() { printf '%s\n' "$@"; }
-die() { c="$1"; shift 1; for x in "$@"; do puts "$x" >&2; done; exit "$c"; }
-eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
-require() { command -v "$1" >/dev/null 2>&1; }
-
-tmux_on() { tmux info >/dev/null 2>&1; }
-
-# $1 is the name of the actual command
-# $2...  are the acceptable shorthands for the command (used by -x option)
-select() {
-  cmd="$1"; shift 1
-  # If blank, any choice is fine. Then check if we have the command
-  [ -z "${CHOICE}" ] || match_any "${CHOICE}" "$@" && require "${cmd}" \
-    && { "${VERBOSE}" && puts "Using \`${cmd}\`" >&2;  true; }
-}
-
-match_any() {
-  matchee="$1"; shift 1
-  [ -z "${matchee}" ] && return 1
-  for matcher in "$@"; do  # Literal match in case
-    case "${matchee}" in "${matcher}") return 0 ;; esac
+out() { printf %s "$@"; }
+outln() { printf %s\\n "$@"; }
+die() { printf %s "${1}: " >&2; shift 1; printf %s\\n "$@" >&2; exit "${1}"; }
+require() {
+  for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
+    [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && return 0
   done
   return 1
 }
+#require() { command -v "${1}" >/dev/null 2>&1; }
 
-##############################################################################
+eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
+
 main "$@"

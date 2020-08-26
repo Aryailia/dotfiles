@@ -1,17 +1,20 @@
 #!/usr/bin/env sh
 
-value='1'
 first="$( if [ "${1}" = "-" ]; then
     cat -
   else
-    printf %s\\n "${1}"
+    printf %s "${1}"
   fi
   printf a
-)"; first="${first%?a}"
-shift 1
+)"; first="${first%a}"
+shift 1  # ${first} eats the first argument
 
-if pgrep 'Xorg' >/dev/null 2>&1
-  then notify-send "${first}" "$@" && value="0"
-  else [ -n "$TMUX" ] && tmux display-message "$@" && value="0"
+if [ -n "${DISPLAY}" ]; then
+  notify-send "${first}" "$@"
+elif [ -n "$TMUX" ]; then
+  tmux display-message "${first}" "$@"
+else
+  printf %s "${first}" >&2
+  printf \\n%s "$@" >&2
+  exit 1
 fi
-exit "${value}"
