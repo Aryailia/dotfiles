@@ -1,5 +1,9 @@
 let s:cmdline_prefix_regexp = '//run:'
 
+function! BuildBackground()
+  vertical T cargo check
+endfunction
+
 function! Build()
   " `%` is the full path, `expand("%")` is just the current file name
   "execute("vertical T rustc % -o \"${TMPDIR}/" . expand("%") . '"')

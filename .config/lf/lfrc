@@ -119,7 +119,7 @@ map r prompt-rename
 map R $batch-rename.sh --relative-path-to '.' --direct "/.${fx}"
 map o $handle.sh --file --terminal "${f}"
 map O &handle.sh --file --gui "${f}"
-map D delete
+map D $rm -rf "$f"
 # This cannot deal with files with newlines
 map L $for a in $( lf -remote load | sed -e '1d' ); do ln -s "$a" ./; done
 #map <c-l> $handle.sh --file --gui "${f}"
