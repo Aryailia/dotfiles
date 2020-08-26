@@ -1,11 +1,9 @@
 # Reload on startup and default reloads every 60 minutes
+
 #auto-reload yes
 #reload-time 60
 
 history-limit 0
-
-# For some reason urlscan -r kills ${BROWSER} variable
-#external-url-viewer "urlscan -cd -r 'handle.sh -l -t \"{}\"'"
 
 # Need cat otherwise python throws a pipe error
 #external-url-viewer "urlscan -cdn | cat - | handle.sh -l -t"
@@ -40,21 +38,29 @@ color listfocus_unread white blue bold
 color info white magenta bold
 # color article white default
 
-# Must use prefix macros with single quote to use
-# External-url-viewer pipes the entire screen to the command 
-# Browser feeds the one link as a command line argument
+# For some reason urlscan -r kills ${BROWSER} variable
+#external-url-viewer "urlscan -cd -r 'handle.sh -l -t \"{}\"'"
+
+######## start ~ automatically replaced by 'config-newsboat.sh' ########
+# Default macro key is ,
+# 'external-url-viewer' pipes to command
+# 'browser' provides %u or provides it as first argument
+external-url-viewer "uriscan -lms - | handle.sh"
 browser "handle.sh -l -t"
+
+macro h set browser "config-newsboat.sh -l"; open-in-browser ; set browser "handle.sh -l -t"
+macro t set browser "notify.sh '%u'"; open-in-browser ; set browser "handle.sh -l -t"
+macro T set external-url-viewer "notify.sh -"; show-urls ; set external-url-viewer "uriscan -lms - | handle.sh"
 macro n next-feed article-list ; next-unread
 macro p prev-feed article-list ; prev-unread
 macro v set browser "queue.sh youtube-dl --video"; open-in-browser ; set browser "handle.sh -l -t"
 macro a set browser "queue.sh youtube-dl --audio"; open-in-browser ; set browser "handle.sh -l -t"
 macro s set browser "queue.sh youtube-dl --video --subtitles"; open-in-browser ; set browser "handle.sh -l -t"
-
 macro c set browser "clipboard.sh --write '%u'"; open-in-browser ; set browser "handle.sh -l -t"
 macro o set browser "handle.sh -l -g"; open-in-browser ; set browser "handle.sh -l -t"
-macro e set external-url-viewer "${EDITOR}"; show-urls ; set external-url-viewer "uriscan.sh -lms - | handle.sh -l -t"
+macro O set external-url-viewer "uriscan.sh -lms - | handle.sh -l -g"; show-urls ; set external-url-viewer "uriscan -lms - | handle.sh"
+macro e set external-url-viewer "${EDITOR}"; show-urls ; set external-url-viewer "uriscan -lms - | handle.sh"
+macro d set browser "uriscan.sh -lms - | handle.sh -l -d"; open-in-browser ; set browser "handle.sh -l -t"
+macro E set browser "printf %s '%u' >/dev/null; ${EDITOR} ~/.config/newsboat/config"; open-in-browser ; set browser "handle.sh -l -t"
 
-macro E set browser "printf %s '%u'; ${EDITOR} ~/.config/newsboat/config"; open-in-browser ; set browser "handle.sh -l -t"
-
-macro U set external-url-viewer "uriscan.sh -lms - | handle.sh -l -g"; show-urls ; set external-url-viewer "uriscan.sh -lms - | handle.sh -l -t"
-macro d set external-url-viewer "uriscan.sh -lms - | handle.sh -l -d"; show-urls ; set external-url-viewer "uriscan.sh -lms - | handle.sh -l -t"
+######## close ~ automatically replaced by 'config-newsboat.sh' ########
