@@ -1,19 +1,65 @@
 #!/usr/bin/env sh
-# TODO: add warning for profile
-# TODO: add warning for --browser without 'menu' specified
 
-name="$( basename "$0"; printf a )"; name="${name%?a}"
-search_engines="${DOTENVIRONMENT}/websearches.csv"
-bookmarks_file="${DOTENVIRONMENT}/bookmarks.csv"
+NAME="$( basename "$0"; printf a )"; NAME="${NAME%?a}"
+
+
+add_help() {
+  printf %-20s%s "  --${3}" "(alias: ${2})"
+  if [ "${1}" = 'short' ]; then
+    outln ''
+  elif [ "${1}" = 'detailed' ]; then
+    shift 3
+    outln ''
+    for line in "$@"; do outln "   ${line}"; done
+    outln ''
+  else
+    die DEV 1 "\`show_help ${1}\` must be either 'short' or 'detailed'"
+  fi
+}
+
 
 show_help() {
+  HELP_OPTIONS="$(
+add_help "${1}" 'h' 'help' \
+  "For help, more help can be found once TARGET is specified" \
+  "eg. \`${NAME} --help download search\`" \
+;
+add_help "${1}" 'b' 'browser <ARG>' \
+  "Specify the browser to use. See 'list' for <COMMAND> for the list" \
+  "of available browsers" \
+;
+add_help "${1}" 'e' 'engine <ARG>' \
+  "Specify which search engine to use" \
+;
+add_help "${1}" 'o' 'output' \
+  "To print the command to stdout instead of running. If you want just" \
+  "the link use \`${NAME} print ...\` instead." \
+;
+add_help "${1}" 'P' 'profile <ARG>' \
+  "For specifying PROFILE to use as a profile for the browser" \
+;
+add_help "${1}" 'n' 'name' \
+  "Search by name/description of bookmarks or search engines." \
+  "Mutually exclusive with '--tags' and '--url'" \
+;
+add_help "${1}" 't' 'tags' \
+  "Search by the tags associated with a given bookmark or search engine." \
+  "Mutually exclusive with '--name' and '--url'" \
+;
+add_help "${1}" 'u' 'url' \
+  "Search by the url of the bookmark or search engine" \
+  "Mutually exclusive with '--name' and '--tags'" \
+;
+)"
+
   <<EOF cat - >&2
 SYNOPSIS
-  ${name} <COMMAND> <TARGET> [<OPTIONS>] [<ARG1>, [<ARG2>, [...]]]
+  ${NAME} [<COMMAND> [<TARGET> [<LINK>]]] [<OPTIONS> [<ARG>]]
 
 DESCRIPTION
   Desgined as a command line interface for my bookmarks and websearch files
-  which are both stored in csv format.
+  which are both stored in csv format. Use \`${NAME} --help\` for more
+  details on what each option does.
 
   (Also consider using surfraw)
 
@@ -31,582 +77,505 @@ TARGET
   bookmarks  (alias: b, bm, bookmark) Select a bookmark
   search     (alias: s)               Select a search engine and enter a query
 
-$( help_universal_options )
+OPTIONS
+${HELP_OPTIONS}
+
+EXAMPLES
+  \$ ${NAME} --browser
+
 EOF
 }
 
-help_universal_options() {
-  # Not to STDERR because this is meant to be included within other things
-  <<EOF cat
-UNIVERSAL OPTIONS
-  --help           (alias: -h)
-    For help, more help can be found once TARGET is specified
-    eg. \`${name} --help download search\`
+# TODO: More examples
 
-  --launch         (alias: -l)
-    Only applicable for terminal browsers, if in an X session and this is set,
-    then 
+# TODO or maybe we do not want this option:
+#  --launch         (alias: -l)
+#    Only applicable for terminal browsers, if in an X session and this is set,
+#    then 
 
-  --output         (alias: -o, -p)
-    To print the command to stdout
+BOOKMARKS="${DOTENVIRONMENT}/bookmarks.csv"
+SEARCH_ENGINES="${DOTENVIRONMENT}/websearches.csv"
+NEWLINE='
+'
 
-  --profile <ARG>  (alias: -P)
-    For specifying PROFILE to use as a profile for the browser
-EOF
-}
+DEBUG='false'        # True to default to terminal prompting
+OUTPUT='false'
+PROGRAM=''           # Blank means default
+INCOGNITO='false'
 
-
-
-# Main
-COMMAND='0'
-ENUM_DOWNLOAD='1'
-ENUM_TERMINAL='2'
-ENUM_GUI='3'
-ENUM_MENU='4'
-ENUM_EDIT='5'
-
-FLAG_NO_OPTIONS='false'
-FLAG_HELP='false'
-FLAG_PRINT='false'
-FLAG_INCOGNITO='false'
-FLAG_LAUNCH='false'
+SEARCH_COLUMNS=''
+SEARCH_PROMPT=''
+PROGRAM=''           # Browser to use, blank will popup a menu
+ALREADY_RUN='false'  # Minor optimisation
+BROWSER_LIST=''      # List to populate
 PROFILE=''
 
+need_arg() { die FATAL 1 "Option '${1}' needs an argument"; }
+
+# Prompt for both ${1} and ${2} if not provided
 main() {
-  # Options processing
+  # Handles options that need arguments
   args=''
+  literal='false'
+  bTags='false'
+  bName='false'
+  bUrl='false'
+  ENGINE=''
+
   while [ "$#" -gt 0 ]; do
-    "${FLAG_NO_OPTIONS}" || case "$1" in
-      --)  FLAG_NO_OPTIONS='true'; shift 1; continue ;;
-      -h|--help)       FLAG_HELP='true' ;;
-      -o|-p|--print)   FLAG_PRINT='true' ;;
-      -i|--incognito)  FLAG_INCOGNITO='true' ;;
-      -l|--launch)     FLAG_LAUNCH='true' ;;
-      -P|--profile)    PROFILE="$2"; shift 1 ;;
-      *)   args="${args} $( puts "$1" | eval_escape )" ;;
+    "${literal}" || case "${1}"
+      in --)  literal='true'; shift 1; continue
+      ;; -h|--help)       show_help 'detailed'; exit 0
+      ;; -i|--incognito)  INCOGNITO='true'
+
+      # TODO: -o
+      ;; -o|--output)  OUTPUT='true'
+      ;; -p|--profile) PROFILE="${2:-$( missing "${1}" )}" || exit "$?"; shift 1
+      ;; -b|--browser) PROGRAM="${2:-$( missing "${1}" )}" || exit "$?"; shift 1
+      ;; -e|--engine)  ENGINE="${2:-$( missing "${1}" )}" || exit "$?"; shift 1
+      ;; -t|--tags)    bTags='true'
+      ;; -n|--name)    bName='true'
+      ;; -u|--url)     bUrl='true'
+
+      ;; *)   args="${args} $( outln "${1}" | eval_escape )"
     esac
-    "${FLAG_NO_OPTIONS}" && args="${args} $( puts "$1" | eval_escape )"
+    "${literal}" && args="${args} $( outln "${1}" | eval_escape )"
     shift 1
   done
 
-  [ -z "${args}" ] && { show_help; exit 1; }
+  # Guarantee the order of SEARCH_PROMPT
+  if ! "${bTags}" && ! "${bName}" && ! "${bUrl}"; then
+    bTags='true'
+    bName='true'
+  fi
+  "${bTags}" && SEARCH_COLUMNS="${SEARCH_COLUMNS},1"
+  "${bTags}" && SEARCH_PROMPT="${SEARCH_PROMPT}/Tags"
+  "${bName}" && SEARCH_COLUMNS="${SEARCH_COLUMNS},2"
+  "${bName}" && SEARCH_PROMPT="${SEARCH_PROMPT}/Name"
+  "${bUrl}" &&  SEARCH_COLUMNS="${SEARCH_COLUMNS},3"
+  "${bUrl}" &&  SEARCH_PROMPT="${SEARCH_PROMPT}/Url"
+  SEARCH_COLUMNS="${SEARCH_COLUMNS#,}"
+  SEARCH_PROMPT="${SEARCH_PROMPT#/}"
+
   eval "set -- ${args}"
 
-  # Command processing
-  cmd="$1"; [ "$#" -gt 0 ] && shift 1
-  target="$1"; [ "$#" -gt 0 ] && shift 1
-  case "${cmd}" in
-    d|download)  COMMAND="${ENUM_DOWNLOAD}" ;;
-    g|gui)       COMMAND="${ENUM_GUI}" ;;
-    m|menu)      COMMAND="${ENUM_MENU}" ;;
-    t|terminal)  COMMAND="${ENUM_TERMINAL}" ;;
-    e|edit)      require "${EDITOR}" || die 1 'FATAL' "problem with \${EDITOR}"
-                 COMMAND="${ENUM_EDIT}" ;;
-    r|run)       launch_browser "${target}" "$@"; exit 0 ;;
-    l|list)      list_browsers; exit 0 ;;
-    #    b|bm|bookmark|bookmarks)  "${EDITOR}" "${bookmarks_file}" ;;
-    #    s|search)                 "${EDITOR}" "${search_engines}" ;;
-    *)  show_help; exit 1 ;;
+  # Use "${1}" to form "${cmd}"
+  # If not a valid option, displays help
+  # Using one instead of `set -- $( prompt` so we can implement '-o' option
+  one="${1:-$( prompt_flexible '.*' "$( outln \
+    "help     display the short help menu" \
+    "list     displays the list of avialable browsers" \
+    "print    <target>" \
+    "download <target>" \
+    "edit     <target>" \
+    "terminal <target>" \
+    "gui      <target>" \
+    "menu     <target>" \
+  )" "Enter one of the options: " )}"
+  case "${one}"
+    in h*)  show_help 'short'; exit 0
+    ;; l*)
+      outln "GUI and Terminal Browsers" "========================="
+      list_browsers | sed 's/^/  /'
+      outln '' "Terminal Browsers" "================="
+      list_browsers 'terminal-only' | sed 's/^/  /'
+      exit 0
+    ;; p*)  cmd="outln"
+    ;; d*)  cmd="download"; shift 1; set -- download link "$@"
+    ;; e*)  cmd="edit"
+    ;; m*)  cmd="open"; #PROGRAM=''  # default is already '' so superfluous
+    ;; t*)  cmd="open_terminal"; PROGRAM="${PROGRAM:-"${BROWSER_CLI}"}"
+    ;; g*)  cmd="open"; PROGRAM="${PROGRAM:-"${BROWSER}"}"
+    ;; *)   show_help 'short'; exit 1
   esac
 
-  # Process target
-  case "${target}" in
-    l|link|u|url)             process_link "$@" ;;
-    b|bm|bookmark|bookmarks)  process_bookmarks "$@" ;;
-    s|search)                 process_search "$@" ;;
-    *)  die 1 'FATAL' "'${target}' is not a valid target, use -h for help" ;;
-  esac
+  ##############################################################################
+  # Use "${two}", "${3}", and maybe --browser "${ENGINE}" to form "${link}"
+  two="${2:-$( prompt_flexible '[lbs].*' "$(
+    if [ "${cmd}" != "edit" ] && [ "${cmd}" != "outln" ]; then
+      outln "links       | Opens a link"
+    fi
+    outln   "bookmarks   | Select a bookmark"
+    outln   "search      | Select a search engine and a query"
+  )" "${NAME} ${one}: " )}" || exit "$?" # exit if early menu exit
+
+  # But special case "edit", also 
+  # Set ${link}
+  if [ "${cmd}" = "edit" ]; then
+    # Each branch runs the command
+    cmd="${EDITOR-vim}"
+    case "${two}"
+      in b*)  link="${BOOKMARKS}"
+      ;; s*)  link="${SEARCH_ENGINES}"
+      ;; *)   die FATAL 1 \
+        "target '${two}' does not match b* s* (bookmarks/search)" \
+        "Command: ${NAME} ${one} ${two}"
+    esac
+  else
+    case "${two}"
+      in l*)  # direct link
+        link="${3:-$( prompt ".*" "Enter URL: " )}"
+
+      ;; b*)  # from bookmarks file
+        [ -r "${BOOKMARKS}" ] || die FATAL 1 'Error with bookmarks file'
+        row="$( <"${BOOKMARKS}" tablify '|' \
+          | pick_flexible "${SEARCH_PROMPT}" "${3}" "3.." "${SEARCH_COLUMNS}" \
+          | decode )"
+        link="$( sed -n "s/.*| *//;${row}p" "${BOOKMARKS}" )"
+
+      ;; s*)  # from web searches file
+        [ -r "${SEARCH_ENGINES}" ] || die FATAL 1 'Search engines file error'
+        # Pass option specified by '--engine' to `pick_flexible` to validate
+        row="$( <"${SEARCH_ENGINES}" tablify '|' \
+          | pick_flexible "Engine" "${ENGINE}" "2.." "1" \
+          | decode )"
+        format="$( sed -n "s/.*| *//;${row}p" "${SEARCH_ENGINES}" )"
+        search_string="${4:-"$( prompt ".*" "${format}: " )"}" || exit "$?"
+        link="$( printf "${format}" "${search_string}" )"
+
+      ;; *)   die FATAL 1 \
+        "target '${two}' does not match l* b* s* (link/bookmarks/search)" \
+        "Commmand: ${NAME} ${one} ${two}"
+    esac
+    # TODO check valid link?
+    escaped_link="$( outln "${link}" | maybe_prefix_https )"
+  fi
+  "${cmd}" "${escaped_link}"
 }
 
-
-list_browsers() { puts "${browser_list}"; }
-launch_browser() {
-  if "${FLAG_HELP}"; then
-    puterr "Usage: ${name} run <BROWSER> [<URL>]" \
-      "  Open browser with my default settings" \
-      "" \
-      "Choose from:"
-    list_browsers | sed 's/^/  /' >&2
-    exit 0
+add_browser() {
+  type "open_${1}" >/dev/null \
+    || die 1 "FATAL: \`open_${1}\` function undefined in source"
+  if [ -z "${BROWSER_LIST}" ]; then
+    BROWSER_LIST="${1}"
   else
-    browser="$1"; shift 1
-    type "_run_${browser}" >/dev/null >&1 \
-      || die 1 'FATAL' "'${browser}' is not supported by this script"
-    _run_"${browser}" "$@"
+    BROWSER_LIST="${BROWSER_LIST}${NEWLINE}${1}"
   fi
 }
 
+list_browsers() {
+  if ! "${ALREADY_RUN}"; then
+    ALREADY_RUN='true'
+    XORG_ON="$( [ -n "${DISPLAY}" ] && echo 'true' || echo 'false' )"
+    if [ "${1}" = 'terminal-only' ]; then
+      XORG_ON='false'
+    elif [ -n "${1}" ]; then
+      die DEV 1 "Only allows terminal-only" "list_browsers $*"
+    fi
 
+    # This is in order of greatest to least presidence
+    "${XORG_ON}" && require 'firefox' && add_browser 'firefox'
+    require 'termux-open-url' && add_browser 'termux_external'
+    require 'lynx' && add_browser 'lynx'
+    require 'w3m'  && add_browser 'w3m'
 
-show_link_help() {
-  <<EOF cat - >&2
-SYNOPSIS
-  ${name} <COMMMAND> browser [<URL>] [<BROWSER>]
+    # TODO: add these browsers
+    # TODO: default browsers do not seem to check the browser list
 
-DESCRIPTION
-  Opens URL in a browser, choosen depending on COMMAND.
-
-  If TYPE is 'menu' then give an either an fzf menu of the available browsers
-  as specified within this file by \`browser_list\`. If BROWSER is specified,
-  instead grep through that list of browsers.
-
-$( help_universal_options )
-
-OPTIONS
-  --browser <ARG>  (alias: -b)
-    If specified, greps the supported browsers
-EOF
-}
-process_link() {
-  "${FLAG_HELP}" && { show_link_help; exit 1; }
-
-  # Options processing
-  args=''; browser=''; # "${FLAG_OPTIONS}" initialised by main()
-  while [ "$#" -gt 0 ]; do
-    "${FLAG_NO_OPTIONS}" || case "$1" in
-      --)  FLAG_NO_OPTIONS='true'; shift 1; continue ;;
-      -b|--browser)  browser="$2"; shift 1 ;;
-      *)   args="${args} $( puts "$1" | eval_escape )" ;;
-    esac
-    "${FLAG_NO_OPTIONS}" && args="${args} $( puts "$1" | eval_escape )"
-    shift 1
-  done
-  eval "set -- ${args}"
-
-  # Main
-  url="$(if [ "$#" -gt 0 ] && [ -n "$1" ]
-    then prints "$1"
-    else terminal_prompt "Enter url: "
-  fi | prepend_https)"
-
-  case "${COMMAND}" in
-    "${ENUM_DOWNLOAD}") handle.sh --download --link "${url}" ;;
-    "${ENUM_TERMINAL}") launch_browser "${BROWSER_CLI}" "${url}" ;;
-    "${ENUM_GUI}")      launch_browser "${BROWSER}" "${url}" ;;
-    "${ENUM_EDIT}")     "${EDITOR}" "$0" ;;
-    "${ENUM_MENU}")
-      choice="$( list_browsers | prompt '1' 'Browser' '1' "${browser}" )" \
-        || exit "$?"
-      launch_browser "${choice}" "${url}"
-      ;;
-    *)  die 1 'DEV' "\`process_link\` - Should be caught by \`main\`" ;;
-  esac
+    #"${XORG_ON}" && require 'epiphany' && add_browser 'epiphany'
+    #"${XORG_ON}" && require 'midori'   && add_browser 'midori'
+    #"${XORG_ON}" && require 'surf'     && add_browser 'surf'
+  fi
+  outln "${BROWSER_LIST}"
 }
 
-
-show_bookmarks_help() {
-  <<EOF cat - >&2
-SYNOPSIS
-  ${name} <COMMAND> bookmarks [<OPTIONS>] [<CATEGORY>]
-
-DESCRIPTION
-  An interface for my bookmarks file. Allows for easy searching via an \`fzf\`
-  menu or via grep if SEARCH is specified.
-
-CATEGORY
-  <blank>
-    If nothing is provided, then it allows search of both names and tags (to
-    the exclusion of the urls)
-
-  d, description, title
-    Starts a through just the names/titles. Does not display the tags.
-
-  l, link, u, url
-    Starts a search through just the urls. Only displays url in menu
-
-  t, tags
-    Starts a search through just the tags. Does not display the names i.
-
-
-OPTIONS
-  --browser <ARG>  (alias: -b)
-    Greps through the available browsers for one that matches ARG.
-    If specified the fzf menu for choosing a browser is not displayed.
-    This only does something if TYPE is menu.
-
-  --search <ARG>   (alias: -s)
-    Greps through the available bookmarks for one that matches ARG.
-    The stream content that is grepped is, as specified by select(), a
-    bar '|' field seperated csv as specified by the COMMAND given.
-    If specified, the fzf menu for choosing a search engine is not displayed.
-
-$( help_universal_options )
-
-EXAMPLES
-  ${name} gui bookmarks tags
-  ${name} terminal bookmarks description --search duck
-  ${name} m b d -s 'classical chinese' -b w3m
-EOF
-}
-process_bookmarks() {
-  # Dependencies
-  [ -r "${bookmarks_file}" ] || die 1 'FATAL' "Requires '${bookmarks_file}'"
-
-  # Other branches
-  [ "${COMMAND}" = "${ENUM_EDIT}" ] \
-    && { "${EDITOR}" "${bookmarks_file}"; exit 0; }
-  "${FLAG_HELP}" && { show_link_help; exit 1; }
-
-  # Options processing
-  args=''; browser=''; s=''; # ${FLAG_OPTIONS} init in `main`
-  while [ "$#" -gt 0 ]; do
-    "${FLAG_NO_OPTIONS}" || case "$1" in
-      --)  FLAG_NO_OPTIONS='true'; shift 1; continue ;;
-      -b|--browser)  browser="$2"; shift 1 ;;
-      -s|--search)   s="$2"; shift 1 ;;
-      *)   args="${args} $( puts "$1" | eval_escape )" ;;
-    esac
-    "${FLAG_NO_OPTIONS}" && args="${args} $( puts "$1" | eval_escape )"
-    shift 1
-  done
-  eval "set -- ${args}"
-
-  # Main
-  url="$(cat "${bookmarks_file}" |
-    case "$1" in
-      t|tags)               prompt '2 4'   'Tags'      '..-2' "$s" ;;
-      d|description|title)  prompt '3 4'   'Name'      '..-2' "$s" ;;
-      l|link|u|url)         prompt '4'     'Link'      '..-2' "$s" ;;
-      a|all)                prompt '2 3 4' 'All'       '..-2' "$s" ;;
-      *)                    prompt '2 3 4' 'Tags/Link' '..-2' "$s" ;;
-    esac
-  )" || exit "$?"
-  process_link --browser "${browser}" "${url}"
+download() {
+  if   require "curl"; then curl -L --help
+  elif require "wget"; then wget --help
+  else exit 1
+  fi
 }
 
-
-
-show_search_help() {
-  <<EOF cat - >&2
-USAGE
-  ${name} COMMAND search [OPTIONS]
-
-DESCRIPTION
-  An interface for my bookmarks file. Allows for easy searching via an \`fzf\`
-  menu or via grep if SEARCH is specified.
-
-OPTIONS
-  -b, --browser SEARCH
-    Greps through the available browsers for one that matches SEARCH.
-    If specified the fzf menu for choosing a browser is not displayed.
-    This only does something if TYPE is menu.
-
-  -e, --engine SEARCH
-    Greps through the available search engines for one that matches SEARCH.
-    If specified, the fzf menu for choosing a search engine is not displayed.
-
-  -q, --query MESSAGE
-    Enters MESSAGE as the value to the search URL and does not prompt the
-    user to enter a query message.
-
-EXAMPLES
-  ${name} gui search
-  ${name} menu search --engine searx
-  ${name} terminal search --query 'Blue ocean'
-  ${name} t s --e enwikipedia --query Tokyo
-  ${name} menu s --e enwikipedia -q Tokyo -b surf
-EOF
-}
-process_search() {
-  # Dependencies
-  [ -r "${search_engines}" ] || die 1 'FATAL' "Requires '${search_engines}'"
-
-  # Other branches
-  [ "${COMMAND}" = "${ENUM_EDIT}" ] \
-    && { "${EDITOR}" "${search_engines}"; exit 0; }
-  "${FLAG_HELP}" && { show_link_help; exit 1; }
-
-  # Options processing
-  url=''; browser=''; engine=''; query=''; # ${FLAG_OPTIONS} init in `main`
-  while [ "$#" -gt 0 ]; do
-    "${FLAG_NO_OPTIONS}" || case "$1" in
-      --)  FLAG_NO_OPTIONS='true'; shift 1; continue ;;
-      -h|--help)     show_search_help; exit 0 ;;
-      -b|--browser)  browser="$2"; shift 1 ;;
-      -e|--engine)   engine="$2"; shift 1 ;;
-      -q|--query)    query="$2"; shift 1 ;;
-      *)   args="${args} $( puts "$1" | eval_escape )" ;;
-    esac
-    "${FLAG_NO_OPTIONS}" && args="${args} $( puts "$1" | eval_escape )"
-    shift 1
-  done
-  eval "set -- ${args}"
-
-  # Main
-  form="$( <"${search_engines}" prompt '2 3' '' '1' "${engine}" )" || exit "$?"
-  [ -z "${query}" ] && {
-    printf "${form}\\n" '[ inserts here  ]'
-    query="$( terminal_prompt "Enter query: " )"
-  }
-
-  url="$( printf "${form}" "${query}" )"
-  process_link --browser "${browser}" "${url}"
+edit() {
+  file="${1:-"$( prompt_flexible '[bs].*' "$( outln \
+    "bookmarks   | Select a bookmark" \
+    "search      | Select a search engine and a query" \
+  )" "File to edit" )"}"
 }
 
+open_terminal() { open "${1}" 'terminal-only'; }
+open() {
+  # $1: the url to operate on
+  # $2: specify to filter to only terminal browsers or not
+  list_browsers "${2}" >/dev/null  # Populate ${BROWSER_LIST}
+  [ -z "${BROWSER_LIST}" ] && die FATAL 1 \
+    "No browsers implemented/supported. " \
+    "See \`${NAME} list\` for list of available browsers." \
+    "$( if [ "${2}" = 'terminal-only' ]; then
+      outln "Perhaps try \`${NAME} gui ..\` instead"
+    fi )"
+
+  browser="$( outln "${BROWSER_LIST}" \
+    | pick_flexible "Browser" "${PROGRAM}" ".." ".." )"
+  [ -z "${browser}" ] && "FATAL: Browser '${browser}' not in list" \
+    "See \`${NAME} list\` for list of available browsers."
+  open_"${browser}" "${1}"
+}
 
 ################################################################################
-# Prompting
-terminal_prompt() {
-  printf | fzf --no-clear --height=0 --layout=reverse --prompt="$1"
-}
-#terminal_prompt() (
-#  printf %s "$1" >/dev/tty
-#  read -r input
-#  printf %s "${input}"
-#)
-
-prompt() {
-  # &0 the csv
-  # $1 columns of csv to select (eg. '1 4' selects (1st auto-added) 2nd 5th)
-  # $2 A label for the UI
-  # $3 are the fields that are searchable by fzf
-  # $4 select this via first option grep'd
-  match="$(<&0 csv_select_columns "0 $1" \
-    | if [ -z "$4" ]
-      then
-        require "fzf" || die 1 'FATAL' "Requires 'fzf' for menu functionality."
-        fzf --no-sort --height='99%' --layout=reverse --select-1 \
-            --prompt="$2> " --delimiter='\|' --with-nth='2..' --nth="$3" \
-          || die "$?" 'FATAL' "Exited out of $2 prompt"
-
-      # Max one
-      else grep "$4" -m 1 || die "$?" 'FATAL' "'$4' not found"
-    fi
-  )" || exit "$?"  # Stop here before sed'ing in case of any error
-
-  # Remove column number added by `csv_select_columns` after fzf/grep has
-  # used the column number to select. Also remove leading/trailing spaces
-  puts "${match}" | sed 's/.*|//;s/^ *//;s/ *$//'
-}
-
-# Select the columns to use of a csv separated by '|'
-# This auto adds column number so that duplicates can be selected by prompt
-csv_select_columns() {
-  <&0 awk -v FS="|" -v select="$*" '
-    BEGIN { split(select, cols, " "); count = length(cols); }
-    /^ *\/\/|^ *$/ { next; }       # ignore commments, blank lines
-    (1) {
-      tmp = "";
-      for (i = 1; i <= count; ++i) {
-        if (cols[i] == 0) {
-          tmp = tmp FS NR
-        } else {
-          #gsub(/^[ \t\f\r\n]*|[ \t\f\r\n]*$/, "", $(cols[i]));
-          tmp = tmp FS $(cols[i]);
-        }
-      }
-      print(substr(tmp, 2));  # skip the extra FS as the first character
-    }
+# Browsers
+maybe_prefix_https() {
+  <&0 sed '
+    /^www\./                  { s|^|https://|; }
+    /^[^h.\/][^\/.]*\.[^\/.]/ { s|^|https://|; }
   '
 }
 
-# NOTE: Currently not being used
-# In case we do not want to rely on the files being padded by themselves
-# Removes comments and and pads columns to have the same width (or at least
-# that is what it is suppose to do)
-# Does not seem to link unicode for padding
-pad() {
-  awk -v FS='\|' -e '
-    /^ *\/\// { next; }
-    FNR == NR {
-      for (i = 1; i < NF; ++i) {
-        if (length($(i)) > size[i]) size[i] = length($(i));
-      }
-    }
-    NR > FNR  {
-      line=""
-      for (i = 1; i < NF; ++i) {
-        gsub("^[ \f\n\r\t]*|[ \f\n\r\t]*$", "", $(i)); # strip
-        line = sprintf("%s%s%-" size[i] "s", line, FS, $(i)); Pad
-      }
-      line = line FS $(NF);
-      print(substr(line, 2));  # skip the extra FS as the first character
-    }
-  END { for (i = 1; i <= length(size); ++i) { print size[i]; }}
-  ' "$1" "$1"
 
+print_or_launch() {
+  if "${OUTPUT}"; then
+    escape_all "$@"
+    outln  # `escape_all` does not add trailing newline
+  else
+    # When running `$TERMINAL -e tmux.sh open browser.sh menu link gnu.org`
+    # the command seems to not live long enough, particularly on slower
+    # computers, thus we are using 'nohup' to help increase the lifespan
+    # 'setsid' is to fork
+    # 'exec' to remove the current instance of this shell program
+    exec setsid nohup "$@" >/dev/null 2>&1
+  fi
+}
+
+print_or_run() {
+  if "${OUTPUT}"; then
+    escape_all "$@"
+    outln  # `escape_all` does not add trailing newline
+  else
+    "$@"
+  fi
+}
+
+open_firefox() {
+  args='firefox'
+  "${INCOGNITO}" && args="${args} --private-window"
+  [ -n "${PROFILE}" ] && args="${args} -P \"${PROFILE}\""
+  "${OUTPUT}" || errln "Opening '${1}' in firefox" "Running: ${args} '${1}'"
+  print_or_launch ${args} "${1}"  # Allow ${args} to expand
+}
+
+# TODO: epiphany options
+open_epiphany() {
+  [ -n "${PROFILE}" ] && errln "WARN: \`epiphany\` does not support profiles"
+
+  args='epiphany'
+  "${FLAG_INCOGNITO}" && args="${args} --incognito"
+  "${OUTPUT}" \
+    || errln "Opening '${1}' in \`epiphany\`" "Running: ${args} '${1}'"
+  print_or_launch ${args} "${1}"  # Allow ${args} to expand
+}
+
+# TODO: midori profiles
+open_midori() {
+  [ -n "${PROFILE}" ] && errln "WARN: \`midori\` does not support profiles"
+  args='midori'
+  "${FLAG_INCOGNITO}" && args="${args} --private"
+  "${OUTPUT}" || errln "Opening '${1}' in \`midori\`" "Running: ${args} '${1}'"
+  print_or_launch ${args} "${1}"  # Allow ${args} to expand
+}
+
+# TODO: surf options
+open_surf() {
+  [ -n "${PROFILE}" ] && errln "WARN: \`surf\` does not support profiles"
+  args='surf'
+  "${FLAG_INCOGNITO}" && errln "WARN: \`surf\` does not support incognito"
+  "${OUTPUT}" || errln "Opening '${1}' in \`surf\`" "Running: ${args} '${1}'"
+  print_or_launch ${args} "${1}"  # Allow ${args} to expand
+}
+
+open_termux_external() {
+  "${INCOGNITO}" && errln 'WARN: termux does not support incognito mode'
+  [ -n "${PROFILE}" ] && errln 'WARN: termux does not support profiles'
+  errln "Opening '${1}'" "Running: termux-open-url '${1}'"
+  print_or_run 'termux-open-url' "${1}" &
+}
+
+open_w3m() {
+  "${INCOGNITO}" && errln 'WARN: w3m does not support incognito mode'
+  errln "Opening '${1}' in w3m" "Running: lynx '${1}'"
+  print_or_run 'w3m' "${1}"
+}
+
+open_lynx() {
+  "${INCOGNITO}" && errln 'WARN: termux does not support incognito mode'
+  errln "Opening '${1}' in lynx" "Running: lynx '${1}'"
+  print_or_run lynx "${1}"
 }
 
 
 ################################################################################
+# Dealing with CSV
+tablify() {
+  # &0 the csv
+  # $1 the delimiter
+  # $2 is the first line to include
+  # $3 is the final line to include
+  <&0 awk -v FS="${1}" -v first="${2}" -v last="${3}" '
+    first != "" && first > NR { next; }
+    last != "" &&  NR > last  { next; }
+    /^#/ { next; }    # Comments
+    /^ *$/ { next; }  # Empty lines
+
+    { gsub(/@/, "@A"); }
+    { gsub(/\\\\/, "@B"); }
+    { gsub(/\\n/, "@N"); }
+    # @D for delimiter
+    { gsub(/\\"/, "@Q"); }
+
+    '"${DECODE}"'
+    function line_length(input,    i, len, output, temp) {
+      len = split(input, temp, "\n");
+      for (i = 1; i <= len; ++i)
+        if (output < length(temp[i])) output = length(temp[i]);
+      return output;
+    }
+
+    {
+      # The proper CSV parsing
+      counter = 0;
+      delete entries;  # Clear since used on every line
+      for (i = 1; i <= NF; ++i) {
+        if (entries[counter] !~ /^ *"/ || entries[counter] ~ /^ *".*" *$/) {
+          entries[++counter] = $(i);
+        } else {
+          entries[counter] = entries[counter] "@D" $(i);
+        }
+      }
+
+      # NOTE: To enable automatic padding, must uncomment three sections
+      # Trim and remap onto awk framework, calculate padding
+      $0 = NR;
+      for (i = 1; i <= counter; ++i) {
+        ## Automatic padding part 1
+        #gsub(/^ *"?/, "", entries[i]);  # Trim first
+        #gsub(/"? *$/, "", entries[i]);  # Trim end
+        $0 = $0 FS entries[i];          # Always add FS because $0 starts NR
+
+        ## Find total length for padding
+        ## Automatic padding part 2
+        #temp = line_length(decode(entries[i], FS));
+        #len[1] = length(NR);            # Final NR always the longest
+        #if (len[i + 1] < temp) len[i + 1] = temp;
+      }
+
+      # Store for use in END, lines of the final output with skipping done
+      output[++output_length] = $0;
+    }
+    { print decode($0, FS); }
+
+    ## Automatic padding part 3
+    #END {
+    #  for (i = 1; i <= output_length; ++i) {
+    #    counter = split(output[i], fields, FS);
+    #    for (j = 1; j <= counter + 1; ++j) {
+    #      if (j > 1) printf "%s", FS;
+    #      printf "%s", fields[j];
+    #      # TODO: adding padding not working yet for entries with @N
+    #      temp = len[j] - line_length(decode(fields[j], FS));
+    #      while (--temp > -1) printf " ";  # Add the padding
+    #   }
+    #    printf "\n";  # Finish line
+    #  }
+    #}
+  '
+}
+
+decode() {
+  <&0 awk -v FS="|" "${DECODE}"'{ print decode($0, FS); }'
+}
+
+
+DECODE='
+  function decode(input, delimiter) {
+    gsub(/@D/, delimiter, input);
+    gsub(/@Q/, "\"", input);
+    gsub(/@N/, "\n", input);
+    gsub(/@B/, "\\", input);
+    gsub(/@A/, "@", input);
+    return input;
+  }
+'
+
+
+
+
+################################################################################
+#
+
+pick_flexible() {
+  if ! "${DEBUG}" && require "fzf"
+    then <&0 pick_fzf "${1}" "${2}" "${3}" "${4}"
+    else pick "${1}" "$( outln "${2}" "${3}" )" ""
+  fi
+}
+
+pick_fzf() {
+  # &0 the parsed csv
+  # $1 A label for the UI
+  # $2 select this via first option grep'd
+  # $3 are the fields that visible
+  # $4 are the fields that are searchable by fzf
+  _match="$(
+    if [ -z "${2}" ]; then <&0 fzf --no-sort --reverse --delimiter='\|' \
+      --select-1 --prompt="${1}> " --with-nth="${3}" --nth="${4}"
+    else <&0 grep -F "${2}" | sed '1q'
+    fi
+  )"
+  outln "${_match%%|*}"
+}
+
+# TODO: Interactive picker with terminal values....
+pick() {
+  die WIP 1 "Interactive terminal picker not implemented"
+}
+
+
+prompt_flexible() {
+  # $1: acceptable characters for terminal `prompt`
+  # $2: option to choose from
+  # $3: the prompt
+  if ! "${DEBUG}" && require "fzf"
+    then prompt_fzf "${3}" "${2}"
+    else prompt "${1}" "$( outln "${2}" "${1}" )" ""
+  fi
+}
+prompt_fzf() {
+  outln "${2}" \
+    | fzf --height="99%" --reverse --prompt="${1}" --nth='1' --delimiter='|' \
+    | sed 's/ *|.*$//'
+}
+
+
+
+
 # Helpers
+out() { printf %s "$@"; }
+outln() { printf %s\\n "$@"; }
+errln() { printf %s\\n "$@" >&2; }
+die() { printf %s "${1}: " >&2; shift 1; printf %s\\n "$@" >&2; exit "${1}"; }
+
+eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
+escape_all() {
+  out "$( outln "${1}" | eval_escape )"
+  shift 1
+  for a in "$@"; do
+    out " $( outln "$a" | eval_escape )"
+  done
+}
 require() {
   for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
     [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && return 0
   done
   return 1
 }
-prints() { printf %s "$@"; }
-puts() { printf %s\\n "$@"; }
-puterr() { printf %s\\n "$@" >&2; }
-die() { c="$1"; puterr "$2: '${name}' -- $3"; shift 3; puterr "$@"; exit "$c"; }
-eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
-escape_all() { for a in "$@"; do printf ' '; prints "$a" | eval_escape; done; }
 
-################################################################################
-# Browsers helpers
-is_xorg_on="$( if [ -n "${DISPLAY}" ]; then echo 'true'; else 'false'; fi )"
-browser_list=''
-
-add_browser() {
-  case "$1" in xorg)  "${is_xorg_on}" || return 1 ;; esac
-  if [ -n "${browser_list}" ]
-    then browser_list="$( puts "${browser_list}" "$2" )";
-    else browser_list="$2";
-  fi
-}
-print_or_launch() {
-  if "${FLAG_PRINT}"
-    then prints "$1"
-  else
-    eval "set -- $1"
-    # `exec` and `setsid` allow the launching terminal to close gracefully
-    # `setsid` unlinks the I/O streams
-    exec setsid "$@" >/dev/null 2>&1
-  fi
-  exit 0
-}
-print_or_eval() {
-  if "${FLAG_PRINT}"; then
-    printf %s "$1"
-    [ "$#" -ge 1 ] && shift 1
-    for arg in "$@"; do prints " $( puts "${arg}" | eval_escape )"; done
-  else
-    # I think in most of my use cases, eval is not actually necessary
-    # but only here to appease linter
-    eval "$@"
-  fi
-}
-# For use when the program does not support adding new tabs from cli
-# Use `xdotool` to switch to window, new tab (ctrl+t), and paste from clipboard
-copy_paste() {
-  #cmd="$1"
-  pid="$( pgrep "$1" )"
-  # Not sure how to make this more consistent
-  if [ -n "${pid}" ] && require 'xdotool'; then
-    shift 1
-    if [ "$#" -gt 0 ]
-      then setsid clipboard.sh --write "$@"
-      else setsid clipboard.sh --write ""
-    fi
-    #clipboard.sh -r
-
-    #windowId="$(xwininfo -root -tree \
-    #  | grep -i "${cmd}" \
-    #  | awk '/^ *0x/{ print $1; }' \
-    #  | xargs sh -c 'for a in "$@"; do
-    #    xprop -id "$a" WM_STATE | grep -vq "not found" && printf %s "$a"
-    #  done' _
-    #)"
-    #xdotool key --window "${windowId}" ctrl+t ctrl+v Return Return
-
-    exec setsid sh -c '
-      for id in $(xdotool search --pid "'"${pid}"'" ); do
-        if [ -z "$( xdotool windowactivate "${id}" 2>&1 )" ]; then
-          # As input does not buffer, sleep in case GUI slow (eg. epiphany)
-          xdotool key ctrl+t
-          sleep 0.03
-          xdotool key ctrl+v
-          sleep 0.03
-          xdotool key Return
-          break
-        fi
-      done
-    ' >/dev/null 2>&1
-    return 0
-  else
-    return 1
-  fi
-}
-
-prepend_https() {
-  sed '
-    /^www\./                  { s|^|https://|; }
-    /^[^h.\/][^\/.]*\.[^\/.]/ { s|^|https://|; }
-  '
-}
-
-# Does not join, prepends all with a space as well as the 'https' if relevant
-escape_all_and_prepend_https() {
-  for arg in "$@"; do
-    printf ' '
-    prints "${arg}" | prepend_https | eval_escape
+pc() { printf %b "$@" >/dev/tty; }
+prompt() (
+  pc "${2}"; read -r _v; pc "${CLEAR}"
+  while outln "${_v}" | grep -qve "$1"; do
+    pc "${3:-"$2"}"; read -r _v
+    pc "${CLEAR}"
   done
-}
+  printf %s "${_v}"
+)
 
-################################################################################
-# Browsers
-# Commands for running the browsers
-# If a GUI browser, then handle the setsid stuff here
-firefox --version >/dev/null >&1 && add_browser xorg 'firefox'
-_run_firefox() {
-  args='firefox'
-  "${FLAG_INCOGNITO}" && args="${args} --private-window"
-  [ -n "${PROFILE}" ] && args="${args} -P ${PROFILE}"
-  [ -n "$*" ] && args="${args}$( escape_all "$@" )"
-  print_or_launch "${args}"
-}
-
-# 'elinks'
-# 'lynx'
-
-surf -v >/dev/null 2>&1; [ "$?" = '1' ] && add_browser xorg 'surf'
-_run_surf() { print_or_launch "surf" "$@"; }
-
-epiphany --help >/dev/null 2>&1 && add_browser xorg 'epiphany'
-_run_epiphany() {
-  eval "copy_paste epiphany $( escape_all_and_prepend_https "$@" )" || {
-    [ -n "${PROFILE}" ] && puterr "WARN: \`epiphany\` does not support profiles"
-
-    args='epiphany'
-    "${FLAG_INCOGNITO}" && args="${args} --incognito"
-    [ -n "$*" ] && args="${args}$( escape_all "$@" )"
-    echo "${args}"
-    print_or_launch "${args}"
-  }
-}
-
-midori --version >/dev/null 2>&1 && add_browser xorg 'midori'
-_run_midori() {
-  [ -n "${PROFILE}" ] && puterr "WARN: \`midori\` does not support profiles"
-
-  args='midori'
-  "${FLAG_INCOGNITO}" && args="${args} --private"
-  [ -n "$*" ] && args="${args}$( escape_all_and_prepend_https "$@" )"
-  print_or_launch "${args}"
-}
-
-w3m -version >/dev/null 2>&1 && add_browser both 'w3m'
-_run_w3m() {
-  "${FLAG_INCOGNITO}" && puterr "WARN: \`w3m\` does not support incognito mode"
-  [ -n "${PROFILE}" ] && puterr "WARN: \`w3m\` does not support profiles"
-
-  args="$( printf 'sh -c %sw3m "$1"; [ -f "%s" ] && rm "%s"%s _' \
-    "'" "${HOME}/.w3m/cookie" "${HOME}/.w3m/cookie" "'"
-  )"
-  [ "$#" = 0 ] && args="${args} ."
-  args="${args}$( escape_all "$@" )"
-  if "${FLAG_LAUNCH}" && "${is_xorg_on}"; then
-    require "${TERMINAL}" || die 1 'FATAL' "\$TERMINAL is not set properly"
-    args="$( puts "${args}" | eval_escape )"
-    print_or_launch "${TERMINAL} -e tmux.sh open ${args}"
-  else
-    print_or_eval "${args}"
-  fi
-}
-
-termux-open-url >/dev/null 2>&1 && add_browser both 'termux_external'
-_run_termux_external() {
-  "${FLAG_INCOGNITO}" && puterr 'WARN: termux does not support incognito mode'
-  [ -n "${PROFILE}" ] && puterr 'WARN: termux does not support profiles'
-  print_or_eval "termux-open-url$(escape_all "$@")"
-}
-
-# For copying just the link without any browser rubbish
-add_browser both 'clipboard'
-_run_clipboard() {
-  print_or_eval "setsid clipboard.sh --write$( escape_all "$@" )"
-}
-
-################################################################################
 main "$@"

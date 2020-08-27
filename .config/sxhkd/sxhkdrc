@@ -13,6 +13,7 @@ super + shift + {_, alt +, ctrl +, ctrl + alt +} Return
   {$TERMINAL, alacritty, st, sakura}
 super + shift + q
   kill "$(xprop -id "$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)" '\t$0' _NET_WM_PID | cut -f 2)"
+  #i3-msg kill  # does not seem to work
 super super + d
   dmenu_run
 
@@ -36,7 +37,7 @@ super + space ; super + c
 super + space ; super + m
   $TERMINAL -e tmux.sh open 'mw.sh'
 super + space ; super + n
-  $TERMINAL -e tmux.sh open 'newsboat'
+  $TERMINAL -e 'newsboat'
 #super + space ; super + m
 #  $TERMINAL -e ncmpcpp
 
@@ -44,14 +45,15 @@ super + space ; super + n
 
 ################################################################################
 # Cheat sheets and copy
-# Xclip seems to need setsid to perserve the copy after the launching terminal has closed
+# clipboard.sh seems to need setsid after `$TERMINAL -e`
+# browser.sh seems to need 'nohup' and 'setsid' after 'exec' (interior details)
 super + g ; super + {s, b, g}
-  $TERMINAL -t 'fullscreen_overlay' -e browser.sh --launch menu {search, bookmark, link}
+  $TERMINAL -t 'fullscreen_overlay' -e tmux.sh open browser.sh menu {search, bookmark, link}
 # Let dmenu finish first before piping its output
 super + c ; super + c
   asdf="$( dmenu -p "Write to clipboard:" )"; printf %s "${asdf}" | clipboard.sh --write
 super + c ; super + {s, b}
-  $TERMINAL -t 'fullscreen_overlay' -e browser.sh menu {search, bookmark} --browser "clipboard"
+  $TERMINAL -t 'fullscreen_overlay' -e sh -c 'link="$( browser.sh print {search, bookmark} )"; echo "${link}"; setsid clipboard.sh --write "${link}"'
 super + c ; super + e
   $TERMINAL -t 'fullscreen_overlay' -e sh -c 'setsid clipboard.sh -w "$(<~/.config/emoji fzf | cut -d " " -f 1)"'
 super + g ; super + {m, p}
