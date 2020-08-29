@@ -32,31 +32,33 @@ EOF
 # 'show-urls' pipes
 # 'open-in-browser' provides %u
 DEFAULT_VIEWER='uriscan -lms - | handle.sh'
-DEFAULT_BROWSER='handle.sh -l -t'
+DEFAULT_BROWSER='handle.sh t -l'
 NEWSBOAT_CONFIG="${XDG_CONFIG_HOME}/newsboat/config"
 
 main() {
-  m_link  'h' 'display marco list'     "${NAME} -l"
-  m_link  't' 'display/notify link'    "notify.sh '%u'"
-  m_pipe  'T' 'display/notify entry'   "notify.sh -"
-  m_input 'n' "next feed's unread"     "next-feed article-list ; next-unread"
-  m_input 'p' "previous feed's unread" "prev-feed article-list ; prev-unread"
+  #run: sh % -m
+  m_link  h 'display marco list'     "${NAME} --list"
+  m_link  t 'display/notify link'    "notify.sh '%u'"
+  m_pipe  T 'display/notify entry'   "notify.sh -"
+  # These wrap around? Honestly forgot why i have these
+  m_input n "next feed's unread"     "next-feed article-list ; next-unread"
+  m_input p "previous feed's unread" "prev-feed article-list ; prev-unread"
 
-  m_link  'v' 'download video'         "queue.sh youtube-dl --video"
-  m_link  'a' 'download audio only'    "queue.sh youtube-dl --audio"
-  m_link  's' 'download subtitled video' \
-                                       "queue.sh youtube-dl --video --subtitles"
-  m_link  'c' 'download copy link'     "clipboard.sh --write '%u'"
+  m_link  v 'download video'         "queue.sh youtube-dl --video"
+  m_link  a 'download audio only'    "queue.sh youtube-dl --audio"
+  m_link  s 'download subbed video'  "queue.sh youtube-dl --video --subtitles"
+  m_link  c 'download copy link'     "clipboard.sh --write '%u'"
+  m_pipe  C 'download copy link'     "uriscan.sh -lms - | clipboard.sh -w -"
   # Symmetry: Regular keybind 'o' opens in terminal
-  m_link  'o' 'gui open link'          "handle.sh -l -g"
-  m_pipe  'O' 'link menu open in gui'  "uriscan.sh -lms - | handle.sh -l -g"
+  m_link  o 'gui open link'          "handle.sh g -l '%u'"
+  m_pipe  O 'link menu open in gui'  "uriscan.sh -lms - | handle.sh g -l -i"
 
-  m_pipe  'e' 'entry in term editor'   "\${EDITOR}"
-  m_link  'd' 'link menu download'     "uriscan.sh -lms - | handle.sh -l -d"
-  # printf to eat the first argument
-  m_link  'E' 'edit newsboat config'   \
-    "printf %s '%u' >/dev/null; \${EDITOR} ~/.config/newsboat/config"
-  m_info  'E' 'edit newsboat urls'
+  m_pipe  e 'entry in term editor'   "\${EDITOR}"
+  m_pipe  d 'link menu download'     "uriscan.sh -lms - | handle.sh d -l -i"
+  # : '%u' to eat first argument
+  m_link  E 'edit newsboat config'   \
+    ": '%u'; \${EDITOR} '\${XDG_CONFIG_HOME}/newsboat/config'"
+  m_info  E 'edit newsboat urls'
 
   OUT="# Default macro key is ,
 # 'external-url-viewer' pipes to command
@@ -66,7 +68,6 @@ browser \"${DEFAULT_BROWSER}\"
 
 ${OUT}"
 
-  #run: sh % -m
   # Options processing
   for arg in "$@"; do
     case "${arg}"

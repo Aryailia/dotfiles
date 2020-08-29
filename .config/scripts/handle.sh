@@ -1,279 +1,342 @@
 #!/usr/bin/env sh
 
-name="$( basename "$0"; printf a )"; name="${name%?a}"
+NAME="$( basename "$0"; printf a )"; NAME="${NAME%?a}"
 
 show_help() {
   <<EOF cat - >&2
 SYNOPSIS
-  ${name}
+  ${NAME} <SUBCOMMAND> <URI>
 
 DESCRIPTION
-  
+  Inspired from Ranger's 'scope.sh', basically a terminal form of xdg-open
+  but we can open terminal programs
+
+  ANSI color codes are supported.
+  STDIN is disabled, so interactive scripts won't work properly
+  This script is considered a configuration file and must be updated manually.
+
+  Meanings of exit codes:
+  code | meaning    | action of lf
+  -----+------------+-------------------------------------------
+  0    | success    | Display stdout as preview
+  1    | no preview | Display no preview at all
+  2    | plain text | Display the plain content of the file
+
+
+SUBCOMMANDS
+  download
+  terminal
+  gui
+  preview
+  edit
+
 OPTIONS
   --
     Special
 EOF
 }
 
-# ANSI color codes are supported.
-# STDIN is disabled, so interactive scripts won't work properly
-# This script is considered a configuration file and must be updated manually.
-
-# Meanings of exit codes:
-# code | meaning    | action of lf
-# -----+------------+-------------------------------------------
-# 0    | success    | Display stdout as preview
-# 1    | no preview | Display no preview at all
-# 2    | plain text | Display the plain content of the file
-
-# Settings
-HIGHLIGHT_SIZE_MAX=262143  # 256KiB
-HIGHLIGHT_TABWIDTH=8
-HIGHLIGHT_STYLE='pablo'
-#PYGMENTIZE_STYLE='autumn'
+# Customisation
+BAT_THEME="Solarized (light)"
 
 # Enums
 FLAG_PRINT='false'
 ENUM_DEFAULT='0'
-ENUM_SUCCESS='0'
-ENUM_NOPREVIEW='1'  # Or error, or make ENUM_ERROR?
-ENUM_PLAINTEXT='2'
+
+CODE_STDOUT='0'
+CODE_NOPREVIEW='1'  # Or error, or make ENUM_ERROR?
+CODE_PLAINTEXT='2'
 
 PATH_TYPE="${ENUM_DEFAULT}"
 ENUM_HYPERTEXT='1'
 ENUM_FILE='2'
 
-ENUM_DOWNLOAD='1'
-ENUM_TERMINAL='2'
-ENUM_GUI='3'
-ENUM_PREVIEW='4'
-ENUM_EDIT='5'
+# No default
+CMD_DOWNLOAD='1'
+CMD_TERMINAL='2'
+CMD_GUI='3'
+CMD_PREVIEW='4'
+CMD_EDIT='5'
 COMMAND="${ENUM_TERMINAL}"  # Select the default
 
-
-# Handles options that need arguments
 main() {
-  # Dependencies
+  #TODO: maybe want terminal viewers set read-only where relevant?
+  #TODO: disable interactive scripts by disabling STDOUT? See ranger's scope.sh
+  # Guard against overwriting files with output redirection '>'
+  set -C
 
   # Options processing
-  args=''
-  no_options='false'
+  args=''; literal='false'
   while [ "$#" -gt 0 ]; do
-    "${no_options}" || case "$1" in
-      --)  no_options='true'; shift 1; continue ;;
-      -h|--help)  show_help; exit 0 ;;
-      -p|--print)     FLAG_PRINT='true' ;;
-      -l|--link)      PATH_TYPE="${ENUM_HYPERTEXT}" ;;
-      -f|--file)      PATH_TYPE="${ENUM_FILE}" ;;
-
-      -d|--download)  COMMAND="${ENUM_DOWNLOAD}" ;;
-      -t|--terminal)  COMMAND="${ENUM_TERMINAL}" ;;
-      -g|--gui)       COMMAND="${ENUM_GUI}" ;;
-      -v|--preview)   COMMAND="${ENUM_PREVIEW}" ;;
-      -e|--edit)      COMMAND="${ENUM_EDIT}" ;;
-
-      *)   args="${args} $( puts "$1" | eval_escape )" ;;
+    "${literal}" || case "${1}"
+      in --)  no_options='true'; shift 1; continue
+      ;; -h|--help)   show_help; exit "${CODE_STDOUT}"
+      ;; -p|--print)  FLAG_PRINT='true'
+      ;; -l|--link)   PATH_TYPE="${ENUM_HYPERTEXT}"
+      ;; -f|--file)   PATH_TYPE="${ENUM_FILE}"
+      ;; -i|--stdin)  args="${args} $( <&0 eval_escape )"
+      ;; -*)  die FATAL 1 "No option '${1}' suppoorted"
+      ;; *)   args="${args} $( outln "${1}" | eval_escape )"
     esac
-    "${no_options}" && args="${args} $( puts "$1" | eval_escape )"
+    "${literal}" && args="${args} $( outln "${1}" | eval_escape )"
     shift 1
   done
 
   eval "set -- ${args}"
-  # if NOT ${ENUM_EDIT}, then -C no overwite files with output redirection '>'
-  [ "${COMMAND}" != "${ENUM_EDIT}" ] && set -C
+
+  case "${1}"
+    in d*)  COMMAND="${CMD_DOWNLOAD}"
+    ;; t*)  COMMAND="${CMD_TERMINAL}"
+    ;; g*)  COMMAND="${CMD_GUI}"
+    ;; p*)  COMMAND="${CMD_PREVIEW}"
+    ;; e*)  COMMAND="${CMD_EDIT}"
+    ;; *)   die FATAL "${CODE_NOPREVIEW}" "invalid subcommand" "\`$*\`"
+  esac
+
+  [ "$#" != 2 ] && die FATAL 1 \
+    "Must open just one link. Try '-i' if piping" "$@"
 
   # Cannot download local files
   # Cannot edit online files
   # Careful about boolean operator order
-  if  [ "${PATH_TYPE}" = "${ENUM_FILE}" ] || {
-      [ "${PATH_TYPE}" = "${ENUM_DEFAULT}" ] && [ -e "${1}" ] \
-    ; }
+  if  [ "${PATH_TYPE}" = "${ENUM_FILE}" ] \
+    || { [ "${PATH_TYPE}" = "${ENUM_DEFAULT}" ] && [ -e "${2}" ]; }
   then
-    [ "${COMMAND}" = "${ENUM_DOWNLOAD}" ] \
-      && die "${ENUM_NOPREVIEW}" 'FATAL' 'Cannot `--download` local paths'
-
-    local_handle_extension "${1}"
-    local_handle_mime "${1}"
-    local_handle_fallback "${1}"
-    exit "${ENUM_NOPREVIEW}"
+    d_do die FATAL "${CODE_NOPREVIEW}" "Cannot 'download' local paths"
+    HANDLE_TYPE='extension' handle_extension "${2}"
+    HANDLE_TYPE='mime' local_handle_mime "${2}"
+    HANDLE_TYPE='fallback' handle_fallback "${2}"
+    die FATAL "${CODE_NOPREVIEW}" "No program found"
   else
-    [ "${COMMAND}" = "${ENUM_EDIT}" ] \
-      && die "${ENUM_NOPREVIEW}" 'FATAL' 'Cannot `--edit` hypertext links'
-    external_handle_link "${1}"
+    e_do die FATAL "${CODE_NOPREVIEW}" "Cannot 'edit' hypertext links"
+    HANDLE_TYPE='link' handle_link "${2}"
   fi
 }
 
+
 # TODO: check BROWSER run
-external_handle_link() {
+# `t ...`, `g ...`, etc. propagate their conditions so can `&& exit ...`
+handle_link() {
   #echo link >&2
-  case "${1}" in
-    *youtube.com/watch*|*youtu.be*|*clips.twitch.tv*|*bitchute.com*|*hooktube*)
-      d queue.sh youtube-dl --video "${1}"; d exit "${ENUM_SUCCESS}"
-      require 'mpv' && { t mpv --vo=caca --quiet -- "${1}"
-        exit "${ENUM_SUCCESS}"; }
-      c.sh is-android || { g setsid mpv --quiet -- "$1" >/dev/null 2>&1&
-        exit "${ENUM_SUCCESS}"; }
-      ;;
+  case "${1}"
+    in *youtube.com/watch*|*youtu.be*)
+      d        "${CODE_NOPREVIEW}" queue.sh youtube-dl --video -- "${1}"
+      t        "${CODE_NOPREVIEW}" mpv --vo=caca --quiet -- "${1}"
+      ! c.sh is-android && g_launch "${CODE_NOPREVIEW}" mpv --quiet -- "${1}"
 
-    *huya.com/*|*twitch.tv*)
-      g streamlink -- "${1}" '320p,480p,worst'
-      ;;
+    ;; *clips.twitch.tv*|*bitchute.com*|*hooktube*)
+      t        "${CODE_NOPREVIEW}" mpv --vo=caca --quiet -- "${1}"
+      ! c.sh is-android && g_launch "${CODE_NOPREVIEW}" mpv --quiet -- "${1}"
 
-    *.gif|*.png|*.bmp|*.tiff|*.jpeg|*.jpe|*.jpg)
-      g curl -L "${1}" | sxiv -ai && exit "${ENUM}"
-      ;;
+    ;; *huya.com/*|*twitch.tv*)
+      g_launch "${CODE_NOPREVIEW}" streamlink -- "${1}" '320p,480p,worst'
 
-    *.ogg|*.flac|*.opus|*.mp3|*.m4a|*.aac)
-      require 'mpv' && { t mpv --quiet "${1}"; exit "${ENUM_SUCCESS}"; }
-      require 'mpv' && { g setsid mpv --quiet "${1}" >/dev/null 2>&1
-        exit "${ENUM_SUCCESS}"; }
-      ;;
-    *reddit.com*)
-      require 'tuir' && { t tuir "${1}"; exit "${ENUM_SUCCESS}"; } ;;
+    ;; *.gif|*.png|*.bmp|*.tiff|*.jpeg|*.jpe|*.jpg)
+      t        "${CODE_NOPREVIEW}" sh -c 'curl -L -- "${1}" | chafa -' _ "${1}"
+
+      # sxiv needs to read a file so have to `mktemp`
+      g_launch "${CODE_NOPREVIEW}" sh -c '
+        image="$( mktemp )" || {
+          printf %s\\n "Cannot make a temp file" >&2
+          exit 1
+        }
+        trap "rm -f \"${image}\"" EXIT
+        curl -Lo "${image}" -- "${1}"
+        printf %s\\n "Opening ${image}" >&2
+        sxiv -a "${image}"  # -a for play animations
+      ' _ "${1}"
+
+    ;; *.ogg|*.flac|*.opus|*.mp3|*.m4a|*.aac)
+      req 'mpv' && t        "${CODE_NOPREVIEW}" mpv --quiet "${1}"
+      req 'mpv' && g_launch "${CODE_NOPREVIEW}" \
+        "${TERMINAL}" -e mpv --quiet "${1}"
+
+    ;; *reddit.com*)
+      t        "${CODE_NOPREVIEW}" tuir "${1}"
+
+    ;;
   esac
 
-  d queue.sh direct "${1}"
-  t browser.sh run "${BROWSER_CLI}" -- "${1}"
-  g browser.sh run "${BROWSER}" -- "${1}"
-  exit "${ENUM_SUCCESS}"
+  # Fallbacks
+  d        "${CODE_NOPREVIEW}" queue.sh direct "${1}"
+  t        "${CODE_NOPREVIEW}" browser.sh terminal link "${1}"
+  g_launch "${CODE_NOPREVIEW}" browser.sh gui link "${1}"
+  exit_message 'link, but program not found' "${CODE_NOPREVIEW}"
 }
 
-local_handle_extension() {
+#TODO think about to proceed with fallbacks or not (i.e. the early exit's)
+handle_extension() {
   #echo local >&2
-  lowercase_extension="$( puts "${1##*.}" | tr '[:upper:]' '[:lower:]' )"
-  case "${lowercase_extension}" in
-    a|ace|alz|arc|arj|bz|bz2|cab|cpio|deb|gz|jar|lha|lz|lzh|lzma|lzo|\
-    rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tZ|tzo|war|xpi|xz|Z|zip)
-      p atool --list -- "${1}"
-      p bsdtar --list --file "${1}"
-      exit "${ENUM_NOPREVIEW}" ;;
-    rar)
+  lowercase_extension="$( outln "${1##*.}" | tr '[:upper:]' '[:lower:]' )"
+  case "${lowercase_extension}"
+    in a|ace|alz|arc|arj|bz|bz2|cab|cpio|deb|gz|jar|lha|lz|lzh|lzma|lzo|\
+       rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tZ|tzo|war|xpi|xz|Z|zip)
+      p "${CODE_STDOUT}" atool --list -- "${1}"
+      exit_message 'extension' "${CODE_NOPREVIEW}"  # do not fallback
+
+    ;; rar)
       # Avoid password prompt by providing empty password
-      p unrar lt -p- -- "${1}"
-      exit "${ENUM_NOPREVIEW}" ;;
-    7z)
+      p "${CODE_STDOUT}" unrar lt -p- -- "${1}"
+      exit_message 'extension' "${CODE_NOPREVIEW}"  # do not fallback
+
+    ;; 7z)
       # Avoid password prompt by providing empty password
-      p 7z l -p -- "${1}"
-      exit "${ENUM_NOPREVIEW}" ;;
+      p "${CODE_STDOUT}" 7z l -p -- "${1}"
+      exit_message 'extension' "${CODE_NOPREVIEW}"  # do not fallback
 
     # PDF
-    pdf)
+    ;; pdf)
       # Preview as text conversion
-      t sh -c "pdftotext -nopgbrk -q -- '${1}' - | '${EDITOR}'" \
-        && exit "${ENUM_SUCCESS}"
-      t exit "${ENUM_SUCCESS}"
-      g setsid zathura -- "${1}" >/dev/null 2>&1& g exit "${ENUM_SUCCESS}"
-      #e sigil
+      t        "${CODE_NOPREVIEW}" \
+        sh -c 'pdftotext -nopgbrk -q -- "${1}" - | "${EDITOR}"' _ "${1}"
+      g_launch "${CODE_NOPREVIEW}" zathura -- "${1}"
+      #e        "${CODE_NOPREVIEW}" sigil
+
       # pdftotext is too slow for my tastes
-      #p pdftotext -l 2 -nopgbrk -q -- "${1}" -  # -l lines, -q quiet
-      #p mutool draw -F txt -i -- "${1}" 1-10
-      p exiftool "${1}"
-      exit "${ENUM_NOPREVIEW}" ;;
+      # -l lines, -q quiet
+      #p        "${CODE_STDOUT}" pdftotext -l 2 -nopgbrk -q -- "${1}" -
+      #p        "${CODE_STDOUT}" mutool draw -F txt -i -- "${1}" 1-10
+      p        "${CODE_STDOUT}" exiftool "${1}"
 
     ## BitTorrent
-    #torrent)
+    #;; torrent)
     #  transmission-show -- "${1}"
-    #  exit "${ENUM_NOPREVIEW}" ;;
+    #  exit "${CODE_NOPREVIEW}"
 
     ## OpenDocument
-    #odt|ods|odp|sxw)
-    #  p odt2txt "${1}"
-    #  exit "${ENUM_NOPREVIEW}" ;;
+    #;; odt|ods|odp|sxw)
+    # p "${CODE_STDOUT}" odt2txt "${1}"
+    #  exit "${CODE_NOPREVIEW}"
 
-    doc|docx|xls|xlsx)
-      g setsid libreoffice "${1}"
-      exit "${ENUM_NOPREVIEW}" ;;
+    ;; doc|docx|xls|xlsx)
+      g_launch "${CODE_NOPREVIEW}" libreoffice "${1}"
 
     # HTML
-    htm|html|xhtml)
-      t w3m "${1}" && exit "${ENUM_SUCCESS}"
-      p w3m -dump "${1}"
-      p lynx -dump -- "${1}"
-      p elinks -dump "${1}"
-      ;; # Continue with next handler
+    ;; htm|html|xhtml)
+      t        "${CODE_NOPREVIEW}" browser.sh terminal link "${1}"
 
-    1)  man ./ "${uri}" | col -b ;;
+      req 'w3m'    && p "${CODE_STDOUT}" w3m -dump "${1}"
+      req 'lynx'   && p "${CODE_STDOUT}" lynx -dump -- "${1}"
+      req 'elinks' && p "${CODE_STDOUT}" elinks -dump "${1}"
+
+    ;; 1)  man ./ "${1}" | col -b
+    ;;
   esac
 }
 
+# NOTE: Unquoted spaces in pattern match of case-structure are skipped
+#       so `text/* | *xml)` is the same as `text/*|*xml)`
 local_handle_mime() {
   mimetype="$( file --dereference --brief --mime-type -- "${1}" )"
-  case "${mimetype}" in
+  case "${mimetype}"
     # Text
-    text/* | */xml)
+    in text/* | */xml)
       # Syntax highlight
-      if [ "$( stat --printf='%s' -- "${1}" )" -gt "${HIGHLIGHT_SIZE_MAX}" ]
-        then exit "${ENUM_PLAINTEXT}"
-      fi
-      if [ "$( tput colors )" -ge 256 ]; then
-        pygmentize_format='terminal256'
-        highlight_format='xterm256'
-      else
-        pygmentize_format='terminal'
-        highlight_format='ansi'
-      fi
-      t "${EDITOR}" "${2}"
-      g "${TERMINAL}" -e "${EDITOR}" "${2}"
-      #c.sh is-android || g "${TERMINAL}" -e "${EDITOR}" "${2}"
-      #c.sh is-android && g "${TERMINAL}" -e "${EDITOR}" "${2}"
-      p highlight --replace-tabs="${HIGHLIGHT_TABWIDTH}" \
-        --out-format="${highlight_format}" \
-        --style="${HIGHLIGHT_STYLE}" --force -- "${1}"
-      #p pygmentize -f "${pygmentize_format}" -O "style=${PYGMENTIZE_STYLE}" \
-      #   -- "${1}"
-      exit "${ENUM_PLAINTEXT}" ;;
+      t        "${CODE_STDOUT}"     "${EDITOR}" "${1}"
+      ! c.sh is-android && g_launch \
+               "${CODE_NOPREVIEW}"  "${TERMINAL}" -e "${EDITOR}" "${1}"
+      c.sh is-android && g \
+               "${CODE_NOPREVIEW}"  "${EDITOR}" "${1}"
+      p        "${CODE_STDOUT}"     \
+        bat --color always --line-range '40:' --pager never -- "${1}"
+      #exit_message 'mime' "${CODE_PLAINTEXT}"  # Do not fallback
 
     # Image
-    image/*)
-      #t ueberzug "${1}" && exit "${ENUM_SUCCESS}"
-      t chafa "${1}" && exit "${ENUM_SUCCESS}"
-      g setsid sxiv -a "${1}" >/dev/null 2>&1& g exit "${ENUM_SUCCESS}"
-      e setsid krita -- "${1}" >/dev/null 2>&1& e exit "${ENUM_SUCCESS}"
-      #p img2txt --gamma=0.6 -- "${1}" && exit "${ENUM_SUCCESS}"
-      #p chafa --colors 16 --symbols=vhalf --bg="#000000" "${1}"
-      p exiftool "${1}"
-      exit "${ENUM_NOPREVIEW}" ;;
+    ;; image/*)
+      #t        "${CODE_NOPREVIEW}" ueberzug "${1}"
+      t        "${CODE_NOPREVIEW}" chafa -- "${1}"
+      g_launch "${CODE_NOPREVIEW}" sxiv -a -- "${1}"
+      e_launch "${CODE_NOPREVIEW}" krita -- "${1}"
+      #p       "${CODE_STDOUT}"    img2txt --gamma=0.6 -- "${1}"
+      #p       "${CODE_STDOUT}"       \
+      #  chafa --colors 16 --symbols=vhalf --bg="#000000" --"${1}"
+      p        "${CODE_STDOUT}"    exiftool -- "${1}"
 
     # Video and audio
-    video/* | audio/*|application/octet-stream)
-      #p mediainfo "${1}"
-      g mpv "${1}"
-      p exiftool "${1}"
-      exit "${ENUM_NOPREVIEW}" ;;
+    ;; video/* | audio/* | application/octet-stream)
+      g        "${CODE_NOPREVIEW}" mpv "${1}"
+      p        "${CODE_NOPREVIEW}" exiftool "${1}"
+      #p        "${CODE_NOPREVIEW}" mediainfo "${1}"
+      # TODO: thumbnail preview
 
+    ;;
   esac
 
 }
 
 local_handle_fallback() {
-  p puts '----- File Type Classification -----' \
-    && p file --dereference --brief -- "${FILE_PATH}"
-  exit "${ENUM_NOPREVIEW}"
+  p "${CODE_STDOUT}" outln '----- File Type Classification -----' \
+    "$( file --dereference --brief -- "${FILE_PATH}" )"
 }
 
 
 
+################################################################################
 # Adding true at the end to protect and short-circuit if statements
-printrun() { if "${FLAG_PRINT}"; then printf '%s ' "$@"; else "$@"; fi; true; }
-d() { [ "${COMMAND}" = "${ENUM_DOWNLOAD}" ] && printrun "$@"; }
-t() { [ "${COMMAND}" = "${ENUM_TERMINAL}" ] && printrun "$@"; }
-g() { [ "${COMMAND}" = "${ENUM_GUI}" ] && printrun "$@"; }
-p() { [ "${COMMAND}" = "${ENUM_PREVIEW}" ] && printrun "$@"; }
-e() { [ "${COMMAND}" = "${ENUM_EDIT}" ] && printrun "$@"; }
+print_or_run() {
+  error_code="${1}"
+  shift 1
+  if "${FLAG_PRINT}"; then
+    err "${HANDLE_TYPE}: "; escape_all "$@"
+  else
+    errln "Opening/Launching ${HANDLE_TYPE}" "$*"
+    "$@"
+  fi
+  exit "${error_code}"
+}
+
+print_or_launch() {
+  error_code="${1}"
+  shift 1
+  if "${FLAG_PRINT}"; then
+    err "${HANDLE_TYPE}: "; escape_all "$@"
+  else
+    errln "Opening/Launching ${HANDLE_TYPE} (may take a while)..." "$*"
+    setsid "$@" & #>/dev/null 2>&1&
+  fi
+  exit "${error_code}"
+}
+
+e_launch() { e_do print_or_launch "$@"; }
+g_launch() { g_do print_or_launch "$@"; }
+d() { d_do print_or_run "$@"; }
+t() { t_do print_or_run "$@"; }
+g() { g_do print_or_run "$@"; }
+p() { p_do print_or_run "$@"; }
+e() { e_do print_or_run "$@"; }
 
 
+d_do() { [ "${COMMAND}" = "${CMD_DOWNLOAD}" ] && "$@"; }
+t_do() { echo "$COMMAND"; [ "${COMMAND}" = "${CMD_TERMINAL}" ] && "$@"; }
+g_do() { [ "${COMMAND}" = "${CMD_GUI}" ] && "$@"; }
+p_do() { [ "${COMMAND}" = "${CMD_PREVIEW}" ] && "$@"; }
+e_do() { [ "${COMMAND}" = "${CMD_EDIT}" ] && "$@"; }
 
 # Helpers
-require() {
+out() { printf %s "$@"; }
+outln() { printf %s\\n "$@"; }
+err() { printf %s "$@" >&2; }
+errln() { printf %s\\n "$@" >&2; }
+die() { printf %s "${1}: " >&2; shift 1; printf %s\\n "$@" >&2; exit "${1}"; }
+
+exit_message() {
+  errln "Opening/Launching ${1}"
+  exit "$(( ${2} - 1 ))"
+}
+
+eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
+escape_all() {
+  [ "$#" = 0 ] && return 1
+  outln "${1}" | eval_escape
+  shift 1
+  for arg in "$@"; do outln "${arg}" | eval_escape; done
+  outln ''
+}
+req() {
   for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
-    [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && return 0
+    [ -f "${dir}/${1}" ] && [ -x "${dir}/${1}" ] && return 0
   done
   return 1
 }
-puts() { printf %s\\n "$@"; }
-puterr() { printf %s\\n "$@" >&2; }
-die() { c="$1"; puterr "$2: '${name}' -- $3"; shift 3; puterr "$@"; exit "$c"; }
-
-eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 
 main "$@"

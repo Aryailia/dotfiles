@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-handle.sh --file --preview "${1}"
+handle.sh preview --file "${1}"

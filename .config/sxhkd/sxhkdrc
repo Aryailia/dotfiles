@@ -48,7 +48,8 @@ super + space ; super + n
 # clipboard.sh seems to need setsid after `$TERMINAL -e`
 # browser.sh seems to need 'nohup' and 'setsid' after 'exec' (interior details)
 super + g ; super + {s, b, g}
-  $TERMINAL -t 'fullscreen_overlay' -e tmux.sh open browser.sh menu {search, bookmark, link}
+  $TERMINAL -t 'fullscreen_overlay' -e sh -c 'tmux.sh open browser.sh menu {search, bookmark, link}'
+  # seems to need `sh -c` otherwise it breaks sxhkd
 # Let dmenu finish first before piping its output
 super + c ; super + c
   asdf="$( dmenu -p "Write to clipboard:" )"; printf %s "${asdf}" | clipboard.sh --write
@@ -82,10 +83,10 @@ super + shift + Insert
 #notify.sh 'Sleep!'
 # sudo halt
 super + BackSpace ; super + { w, e, r, BackSpace }
-  printf '%s\n' No Yes | dmenu -i -p { \
-    'Hibernate?' | grep -q 'Yes' && sudo zzz -Z, \
-    'Shutdown?' | grep -q 'Yes' && sudo shutdown -h now, \
-    'Reboot?' | grep -q 'Yes' && sudo reboot, \
+  printf %s\\n No Yes | dmenu -i -p { \
+    'Hibernate?'  | grep -q 'Yes' && sudo zzz -Z, \
+    'Shutdown?'   | grep -q 'Yes' && sudo shutdown -h now, \
+    'Reboot?'     | grep -q 'Yes' && sudo reboot, \
     'Close Xorg?' | grep -q 'Yes' && killall Xorg \
   }
 super + BackSpace ; super + s

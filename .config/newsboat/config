@@ -19,12 +19,12 @@ bind-key x delete-article
 bind-key ^D pagedown
 bind-key G end
 bind-key g home
-bind-key l open
 bind-key J next-feed articlelist
 bind-key K prev-feed articlelist
+bind-key H quit
 bind-key j down
 bind-key k up
-bind-key q quit
+bind-key l open
 bind-key n next-unread
 bind-key m toggle-article-read
 bind-key N prev-unread
@@ -46,21 +46,22 @@ color info white magenta bold
 # 'external-url-viewer' pipes to command
 # 'browser' provides %u or provides it as first argument
 external-url-viewer "uriscan -lms - | handle.sh"
-browser "handle.sh -l -t"
+browser "handle.sh t -l"
 
-macro h set browser "config-newsboat.sh -l"; open-in-browser ; set browser "handle.sh -l -t"
-macro t set browser "notify.sh '%u'"; open-in-browser ; set browser "handle.sh -l -t"
+macro h set browser "config-newsboat.sh --list"; open-in-browser ; set browser "handle.sh t -l"
+macro t set browser "notify.sh '%u'"; open-in-browser ; set browser "handle.sh t -l"
 macro T set external-url-viewer "notify.sh -"; show-urls ; set external-url-viewer "uriscan -lms - | handle.sh"
 macro n next-feed article-list ; next-unread
 macro p prev-feed article-list ; prev-unread
-macro v set browser "queue.sh youtube-dl --video"; open-in-browser ; set browser "handle.sh -l -t"
-macro a set browser "queue.sh youtube-dl --audio"; open-in-browser ; set browser "handle.sh -l -t"
-macro s set browser "queue.sh youtube-dl --video --subtitles"; open-in-browser ; set browser "handle.sh -l -t"
-macro c set browser "clipboard.sh --write '%u'"; open-in-browser ; set browser "handle.sh -l -t"
-macro o set browser "handle.sh -l -g"; open-in-browser ; set browser "handle.sh -l -t"
-macro O set external-url-viewer "uriscan.sh -lms - | handle.sh -l -g"; show-urls ; set external-url-viewer "uriscan -lms - | handle.sh"
+macro v set browser "queue.sh youtube-dl --video"; open-in-browser ; set browser "handle.sh t -l"
+macro a set browser "queue.sh youtube-dl --audio"; open-in-browser ; set browser "handle.sh t -l"
+macro s set browser "queue.sh youtube-dl --video --subtitles"; open-in-browser ; set browser "handle.sh t -l"
+macro c set browser "clipboard.sh --write '%u'"; open-in-browser ; set browser "handle.sh t -l"
+macro C set external-url-viewer "uriscan.sh -lms - | clipboard.sh -w -"; show-urls ; set external-url-viewer "uriscan -lms - | handle.sh"
+macro o set browser "handle.sh g -l '%u'"; open-in-browser ; set browser "handle.sh t -l"
+macro O set external-url-viewer "uriscan.sh -lms - | handle.sh g -l -i"; show-urls ; set external-url-viewer "uriscan -lms - | handle.sh"
 macro e set external-url-viewer "${EDITOR}"; show-urls ; set external-url-viewer "uriscan -lms - | handle.sh"
-macro d set browser "uriscan.sh -lms - | handle.sh -l -d"; open-in-browser ; set browser "handle.sh -l -t"
-macro E set browser "printf %s '%u' >/dev/null; ${EDITOR} ~/.config/newsboat/config"; open-in-browser ; set browser "handle.sh -l -t"
+macro d set external-url-viewer "uriscan.sh -lms - | handle.sh d -l -i"; show-urls ; set external-url-viewer "uriscan -lms - | handle.sh"
+macro E set browser ": '%u'; ${EDITOR} '${XDG_CONFIG_HOME}/newsboat/config'"; open-in-browser ; set browser "handle.sh t -l"
 
 ######## close ~ automatically replaced by 'config-newsboat.sh' ########
