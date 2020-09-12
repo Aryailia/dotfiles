@@ -30,19 +30,3 @@ function! Lint()
   RustFmt
   ALELint
 endfunction
-
-let b:ale_lint_on_text_changed = 'never'
-let b:ale_lint_on_insert_leave = 1
-let b:ale_lint_on_save = 0
-let b:ale_lint_on_enter = 0
-let b:ale_rust_rls_config = {
-  \ 'rust': {
-    \ 'all_targets': 1,
-    \ 'build_on_save': 1,
-    \ 'clippy_preference': 'on',
-  \ }
-\ }
-let b:ale_rust_rls_toolchain = ''
-let b:ale_linters = {'rust': ['rls']}
-"let b:ale_rust_rls_executable = 'rust-analyzer'
-let b:ale_fixers = ['rustfmt']

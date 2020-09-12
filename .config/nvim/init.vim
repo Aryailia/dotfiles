@@ -9,7 +9,7 @@ mapclear!
 
 " Automatically executes `filetype plugin indent on` and `syntax enable`
 " :PlugInstall to install
-call plug#begin('~/.config/nvim/package')
+call plug#begin($VIMDOTDIR . '/package')
   Plug 'tpope/vim-unimpaired'       " Setting toggles, back/next nav shortcuts
   Plug 'tpope/vim-surround'         " Adding quotes
   Plug 'aryailia/vim-markdown-toc'  " Table of contents woo
@@ -17,11 +17,14 @@ call plug#begin('~/.config/nvim/package')
   Plug 'kassio/neoterm'             " Terminal for vim and neovim
   Plug 'rlue/vim-barbaric'          " Swap IME on entering insert mode
 
-  "Plug 'dpelle/vim-LanguageTool'    " Cannot figure out how to use ale for this
-  " Microsoft's Language Server Protocol, for autocompletion etc.
+  "Plug 'dpelle/vim-LanguageTool'    " LanguageTool
+  "Plug 'rhysd/vim-grammarous'       " LanguageTool. More async but older 
   Plug 'ap/vim-css-color'           " Color hex colour values
-  Plug 'rust-lang/rust.vim'         " Rust syntax hilighting
-  Plug 'dense-analysis/ale'         " Autocomplete, LSP integration, and linting
+  Plug 'rust-lang/rust.vim'         " Rust syntax highlighting
+  Plug 'habamax/vim-asciidoctor'    " Stock adoc syntax highlighting is slow
+  Plug 'prabirshrestha/vim-lsp'     " Language-Server Protocol client
+  Plug 'prabirshrestha/asyncomplete.vim'     " Show omni menu while typing
+  Plug 'prabirshrestha/asyncomplete-lsp.vim' " Source from vim-lsp
 call plug#end()
 
 "colorscheme base16-unikitty-light
@@ -31,7 +34,6 @@ call plug#end()
 "set termguicolors
 
 " autocmd BufNewFile,BufRead *.md set filetype=markdown
-
 
 " General
 set nocompatible
@@ -201,7 +203,7 @@ endfunction
 
 
 function! Lint()
-  ALELint
+  "ALELint
 endfunction
 
 noremap <unique> <silent> <Leader>1 :call BuildBackground()<CR>
@@ -217,68 +219,134 @@ imap <unique> <silent> <F4> <C-o><Leader>4
 imap <unique> <silent> <F5> <C-o><Leader>5
 
 " ==============================================================================
-" Language Server Protocol (LSP) and 'ale' plugin
+" Language Server Protocol (LSP) and autocompletion
 " ==============================================================================
-" Linters set in filetypes (or detected automatically)
-nnoremap <unique> <Leader>tl :ALEToggle<CR>
-let g:ale_lint_on_text_changed = 'never'  " Text change in insert or normal mode
-let g:ale_lint_on_insert_leave = 1        " Enter/leave insert mode
-let g:ale_lint_on_save = 1                " on :Write
-let g:ale_lint_on_enter = 0               " When entering the file
-let g:ale_virtualtext_cursor = 1          " Neovim: Display linter text on side
-
-
-"" LanguageTool integration only seems to execute on manual :ALELint
-"let b:ale_languagetool_executable = 'java'
-"let b:ale_languagetool_options = '-jar ${XDG_DATA_HOME}/LanguageTool-4.7
-"  \/languagetool-commandline.jar -l zh'
-""let g:ale_linters = { 'tex': ['languagetool','proselint'] }
-""let g:ale_linter_aliases = { 'tex': ['tex', 'text']}
-""let g:ale_linters = {'tex': ['languagetool'], 'text': ['languagetool']}
-""let g:ale_linters_explicit = 0
-"
-call ale#linter#Define('css', {
-  \ 'name':       'vscode-css',
-  \ 'lsp':        'stdio',
-  \ 'executable': 'css-languageserver',
-  \ 'command':    '%e --stdio',
-  \ 'project_root': '.',
-\ })
-call ale#linter#Define('hmtl', {
-  \ 'name':       'vscode-css',
-  \ 'lsp':        'stdio',
-  \ 'executable': 'css-languageserver',
-  \ 'command':    '%e --stdio',
-  \ 'project_root': '.',
-\ })
-
 "" Auto complete
-let g:ale_completion_enabled = 1
-set omnifunc=ale#completion#OmniFunc
-inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
+"inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
 inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
-"" Avoid completing with only one item. Causes problems when deleting
+"inoremap <expr> <TAB> pumvisible() ? "\<C-y>" : "\<TAB>"
+" Avoid completing with only one item. Causes problems when deleting
 set completeopt=menu,menuone,preview,noinsert,noselect
+nnoremap <unique> <Leader>rn :LspRename<CR>
+" e for error
+nnoremap <unique> yoe :call ToggleVimLsp()<CR>
 
-" Keymaps
-nnoremap <unique> <silent> K :ALEHover<CR>
-nnoremap <unique> <silent> gd :ALEGoToDefinition<CR>
-nnoremap <unique> <silent> <Leader>rn :ALERename<CR>
+nnoremap <unique> gr <plug>(lsp-references)
+nnoremap <unique> gt <plug>(lsp-type-definition)
+nnoremap <unique> gi <plug>(lsp-implementation)
+nnoremap <unique> gd <plug>(lsp-definition)
+nnoremap <unique> [g <plug>(lsp-previous-diagnostic)
+nnoremap <unique> ]g <plug>(lsp-next-diagnostic)
+nnoremap <unique> K <plug>(lsp-hover)
+
+" Spelling
 nnoremap <unique> <Leader>sus :set spelllang=en_US,cjk<CR>
 nnoremap <unique> <Leader>sen :set spelllang=en_GB,cjk<CR>
 
-" UI
-highlight link ALEWarningSign Todo
-highlight link ALEErrorSign WarningMsg
-highlight link ALEVirtualTextWarning Todo
-highlight link ALEVirtualTextInfo Todo
-highlight link ALEVirtualTextError WarningMsg
-highlight ALEError guibg=None
-highlight ALEWarning guibg=None
-let g:ale_sign_error = "✖"
-let g:ale_sign_warning = "⚠"
-let g:ale_sign_info = "ℹ"
-let g:ale_sign_hint = "➤"
+let g:asyncomplete_auto_completeopt = 0
+let g:lsp_auto_enable = 0  " Do not auto-start LSP servers on file open
+
+" ==============================================================================
+" Register the LSP servers
+if executable('rls')
+  " Have to repeat install for different streams (stable, nightly, etc.)
+  " rustup add component rls
+  au User lsp_setup call lsp#register_server({
+    \ 'name': 'rls',
+    \ 'cmd': { server_info->['rls'] },
+    \ 'workspace_config': {'rust': {'clippy_preference': 'on' }},
+    \ 'whitelist': ['rust'],
+  \ })
+
+  ""
+  "au User lsp_setup call lsp#register_server({
+  "  \ 'name': 'rust-analyzer',
+  "  \ 'cmd': { server_info->['rust-analyzer'] },
+  "  \ 'whitelist': ['rust'],
+  "\ })
+endif
+
+if executable('vim-language-server')
+  " npm install --global vim-languageserver
+  augroup LspVim
+    autocmd!
+    autocmd User lsp_setup call lsp#register_server({
+      \ 'name': 'vim-language-server',
+      \ 'cmd': { server_info->['vim-language-server', '--stdio'] },
+      \ 'whitelist': ['vim'],
+      \ 'initialization_options': {
+        \ 'vimruntime': $VIMRUNTIME,
+        \ 'runtimepath': &rtp,
+      \ }
+    \ })
+endif
+
+if executable('javascript-typescript-stdio')
+  " sudo npm install --global vscode-css-languageserver-bin
+  au User lsp_setup call lsp#register_server({
+    \ 'name': 'sourcegraph-typescript-javascript',
+    \ 'cmd': { server_info->['javascript-typescript-stdio'] },
+    \ 'whitelist': ['javascript', 'typescript', 'typescript.tsx'],
+  \ })
+endif
+
+if executable('css-languageserver')
+  " sudo npm install --global vscode-css-languageserver-bin
+  au User lsp_setup call lsp#register_server({
+    \ 'name': 'vscode-css',
+    \ 'cmd': { server_info->['css-languageserver', '--stdio'] },
+    \ 'whitelist': ['css', 'less', 'sass'],
+  \ })
+endif
+
+" ==============================================================================
+" vim-lsp enable/disable/init stuff
+function! ToggleVimLsp() abort
+  if !exists("g:lsp_auto_enable")
+      \|| (exists("b:vim_lsp_is_enabled") && b:vim_lsp_is_enabled == 1)
+    call StopVimLsp()
+  else
+    call StartVimLsp()
+  endif
+endfunction
+
+" This does not clear diagnostic or error messages
+function! StopVimLsp() abort
+  let b:vim_lsp_is_enabled = 0
+  LspStopServer
+  setlocal omnifunc=
+  setlocal signcolumn=auto
+  if exists('+tagfunc') | setlocal tagfunc= | endif
+  call lsp#disable()
+endfunction
+
+function! StartVimLsp() abort
+  let b:vim_lsp_is_enabled = 1
+  setlocal omnifunc=lsp#complete
+  setlocal signcolumn=yes
+  if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
+  call lsp#enable()
+endfunction
+
+function! s:on_lsp_buffer_enabled() abort
+  setlocal omnifunc=lsp#complete
+  setlocal signcolumn=yes
+  if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
+endfunction
+
+" Runs when opening a buffer
+augroup lsp_install
+  au!
+  autocmd User lsp_buffer_enabled call StartVimLsp()
+  "autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
+augroup END
+
+
+" Linters set in filetypes (or detected automatically)
+" LanguageTool integration only seems to execute on manual :ALELint
+"let b:ale_languagetool_executable = 'java'
+"let b:ale_languagetool_options = '-jar ${XDG_DATA_HOME}/LanguageTool-4.7
+"  \/languagetool-commandline.jar -l zh'
 
 " ==============================================================================
 " Temporary Plugin Development Stuff
