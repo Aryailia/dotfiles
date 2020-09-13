@@ -2,6 +2,7 @@
 # missing programs required by POSIX to error 127 (no longer make use of)
 # `ion` also does has different syntax for STDERR redirection
 # `exists` should be defined in the rc file for the shell being used
+exists 'lynx'            >/dev/null && export  BROWSER_CLI='lynx'
 exists 'w3m'             >/dev/null && export  BROWSER_CLI='w3m'
 exists 'st'              >/dev/null && export     TERMINAL='st'
 #exists 'st'              >/dev/null && export OPT_TERMNAME='-t'
@@ -13,4 +14,3 @@ exists 'termux-open-url' >/dev/null && export      BROWSER='termux-open-url'
 exists 'firefox'         >/dev/null && export      BROWSER='firefox'
 exists 'surf'            >/dev/null && export      BROWSER='surf'
 exists 'zathura'         >/dev/null && export       READER='zathura'
-

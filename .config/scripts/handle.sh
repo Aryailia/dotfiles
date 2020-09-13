@@ -214,6 +214,7 @@ handle_extension() {
     # HTML
     ;; htm|html|xhtml)
       t        "${CODE_NOPREVIEW}" browser.sh terminal link "${1}"
+      g_launch "${CODE_NOPREVIEW}" browser.sh gui link "${1}"
 
       req 'w3m'    && p "${CODE_STDOUT}" w3m -dump "${1}"
       req 'lynx'   && p "${CODE_STDOUT}" lynx -dump -- "${1}"

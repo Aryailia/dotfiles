@@ -5,7 +5,7 @@
 
 #shopt -s autocd  # cd without typing cd just typing name. Conflicts too much
 
-export GPG_TTY="$( tty )"
+#export GPG_TTY="$( tty )"
 
 # History modification, https://sanctum.geek.nz/arabesque/better-bash-history
 #HISTFILESIZE=10000             # Commands to save to disk (default 500)
@@ -70,3 +70,10 @@ cd_of() {
   fi
 }
 
+if test -z "${XDG_RUNTIME_DIR}"; then
+  export XDG_RUNTIME_DIR="/tmp/${UID}-runtime-dir"
+  if ! test -d "${XDG_RUNTIME_DIR}"; then
+    mkdir "${XDG_RUNTIME_DIR}"
+    chmod 0700 "${XDG_RUNTIME_DIR}"
+  fi
+fi
