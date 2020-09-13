@@ -56,11 +56,7 @@
 ! --- end ~ automatically replaced by 'colours.sh' ---
 
 *foreground:   base05
-#ifdef background_opacity
-*background:   [background_opacity]base00
-#else
 *background:   base00
-#endif
 *cursorColor:  base05
 
 *color0:       base05
@@ -81,9 +77,15 @@
 *color14:      base0F
 *color15:      base03
 
+! This sets $TERM with the Xresources patch
+! If you run into deletion errors, not having this is probably the problem
+st.termname:   st-256color
+
+
 ! Can look through history for more exhausitive list of possible options
-st.alpha:      230
+!st.alpha:      230
 st.font:       mono:size=9:antialias=true:autohint=true;
+!TODO figure out how to implement st.font2
 st.borderpx:   4
 
 
