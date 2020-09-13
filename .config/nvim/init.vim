@@ -89,7 +89,7 @@ silent! set wildignorecase  " Case insensitive, if supported
 
 " Plugin Settings
 let g:mapleader = '\'
-let g:maplocalleader = ','
+let g:maplocalleader = '	'
 
 " Vim Markdown Table of Contents
 let g:vmt_cycle_list_item_markers = 1
@@ -217,6 +217,52 @@ imap <unique> <silent> <F2> <C-o><Leader>2
 imap <unique> <silent> <F3> <C-o><Leader>3
 imap <unique> <silent> <F4> <C-o><Leader>4
 imap <unique> <silent> <F5> <C-o><Leader>5
+
+" Populate the popup menu based on the &filetype
+function ChooseSnippet() abort
+  let b:complete_start= [line('.'), col('.')]
+  let l:blob = system("snippets.sh --list -- " . &filetype)
+  let l:choices = []
+  for line in split(l:blob, '\n')
+    let l:csv = split(line, ',')
+    if len(l:csv) >= 2
+      call add(l:choices, {
+        \ 'word': l:csv[0],
+        \ 'menu': l:csv[1],
+      \ })
+    endif
+  endfor
+  call complete(col('.'), l:choices)
+  " 'complete()' inserts directly so return '' to not insert a '0'
+  return ''
+endfunction
+
+" Uses the @" (yank) register to insert
+function InsertSnippet() abort
+  if exists('b:complete_start')
+    if has_key(v:completed_item, 'word')
+      let l:selection = v:completed_item['word']
+      let l:len =  strlen(l:selection)
+
+      stopinsert
+      normal! v
+      call cursor(b:complete_start[0], b:complete_start[1])
+      normal! x
+      let @" = system("snippets.sh sh " . l:selection)
+      "startinsert does not seem to work
+      normal! P
+    endif
+
+    unlet b:complete_start
+  endif
+endfunction
+
+inoremap <unique> <LocalLeader><Tab> <C-r>=ChooseSnippet()<CR>
+
+augroup Snippets
+  autocmd!
+  autocmd CompleteDone * call InsertSnippet()
+augroup END
 
 " ==============================================================================
 " Language Server Protocol (LSP) and autocompletion

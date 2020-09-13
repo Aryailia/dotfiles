@@ -156,6 +156,7 @@ main() {
   # Also build up ${ignore}
   for dir in \
     "${scripts_relative_path}/" \
+    '.config/snippets/' \
     '.config/nvim/after/' \
   ; do
     dotfile_ignore="${dotfile_ignore}$( escape "${dir}" )"
