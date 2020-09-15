@@ -267,7 +267,7 @@ main() {
     if ! "\${literal}"; then
       # Split grouped single-character arguments up, and interpret '--'
       # Parsing '--' here allows "invalid option -- '-'" error later
-      case "\${1}" in
+      case "\${1}"
         in --)      literal='true'; shift 1; continue
         ;; -[!-]*)  opts="\$( outln "\${1#-}" | sed 's/./ -&/g' )"
         ;; --?*)    opts="\${1}"
