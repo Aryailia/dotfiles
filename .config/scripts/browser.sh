@@ -123,23 +123,36 @@ main() {
   ENGINE=''
 
   while [ "$#" -gt 0 ]; do
-    "${literal}" || case "${1}"
-      in --)  literal='true'; shift 1; continue
-      ;; -h|--help)       show_help 'detailed'; exit 0
-      ;; -i|--incognito)  INCOGNITO='true'
+    if ! "${literal}"; then
+      # Split grouped single-character arguments up, and interpret '--'
+      # Parsing '--' here allows "invalid option -- '-'" error later
+      case "${1}"
+        in --)      literal='true'; shift 1; continue
+        ;; -[!-]*)  opts="$( outln "${1#-}" | sed 's/./ -&/g' )"
+        ;; --?*)    opts="${1}"
+        ;; *)       opts="regular" ;;  # Any non-hyphen value will do
+      esac
 
-      # TODO: -o
-      ;; -o|--output)  OUTPUT='true'
-      ;; -p|--profile) PROFILE="${2:-$( missing "${1}" )}" || exit "$?"; shift 1
-      ;; -b|--browser) PROGRAM="${2:-$( missing "${1}" )}" || exit "$?"; shift 1
-      ;; -e|--engine)  ENGINE="${2:-$( missing "${1}" )}" || exit "$?"; shift 1
-      ;; -t|--tags)    bTags='true'
-      ;; -n|--name)    bName='true'
-      ;; -u|--url)     bUrl='true'
+      # Process arguments properly now
+      for x in ${opts}; do case "${x}"
+        in -h|--help)       show_help 'detailed'; exit 0
+        ;; -i|--incognito)  INCOGNITO='true'
 
-      ;; *)   args="${args} $( outln "${1}" | eval_escape )"
-    esac
-    "${literal}" && args="${args} $( outln "${1}" | eval_escape )"
+        # TODO: -o
+        ;; -o|--output)  OUTPUT='true'
+        ;; -p|--profile) PROFILE="${2:-$( missing "${1}" )}" || exit "$?"; shift 1
+        ;; -b|--browser) PROGRAM="${2:-$( missing "${1}" )}" || exit "$?"; shift 1
+        ;; -e|--engine)  ENGINE="${2:-$( missing "${1}" )}" || exit "$?"; shift 1
+        ;; -t|--tags)    bTags='true'
+        ;; -n|--name)    bName='true'
+        ;; -u|--url)     bUrl='true'
+
+        ;; -*) die FATAL 1 "Invalid option '${1}'. See \`${NAME} -h\` for help"
+        ;; *)   args="${args} $( outln "${1}" | eval_escape )"
+      esac done
+    else
+      args="${args} $( outln "${1}" | eval_escape )"
+    fi
     shift 1
   done
 
@@ -188,6 +201,7 @@ main() {
     ;; g*)  cmd="open"; PROGRAM="${PROGRAM:-"${BROWSER}"}"
     ;; *)   show_help 'short'; exit 1
   esac
+  require "${PROGRAM}" || PROGRAM=""
 
   ##############################################################################
   # Use "${two}", "${3}", and maybe --browser "${ENGINE}" to form "${link}"
@@ -218,18 +232,16 @@ main() {
 
       ;; b*)  # from bookmarks file
         [ -r "${BOOKMARKS}" ] || die FATAL 1 'Error with bookmarks file'
-        row="$( <"${BOOKMARKS}" tablify '|' \
-          | pick_flexible "${SEARCH_PROMPT}" "${3}" "3.." "${SEARCH_COLUMNS}" \
-          | decode )"
+        row="$( <"${BOOKMARKS}" parse_csv \
+          | pick_flexible "${SEARCH_PROMPT}" "${3}" "2.." "${SEARCH_COLUMNS}" )"
         link="$( sed -n "s/.*| *//;${row}p" "${BOOKMARKS}" )"
 
       ;; s*)  # from web searches file
         [ -r "${SEARCH_ENGINES}" ] || die FATAL 1 'Search engines file error'
         # Pass option specified by '--engine' to `pick_flexible` to validate
-        row="$( <"${SEARCH_ENGINES}" tablify '|' \
-          | pick_flexible "Engine" "${ENGINE}" "2.." "1" \
-          | decode )"
-        format="$( sed -n "s/.*| *//;${row}p" "${SEARCH_ENGINES}" )"
+        row="$( <"${SEARCH_ENGINES}" parse_csv \
+          | pick_flexible "Engine" "${ENGINE}" "2.." "1" )"
+        format="$( sed -n "${row}s/.*| *//p" "${SEARCH_ENGINES}" )"
         search_string="${4:-"$( prompt ".*" "${format}: " )"}" || exit "$?"
         link="$( printf "${format}" "${search_string}" )"
 
@@ -307,7 +319,7 @@ open() {
 
   browser="$( outln "${BROWSER_LIST}" \
     | pick_flexible "Browser" "${PROGRAM}" ".." ".." )"
-  [ -z "${browser}" ] && "FATAL: Browser '${browser}' not in list" \
+  [ -z "${browser}" ] && die FATAL 1 "Browser '${browser}' not in list" \
     "See \`${NAME} list\` for list of available browsers."
   open_"${browser}" "${1}"
 }
@@ -391,111 +403,36 @@ open_termux_external() {
 
 open_w3m() {
   "${INCOGNITO}" && errln 'WARN: w3m does not support incognito mode'
-  errln "Opening '${1}' in w3m" "Running: lynx '${1}'"
+  errln "Opening '${1}' in w3m" "Running: w3m '${1}'"
   print_or_run 'w3m' "${1}"
 }
 
 open_lynx() {
   "${INCOGNITO}" && errln 'WARN: termux does not support incognito mode'
+  args='lynx'
   errln "Opening '${1}' in lynx" "Running: lynx '${1}'"
-  print_or_run lynx "${1}"
+  print_or_run ${args} "${1}"
 }
 
 
 ################################################################################
 # Dealing with CSV
-tablify() {
-  # &0 the csv
-  # $1 the delimiter
-  # $2 is the first line to include
-  # $3 is the final line to include
-  <&0 awk -v FS="${1}" -v first="${2}" -v last="${3}" '
-    first != "" && first > NR { next; }
-    last != "" &&  NR > last  { next; }
-    /^#/ { next; }    # Comments
-    /^ *$/ { next; }  # Empty lines
-
-    { gsub(/@/, "@A"); }
-    { gsub(/\\\\/, "@B"); }
-    { gsub(/\\n/, "@N"); }
-    # @D for delimiter
-    { gsub(/\\"/, "@Q"); }
-
-    '"${DECODE}"'
-    function line_length(input,    i, len, output, temp) {
-      len = split(input, temp, "\n");
-      for (i = 1; i <= len; ++i)
-        if (output < length(temp[i])) output = length(temp[i]);
-      return output;
-    }
-
+parse_csv() {
+  # Let the source file handle spacing as there is
+  # no good way to deal with double-width characters (like kanji)
+  <&0 awk -v FS='|' '
+    { $1 = "" }
+    /^[ \t]*$/ { next; }
     {
-      # The proper CSV parsing
-      counter = 0;
-      delete entries;  # Clear since used on every line
-      for (i = 1; i <= NF; ++i) {
-        if (entries[counter] !~ /^ *"/ || entries[counter] ~ /^ *".*" *$/) {
-          entries[++counter] = $(i);
-        } else {
-          entries[counter] = entries[counter] "@D" $(i);
-        }
+      printf("%s", NR);
+      # Skip first column
+      for (i = 2; i <= NF; ++i) {
+        printf("%s%s", FS, $(i));
       }
-
-      # NOTE: To enable automatic padding, must uncomment three sections
-      # Trim and remap onto awk framework, calculate padding
-      $0 = NR;
-      for (i = 1; i <= counter; ++i) {
-        ## Automatic padding part 1
-        #gsub(/^ *"?/, "", entries[i]);  # Trim first
-        #gsub(/"? *$/, "", entries[i]);  # Trim end
-        $0 = $0 FS entries[i];          # Always add FS because $0 starts NR
-
-        ## Find total length for padding
-        ## Automatic padding part 2
-        #temp = line_length(decode(entries[i], FS));
-        #len[1] = length(NR);            # Final NR always the longest
-        #if (len[i + 1] < temp) len[i + 1] = temp;
-      }
-
-      # Store for use in END, lines of the final output with skipping done
-      output[++output_length] = $0;
+      print("");
     }
-    { print decode($0, FS); }
-
-    ## Automatic padding part 3
-    #END {
-    #  for (i = 1; i <= output_length; ++i) {
-    #    counter = split(output[i], fields, FS);
-    #    for (j = 1; j <= counter + 1; ++j) {
-    #      if (j > 1) printf "%s", FS;
-    #      printf "%s", fields[j];
-    #      # TODO: adding padding not working yet for entries with @N
-    #      temp = len[j] - line_length(decode(fields[j], FS));
-    #      while (--temp > -1) printf " ";  # Add the padding
-    #   }
-    #    printf "\n";  # Finish line
-    #  }
-    #}
   '
 }
-
-decode() {
-  <&0 awk -v FS="|" "${DECODE}"'{ print decode($0, FS); }'
-}
-
-
-DECODE='
-  function decode(input, delimiter) {
-    gsub(/@D/, delimiter, input);
-    gsub(/@Q/, "\"", input);
-    gsub(/@N/, "\n", input);
-    gsub(/@B/, "\\", input);
-    gsub(/@A/, "@", input);
-    return input;
-  }
-'
-
-
 
 
 ################################################################################
@@ -515,9 +452,11 @@ pick_fzf() {
   # $3 are the fields that visible
   # $4 are the fields that are searchable by fzf
   _match="$(
-    if [ -z "${2}" ]; then <&0 fzf --no-sort --reverse --delimiter='\|' \
-      --select-1 --prompt="${1}> " --with-nth="${3}" --nth="${4}"
-    else <&0 grep -F "${2}" | sed '1q'
+    if [ -z "${2}" ]; then
+      <&0 fzf --no-sort --reverse --delimiter='\|' \
+        --select-1 --prompt="${1}> " --with-nth="${3}" --nth="${4}"
+    else
+      <&0 grep -F "${2}" | sed '1q'
     fi
   )"
   outln "${_match%%|*}"
@@ -563,7 +502,7 @@ escape_all() {
 }
 require() {
   for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
-    [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && return 0
+    [ -f "${dir}/${1}" ] && [ -x "${dir}/${1}" ] && return 0
   done
   return 1
 }
@@ -571,8 +510,8 @@ require() {
 pc() { printf %b "$@" >/dev/tty; }
 prompt() (
   pc "${2}"; read -r _v; pc "${CLEAR}"
-  while outln "${_v}" | grep -qve "$1"; do
-    pc "${3:-"$2"}"; read -r _v
+  while outln "${_v}" | grep -qve "${1}"; do
+    pc "${3:-"${2}"}"; read -r _v
     pc "${CLEAR}"
   done
   printf %s "${_v}"
