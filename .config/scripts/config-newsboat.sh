@@ -34,6 +34,7 @@ EOF
 DEFAULT_VIEWER='uriscan -lms - | handle.sh'
 DEFAULT_BROWSER='handle.sh t -l'
 NEWSBOAT_CONFIG="${XDG_CONFIG_HOME}/newsboat/config"
+NEWSBOAT_CONFIG_L="\${XDG_CONFIG_HOME}/newsboat/config"
 
 main() {
   #run: sh % -m
@@ -55,9 +56,9 @@ main() {
 
   m_pipe  e 'entry in term editor'   "\${EDITOR}"
   m_pipe  d 'link menu download'     "uriscan.sh -lms - | handle.sh d -l -i"
-  # : '%u' to eat first argument
-  m_link  E 'edit newsboat config'   \
-    ": '%u'; \${EDITOR} '\${XDG_CONFIG_HOME}/newsboat/config'"
+  # use ": '%u'" to eat first argument
+  # Cannot quote 
+  m_link  E 'edit newsboat config'   ": '%u'; \${EDITOR} ${NEWSBOAT_CONFIG_L}"
   m_info  E 'edit newsboat urls'
 
   OUT="# Default macro key is ,

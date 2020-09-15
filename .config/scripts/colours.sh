@@ -12,53 +12,45 @@
 ID_SET="--- set ~ automatically replaced by 'colours.sh' ---"
 ID_END="--- end ~ automatically replaced by 'colours.sh' ---"
 
-#    (light . ((mono1 . "#494B53")
-#              (mono2 . "#696C77")
-#              (mono3 . "#A0A1A7")
-#              (mono4 . "#C2C2C3")
-#              (background . "#FAFAFA")
-#              (contrast-bg . "#F0F0F0")
-#              (low-contrast-bg . "#F5F5F5")
-#              (fringe . "#9E9E9E")
-#              (accent . "#526FFF")
-#              (highlight . "#D0D0D0"))))
-
-#B0="fafafa" # we 0  f default background
-#B1="f0f0f1" # gn 1  x lighter background (status bars)
-#B2="e5e5e6" # yw 1    selection background
-#B3="a0a1a7" # we 1    comments, inivisibles, line highlighting
-#B4="696c77" # be 1  d dark foreground (status bars)
-#B5="383a42" # bk 0    default foreground, caret, delim, operators
-#B6="202227" # ma 1    light foreground (not often used)
-#B7="090a0b" # bk 1    light background (not often used)
-#B8="ca1243" # rd 0    re: var, xml tags, mkup link text, mkup lists, diff del
-#B9="d75f00" # rd 1    or: int, bool, const, xml attributes, mkup link url
-#BA="c18401" # yw 0    ye: classes, markup bold, search text bg
-#BB="50a14f" # gn 0  h gr: strings, inherited class, markup code, diff ins
-#BC="0184bc" # cn 0    cy: support, regexp, escape chars, mkup quotes
-#BD="4078f2" # be 0    bl: fn, methods, attribute ids, headings
-#BE="a626a4" # ma 0    ma: keyw, storage, selector, mkup italics, diff ch
-#BF="986801" # cn 1  s br: deprecated, open/close embedded tags eg. <?php ?>
-
-b0="#fafafa" # we 0  f default background
-b1="#487329" # gn 1  x lighter background (status bars)
-b2="#c18401" # yw 1    selection background
-b3="#9e9e9e" # we 1    comments, inivisibles, line highlighting
-b4="#526fff" # be 1  d dark foreground (status bars)
-b5="#000000" # bk 0    default foreground, caret, delim, operators
-b6="#c2c2c3" # ma 1    light foreground (not often used)
-b7="#494b53" # bk 1    light background (not often used)
-b8="#ca1243" # rd 0    re: var, xml tags, mkup link text, mkup lists, diff del
-b9="#e45649" # rd 1    or: int, bool, const, xml attributes, mkup link url
-bA="#986801" # yw 0    ye: classes, markup bold, search text bg
-bB="#50a14f" # gn 0  h gr: strings, inherited class, markup code, diff ins
-bC="#0184bc" # cn 0    cy: support, regexp, escape chars, mkup quotes
-bD="#4078f2" # be 0    bl: fn, methods, attribute ids, headings
-bE="#a626a4" # ma 0    ma: keyw, storage, selector, mkup italics, diff ch
-bF="#56b6c2" # cn 1  s br: deprecated, open/close embedded tags eg. <?php ?>
+#b0="#fafafa" # we 0  f default background
+#b1="#487329" # gn 1  x lighter background (status bars)
+#b2="#c18401" # yw 1    selection background
+#b3="#9e9e9e" # we 1    comments, inivisibles, line highlighting
+#b4="#526fff" # be 1  d dark foreground (status bars)
+#b5="#000000" # bk 0    default foreground, caret, delim, operators
+#b6="#c2c2c3" # ma 1    light foreground (not often used)
+#b7="#494b53" # bk 1    light background (not often used)
+#b8="#ca1243" # rd 0    re: var, xml tags, mkup link text, mkup lists, diff del
+#b9="#e45649" # rd 1    or: int, bool, const, xml attributes, mkup link url
+#bA="#986801" # yw 0    ye: classes, markup bold, search text bg
+#bB="#50a14f" # gn 0  h gr: strings, inherited class, markup code, diff ins
+#bC="#0184bc" # cn 0    cy: support, regexp, escape chars, mkup quotes
+#bD="#4078f2" # be 0    bl: fn, methods, attribute ids, headings
+#bE="#a626a4" # ma 0    ma: keyw, storage, selector, mkup italics, diff ch
+#bF="#56b6c2" # cn 1  s br: deprecated, open/close embedded tags eg. <?php ?>
 
 #BF="61afef" # cn 1  s br: deprecated, open/close embedded tags eg. <?php ?>
 #B6="c678dd" # ma 1    light foreground (not often used)
+
+
+# https://terminalsplash.com
+# Mostly based off Tomorrow
+b0="#fcfcfc" # we 0  f default background
+b1="#718c00" # gn 1  x lighter background (status bars)
+b2="#eab700" # yw 1    selection background
+b3="#9e9e9e" # we 1    comments, inivisibles, line highlighting
+b4="#4271ae" # be 1  d dark foreground (status bars)
+b5="#111111" # bk 0    default foreground, caret, delim, operators
+b6="#8959a8" # ma 1    light foreground (not often used)
+b7="#111111" # bk 1    light background (not often used)
+b8="#c82829" # rd 0    re: var, xml tags, mkup link text, mkup lists, diff del
+b9="#e45649" # rd 1    or: int, bool, const, xml attributes, mkup link url
+bA="#c18401" # yw 0    ye: classes, markup bold, search text bg
+bB="#50a14f" # gn 0  h gr: strings, inherited class, markup code, diff ins
+bC="#3e999f" # cn 0    cy: support, regexp, escape chars, mkup quotes
+bD="#4271ae" # be 0    bl: fn, methods, attribute ids, headings
+bE="#8959a8" # ma 0    ma: keyw, storage, selector, mkup italics, diff ch
+bF="#3e999f" # cn 1  s br: deprecated, open/close embedded tags eg. <?php ?>
 
 #*color0:       base05 ! black
 #*color1:       base08 ! red

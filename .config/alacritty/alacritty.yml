@@ -1,31 +1,31 @@
 colors:
 # --- set ~ automatically replaced by 'colours.sh' ---
   primary:
-    background: '0xfafafa'
-    foreground: '0x000000'
+    background: '0xfcfcfc'
+    foreground: '0x111111'
 
   cursor:
-    text:       '0xfafafa'
-    cursor:     '0x000000'
+    text:       '0xfcfcfc'
+    cursor:     '0x111111'
 
   normal:
-    black:   '0x000000'
-    red:     '0xca1243'
+    black:   '0x111111'
+    red:     '0xc82829'
     green:   '0x50a14f'
-    yellow:  '0x986801'
-    blue:    '0x4078f2'
-    magenta: '0xa626a4'
-    cyan:    '0x0184bc'
-    white:   '0xfafafa'
+    yellow:  '0xc18401'
+    blue:    '0x4271ae'
+    magenta: '0x8959a8'
+    cyan:    '0x3e999f'
+    white:   '0xfcfcfc'
 
   bright:
-    black:   '0x494b53'
+    black:   '0x111111'
     red:     '0xe45649'
-    green:   '0x487329'
-    yellow:  '0xc18401'
-    blue:    '0x526fff'
-    magenta: '0xc2c2c3'
-    cyan:    '0x56b6c2'
+    green:   '0x718c00'
+    yellow:  '0xeab700'
+    blue:    '0x4271ae'
+    magenta: '0x8959a8'
+    cyan:    '0x3e999f'
     white:   '0x9e9e9e'
 # --- end ~ automatically replaced by 'colours.sh' ---
 

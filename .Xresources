@@ -37,22 +37,22 @@
 !#define base07 #000000
 
 ! --- set ~ automatically replaced by 'colours.sh' ---
-#define base00 #fafafa
-#define base01 #487329
-#define base02 #c18401
+#define base00 #fcfcfc
+#define base01 #718c00
+#define base02 #eab700
 #define base03 #9e9e9e
-#define base04 #526fff
-#define base05 #000000
-#define base06 #c2c2c3
-#define base07 #494b53
-#define base08 #ca1243
+#define base04 #4271ae
+#define base05 #111111
+#define base06 #8959a8
+#define base07 #111111
+#define base08 #c82829
 #define base09 #e45649
-#define base0A #986801
+#define base0A #c18401
 #define base0B #50a14f
-#define base0C #0184bc
-#define base0D #4078f2
-#define base0E #a626a4
-#define base0F #56b6c2
+#define base0C #3e999f
+#define base0D #4271ae
+#define base0E #8959a8
+#define base0F #3e999f
 ! --- end ~ automatically replaced by 'colours.sh' ---
 
 *foreground:   base05
