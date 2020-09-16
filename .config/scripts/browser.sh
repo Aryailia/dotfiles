@@ -250,9 +250,11 @@ main() {
         "Commmand: ${NAME} ${one} ${two}"
     esac
     # TODO check valid link?
-    escaped_link="$( outln "${link}" | maybe_prefix_https )"
+
+    link="$( maybe_prefix_https "${link}"; printf a )"
+    link="${link%a}"  # Plese
   fi
-  "${cmd}" "${escaped_link}"
+  "${cmd}" "${link}"
 }
 
 add_browser() {
@@ -284,8 +286,8 @@ list_browsers() {
     # TODO: add these browsers
     # TODO: default browsers do not seem to check the browser list
 
-    #"${XORG_ON}" && require 'epiphany' && add_browser 'epiphany'
-    #"${XORG_ON}" && require 'midori'   && add_browser 'midori'
+    "${XORG_ON}" && require 'epiphany' && add_browser 'epiphany'
+    "${XORG_ON}" && require 'midori'   && add_browser 'midori'
     #"${XORG_ON}" && require 'surf'     && add_browser 'surf'
   fi
   outln "${BROWSER_LIST}"
@@ -327,10 +329,20 @@ open() {
 ################################################################################
 # Browsers
 maybe_prefix_https() {
-  <&0 sed '
-    /^www\./                  { s|^|https://|; }
-    /^[^h.\/][^\/.]*\.[^\/.]/ { s|^|https://|; }
-  '
+  if [ -r "${1}" ]; then
+    if [ "${1}" != "${1#/}" ]; then
+      out "file://${1}"
+    else  # is relative link
+      _pwd="$( pwd; printf a )"
+      _pwd="${_pwd%${NEWLINE}a}"
+      out "file://${_pwd}/${1}"
+    fi
+  else
+    out "$( outln "${1}" | sed '
+      /^www\./                  { s|^|https://|; }
+      /^[^h.\/][^\/.]*\.[^\/.]/ { s|^|https://|; }
+    ' )"
+  fi
 }
 
 
