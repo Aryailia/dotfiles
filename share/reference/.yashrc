@@ -1,0 +1,58 @@
+#!/usr/bin/env sh
+set -o emacs
+
+# Esc as the escape key
+#bindkey -e '\^[H' complete-prev-column
+#bindkey -e '\^[J' complete-next-candidate
+#bindkey -e '\^[K' complete-prev-candidate
+#bindkey -e '\^[L' complete-next-column
+
+#bindkey -e '\^X\^E' vi-edit-and-accept
+
+# Navigate the drop down menu
+bindkey -e '\B' complete-prev-column
+#bindkey -e '\?' complete-prev-column
+bindkey -e '\eb' complete-prev-column
+bindkey -e '\ej' complete-next-candidate
+bindkey -e '\ek' complete-prev-candidate
+bindkey -e '\el' complete-next-column
+bindkey -e '\eH' complete-prev-column
+bindkey -e '\eJ' complete-next-candidate
+bindkey -e '\eK' complete-prev-candidate
+bindkey -e '\eL' complete-next-column
+
+exists() {
+  for temp in $( printf %s "${PATH}" | tr ':' '\n' ); do
+    [ -f "${temp}/$1" ] && [ -x "${temp}/$1" ] && {
+      printf %s "${temp}/$1"
+      return 0
+    }
+  done
+  return 1
+}
+
+# Bash specific stuff
+rrc() {
+  . "${HOME}/.profile"
+  . "${XDG_CONFIG_HOME}/envrc"
+  . "${XDG_CONFIG_HOME}/aliasrc"
+}
+rrc 'Avoid infinite loop'
+
+PROMPT_COMMAND="$(<<EOF cat -
+  errorcode="\$?"
+  PS1="\$( "${XDG_CONFIG_HOME}/prompt.sh" \
+    "\$errorcode" "\$SECONDS" "\$!" "\\001" "\\002"
+  )"
+  SECONDS="0"
+EOF
+)"
+
+cd_of() {
+  temp="$( "$@"; err="$?"; printf x; exit "${err}" )" || return "$?"
+  temp="${temp%x}"
+  if [ "${temp}" != "${PWD}" ]; then
+    cd "${temp}" && ls --color=auto --group-directories-first -hA
+  fi
+}
+

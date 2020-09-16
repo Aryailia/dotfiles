@@ -16,6 +16,7 @@ export XDG_CACHE_HOME="$HOME/.cache"
 # $HOME directory cleanup, https://superuser.com/questions/874901/
 export npm_config_userconfig="$XDG_CONFIG_HOME/rc/npmrc"
 export npm_config_cache="$XDG_DATA_HOME/npm"
+export npm_config_prefix="$HOME/.local" # No XDG var for ~/.local
 export NODE_REPL_HISTORY=''
 export CARGO_HOME="$HOME/.local/lib/cargo"
 export RUSTUP_HOME="$HOME/.local/bin/rustup"
@@ -36,7 +37,7 @@ export LESSHISTFILE='/dev/null'
 export INPUTRC="$XDG_CONFIG_HOME/rc/inputrc"
 export ZDOTDIR="$HOME/.config/zsh"
 
-export STARDICT_DATA_DIR="$XDG_DATA_HOME/stardict"
+export STARDICT_DATA_DIR="$XDG_DATA_HOME/stardict" # looks in ./dic
 export SDCV_HISTSIZE="0"
 
 # History modification, https://sanctum.geek.nz/arabesque/better-bash-history
@@ -51,6 +52,7 @@ export HISTIGNORE='ls:bg:fg:history'  # Do not log these commands
 
 # PATH
 export SCRIPTS="$XDG_CONFIG_HOME/scripts"
+export NODE_PATH="$npm_config_prefix/lib/node_modules"
 export GOPATH="$HOME/.local/lib/go"
 printf %s\\n ":$PATH:" | grep -q ":$SCRIPTS:" \
   || export PATH="$PATH:$SCRIPTS"
