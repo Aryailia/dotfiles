@@ -62,10 +62,12 @@ alias    gs='git status'
 #  git submodule foreach '\''git checkout -b \"$1\"'\''
 #" _'
 #alias    gu='git submodule update --remote --merge'
-alias     l='\ls --color=auto --group-directories-first -h'
-alias    la='\ls --color=auto --group-directories-first -hA'
-alias   lal='\ls --color=auto --group-directories-first -hAl'
-alias    ll='\ls --color=auto --group-directories-first -hl'
+alias     l='exa --color=auto --group-directories-first  -h'
+alias    la='exa --color=auto --group-directories-first  --sort=modified -rha'
+alias   lal='exa --color=auto --group-directories-first  --sort=modified -rhal'
+alias    ll='exa --color=auto --group-directories-first  --sort=modified -rhl'
+alias   lla='exa --color=auto --group-directories-first  -ha'
+alias  llal='exa --color=auto --group-directories-first  -hal'
 #alias    ls='\ls --color=auto'
 # With `sed` can use escapes like "\n" in filenames
 alias   mkf='sh -c '\''for x in "$@"; do
@@ -147,6 +149,8 @@ alias updateman='sh -c "sudo -V >/dev/null 2>&1" \
   || makewhatis "/usr/share/man"
 '
 alias list-path='printf %s\\n "$PATH" | tr ":" "\n" | sort'
+alias list-users='cat /etc/passwd'
+alias list-groups='cat /etc/group'
 
 # -i list all Internet and x.25 network files
 # -n prevents conversion of network numbers to host names (DNS translation)
