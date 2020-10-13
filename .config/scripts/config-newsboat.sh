@@ -56,9 +56,8 @@ main() {
 
   m_pipe  e 'entry in term editor'   "\${EDITOR}"
   m_pipe  d 'link menu download'     "uriscan.sh -lms - | handle.sh d -l -i"
-  # use ": '%u'" to eat first argument
-  # Cannot quote 
-  m_link  E 'edit newsboat config'   ": '%u'; \${EDITOR} ${NEWSBOAT_CONFIG_L}"
+  # use "sh -c" to eat first argument that newsboat automatically gives (%u)
+  m_link  E 'edit newsboat config'   "sh -c '\${EDITOR} ${NEWSBOAT_CONFIG_L}'"
   m_info  E 'edit newsboat urls'
 
   OUT="# Default macro key is ,
