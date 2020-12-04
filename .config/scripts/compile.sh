@@ -84,8 +84,18 @@ process_latex_with_tectonic() {
 }
 
 process_adoc() {
-  asciidoctor "$1" --backend html5 --destination-dir "${2%/*}"
-  soutln "$2.html"
+  imagesdir="$( <"${1}" sed -n '/^:imagesdir:/{s/^:.*: *//p}' )"
+  dir="$( realpath "${1}"; printf a )"; dir="${dir%?a}"
+  dir="$( dirname "${dir}"; printf a )"; dir="${dir%?a}"
+  target="$( realpath "${dir}/${imagesdir}"; printf a )"; target="${target%?a}"
+
+  # '-a webfonts!' disables <link> to fonts.googleapis.com
+  asciidoctor "${1}" --backend html5 --destination-dir "${2%/*}" \
+    --attribute source-highlighter='pygments' \
+    --attribute 'webfonts!' \
+    --attribute imagesdir="${target}" \
+  #
+  soutln "${2}.html"
 }
 
 process_adoc_pdf() {

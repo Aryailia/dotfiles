@@ -20,7 +20,8 @@ export npm_config_prefix="$HOME/.local" # No XDG var for ~/.local
 export NODE_REPL_HISTORY=''
 export CARGO_HOME="$HOME/.local/lib/cargo"
 export RUSTUP_HOME="$HOME/.local/bin/rustup"
-export GEM_PATH="$HOME/.local/lib/gem"
+export GEM_HOME="$HOME/.local/lib/gem"
+export GEM_PATH="$GEM_HOME"
 export GEM_SPEC_CACHE="$XDG_CACHE_HOME/lib/gem"
 
 export GNUPGHOME="$HOME/.local/gnupg"

@@ -44,7 +44,7 @@ main() {
     || tmux.sh get-current-command | grep_for_editor \
     || tmux_die 'Not running (n)vim at the moment'
   #editor_pid="$(tmux.sh get-current-pid)"
-  tmux send-keys Escape ':q' Enter
+  tmux send-keys Escape ':qa' Enter
   #wait "${editor_pid}"  # Not sure why this does not work
 
   # Need to sleep because vim eats the input stream while it closes
