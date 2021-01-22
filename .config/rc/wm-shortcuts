@@ -1,0 +1,58 @@
+# The Computer
+|super {{, alt, ctrl, ctrl alt}} Return| {{$TERMINAL, alacritty, st, sakura}} -e tmux.sh open
+|super shift {{, alt, ctrl, ctrl alt}} Return| {{$TERMINAL, alacritty, st, sakura}}
+|super d| dmenu_run
+
+# I3 specific stuff
+!super shift q! kill window
+!super {{1,2,3,4,5,6,7,8,9,0}}! swap to workspace {{1,2,3,4,5,6,7,8,9,10}}
+!super shift {{1,2,3,4,5,6,7,8,9,0}}! move current workspace to
+!super r ; super r! reload window manager config
+!super r ; super {{h, Left, k, Up}}! shrink window size
+!super r ; super {{j, Down, l, Right, semicolon}}! grow window size
+!super {{i, shift i}}! inner gaps
+!super {{o, shift o}}! outer gaps
+!super shift f! fullscreen toggle
+!super {{h, Left, j, Down, k, Up, l, Right, semicolon}}! focus window
+!super shift {{h, Left, j, Down, k, Up, l, Right, semicolon}}! move window
+!super shift space! floating toggle
+
+
+|super + shift + Insert|
+  notify.sh "Clipboard: $(xclip -o -selection clipboard)"
+  notify.sh "Primary: $(xclip -o -selection primary)"
+|super + BackSpace ; super + q| sudo zzz -z
+|super + BackSpace ; super + {{w, e, r, BackSpace}}|
+  printf %s\\n No Yes | dmenu -i -p {{\
+    "Hibernate?"  | grep -q "Yes" && sudo zzz -Z, \
+    "Shutdown?"   | grep -q "Yes" && sudo shutdown -h now, \
+    "Reboot?"     | grep -q "Yes" && sudo reboot, \
+    "Close Xorg?" | grep -q "Yes" && killall Xorg \
+  }}
+|super + BackSpace ; super + t| xlock -mode blank
+|Print| flameshot gui
+#|XF86AudioMute| amixer sset Master toggle; statusbar-startrefresh.sh
+#|XF86Audio{{Raise,Lower}}Volume| amixer sset Master 5%{{+,-}}; statusbar-startrefresh.sh
+
+# Main
+|super space ; super {{w, e, a, s, z, m, n}}| {{
+  $TERMINAL -e sh -c 'echo "nmcli"; echo "===="; sudo nmtui'; statusbar-startrefresh.sh,
+  $TERMINAL -e emacs-sandbox.sh -P -O d "${EMACSINIT}",
+  $TERMINAL -e alsamixer; statusbar-startrefresh.sh,
+  $TERMINAL -e syncthing -no-browser,
+  $TERMINAL -e htop,
+  $TERMINAL -e tmux.sh open mw.sh,
+  $TERMINAL -e tmux.sh open newsboat
+}}
+
+## Cheat sheets
+#|super g ; super {{s, b, g}}| $TERMINAL -t 'fullscreen_overlay' -e sh -c 'tmux.sh open browser.sh menu {{search, bookmark, link}}'
+#|super g ; super {{a, e}}| handle.sh gui --file "$DOTENVIRONMENT/notes/cheatsheets/{{asciidoc-syntax-quick-reference.pdf,emacs_cheatsheet.pdf}}"
+
+# Fcitx
+# You can find these names at "$XDG_CONFIG_HOME/fcitx/profile"
+|super u ; super q ; super {{q, w, e}}| fcitx-remote -s {{fcitx-keyboard-us-alt-intl-unicode, fcitx-keyboard-cn-altgr-pinyin, ipa-x-sampa}}
+|super u ; super w ; super {{q, w, e}}| fcitx-remote -s {{mozc, anthy, kkc}}
+|super u ; super e ; super {{q, w, e}}| fcitx-remote -s {{zhengma-large, pinyin, wbpy}}
+|super u ; super r ; super {{q, w, e}}| fcitx-remote -s {{jyutping, rime, chewing}}
+|super u ; super t ; super {{q, w, e}}| fcitx-remote -s hangul

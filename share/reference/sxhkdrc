@@ -13,8 +13,8 @@ super + shift + {_, alt +, ctrl +, ctrl + alt +} Return
   {$TERMINAL, alacritty, st, sakura}
 super + shift + q
   kill "$(xprop -id "$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)" '\t$0' _NET_WM_PID | cut -f 2)"
-  #i3-msg kill  # does not seem to work
-super super + d
+#  i3-msg kill  # does not seem to work
+super + d
   dmenu_run
 
 super + space ; super + e
@@ -108,8 +108,8 @@ super + {1,2,3,4,5,6,7,8,9,0}
   i3-msg 'workspace {1,2,3,4,5,6,7,8,9,10}'
 super + shift + {1,2,3,4,5,6,7,8,9,0}
   i3-msg 'move container to workspace {1,2,3,4,5,6,7,8,9,10}'
-super + shift + q
-  kill "$(xprop -id "$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)" '\t$0' _NET_WM_PID | cut -f 2)"
+#super + shift + q
+#  kill "$(xprop -id "$(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2)" '\t$0' _NET_WM_PID | cut -f 2)"
 super + r ; super + r
   pkill -USR1 sxhkd; i3-msg reload
 super + r ; super + {h, Left, k, Up}

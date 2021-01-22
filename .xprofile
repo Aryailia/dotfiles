@@ -27,7 +27,7 @@ xbacklight -set 40&            # Screen brightness
 x.sh set-wallpaper&            # Desktop Wallpaper
 xcompmgr -c&                   # Window Transparency
 dunst&                         # Notifications
-sxhkd&                         # For hotkeys
+#sxhkd&                         # For hotkeys
 
 ## Swap CapsLock and ControlR
 #xmodmap "${XDG_CONFIG/HOME}/rc/xmodmap"&

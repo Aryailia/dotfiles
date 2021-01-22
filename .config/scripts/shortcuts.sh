@@ -1,41 +1,44 @@
-#!/usr/bin/env sh
-
-shortcuts="${HOME}/.config/shortcutsrc"
-shell_shortcuts="${HOME}/.config/named_directories"
-vifm_shortcuts="${HOME}/.config/vifm/directory_shortcuts"
-
-require() { command -v "$1" >/dev/null 2>&1; }
-die() { exitcode="$1"; shift 1; printf %s\\n "$@" >&2; exit "${exitcode}"; }
-puts() { printf %s\\n "$@"; }
-
-require "${shortcuts}" || die 1 "FATAL: Need '${shortcuts}' script"
-
-mkdir -p "${shell_shortcuts}"    # Put the shortcuts inside this directory
-mkdir -p "${vifm_shortcuts%/*}"  # basedir, probably no need to check edge cases
-
-# Expect eval-escaped (shell-quotable) output from `${shortcuts}`
-eval "set -- $("${shortcuts}")" || die 1 "FATAL: Error with '${shortcuts}'"
-
-# Sanitise ${shortcuts} output and create the symlinks for the shell shortcuts
-# STDERR is to the tty, STDOUT is to ${map}
-rm "${shell_shortcuts}"/*
-map="$(sh -c "$(<<EOF cat -
-  while [ "\$#" -ge 2 ]; do
-    path="\${2#${HOME}}"
-    [ "\${path}" != "\$2" ] && path="~\${path}"
-    if [ -e "\$2" ] && ln -s \$2 "${shell_shortcuts}/"\$1; then
-      printf "%s\\\\n"        "SUCCESS: \$1 -> \${path}" >&2
-      printf "'%s' '%s'\\\\n" "\$1" "\$2"
-    else
-      printf "%s\\\\n" "FAIL: '\${path}' does not exist" >&2
-    fi
-    shift 2
-  done
-EOF
-)" '_' "$@")"
-
-## Vifm
-#FS="' *'|'"
-#puts "${map}" | awk -v FS="${FS}" '(1) { print("mark " $2 " " $3); }' \
-#  >"${vifm_shortcuts}"
-
+#!/bin/sh
+case "${1}"
+  in "super Return") $TERMINAL -e tmux.sh open 
+  ;; "alt super Return") alacritty -e tmux.sh open 
+  ;; "ctrl super Return") st -e tmux.sh open 
+  ;; "alt ctrl super Return") sakura -e tmux.sh open 
+  ;; "shift super Return") $TERMINAL 
+  ;; "alt shift super Return") alacritty 
+  ;; "ctrl shift super Return") st 
+  ;; "alt ctrl shift super Return") sakura 
+  ;; "super d") dmenu_run 
+  ;; "shift super Insert") notify.sh "Clipboard: $(xclip -o -selection clipboard)"
+  notify.sh "Primary: $(xclip -o -selection primary)" 
+  ;; "super BackSpace ; super q") sudo zzz -z 
+  ;; "super BackSpace ; super w") printf %s\\n No Yes | dmenu -i -p     "Hibernate?"  | grep -q "Yes" && sudo zzz -Z 
+  ;; "super BackSpace ; super e") printf %s\\n No Yes | dmenu -i -p      "Shutdown?"   | grep -q "Yes" && sudo shutdown -h now 
+  ;; "super BackSpace ; super r") printf %s\\n No Yes | dmenu -i -p      "Reboot?"     | grep -q "Yes" && sudo reboot 
+  ;; "super BackSpace ; super BackSpace") printf %s\\n No Yes | dmenu -i -p      "Close Xorg?" | grep -q "Yes" && killall Xorg 
+  ;; "super BackSpace ; super t") xlock -mode blank 
+  ;; "Print") flameshot gui 
+  ;; "super space ; super w") $TERMINAL -e sh -c 'echo "nmcli"; echo "===="; sudo nmtui'; statusbar-startrefresh.sh 
+  ;; "super space ; super e") $TERMINAL -e emacs-sandbox.sh -P -O d "${EMACSINIT}" 
+  ;; "super space ; super a") $TERMINAL -e alsamixer; statusbar-startrefresh.sh 
+  ;; "super space ; super s") $TERMINAL -e syncthing -no-browser 
+  ;; "super space ; super z") $TERMINAL -e htop 
+  ;; "super space ; super m") $TERMINAL -e tmux.sh open mw.sh 
+  ;; "super space ; super n") $TERMINAL -e tmux.sh open newsboat 
+  ;; "super u ; super q ; super q") fcitx-remote -s fcitx-keyboard-us-alt-intl-unicode 
+  ;; "super u ; super q ; super w") fcitx-remote -s  fcitx-keyboard-cn-altgr-pinyin 
+  ;; "super u ; super q ; super e") fcitx-remote -s  ipa-x-sampa 
+  ;; "super u ; super w ; super q") fcitx-remote -s mozc 
+  ;; "super u ; super w ; super w") fcitx-remote -s  anthy 
+  ;; "super u ; super w ; super e") fcitx-remote -s  kkc 
+  ;; "super u ; super e ; super q") fcitx-remote -s zhengma-large 
+  ;; "super u ; super e ; super w") fcitx-remote -s  pinyin 
+  ;; "super u ; super e ; super e") fcitx-remote -s  wbpy 
+  ;; "super u ; super r ; super q") fcitx-remote -s jyutping 
+  ;; "super u ; super r ; super w") fcitx-remote -s  rime 
+  ;; "super u ; super r ; super e") fcitx-remote -s  chewing 
+  ;; "super u ; super t ; super q") fcitx-remote -s hangul 
+  ;; "super u ; super t ; super w") fcitx-remote -s hangul 
+  ;; "super u ; super t ; super e") fcitx-remote -s hangul 
+  ;; *) echo yo
+esac
