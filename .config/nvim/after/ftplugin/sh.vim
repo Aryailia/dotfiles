@@ -10,22 +10,40 @@ let b:ale_lint_on_save = 1
 let b:ale_lint_on_enter = 0
 
 function! Lint()
+  vertical T shellcheck %
 endfunction
 
-function! s:RunDefault()
-  vertical T sh %
-endfunction
-
-function! s:RunWithArguments(cmdline)
-  execute('vertical T ' . a:cmdline)
-endfunction
-
-function! Run()
+function! Build()
   write
+  let b:build_background = 0
   call RunCmdlineOverload('#run: ',
     \ function('s:RunDefault'), function('s:RunWithArguments'))
 endfunction
 
-function! Build()
-  call Run()
+function! BuildBackground()
+  write
+  let b:build_background = 1
+  call RunCmdlineOverload('#run: ',
+    \ function('s:RunDefault'), function('s:RunWithArguments'))
 endfunction
+
+function! s:RunDefault()
+  if b:build_background
+    silent !sh %
+  else
+    vertical T sh %
+  endif
+endfunction
+
+function! s:RunWithArguments(cmdline)
+  if b:build_background
+    execute 'silent !' . a:cmdline
+  else
+    execute('vertical T ' . a:cmdline)
+  endif
+endfunction
+
+function! Run()
+  call Build()
+endfunction
+

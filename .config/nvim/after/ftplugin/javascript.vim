@@ -1,20 +1,29 @@
 let s:cmdline_prefix_regexp = '//run:'
 
 function! BuildBackground()
-  vertical T cargo check
+  call RunCmdlineOverload(s:cmdline_prefix_regexp,
+    \function('s:BackgroundDefault'), function('s:BackgroundWithArguments'))
+endfunction
+
+function! s:BackgroundDefault()
+  silent !node %
+endfunction
+
+function! s:BackgroundWithArguments(cmdline)
+  call system(a:cmdline)
 endfunction
 
 function! Build()
   " `%` is the full path, `expand("%")` is just the current file name
   "execute("vertical T rustc % -o \"${TMPDIR}/" . expand("%") . '"')
-  vertical T cargo build
+  vertical T node %
   execute "normal! \<C-w>\<C-w>"
   normal! G
   execute "normal! \<C-w>\<C-w>"
 endfunction
 
 function! s:RunDefault()
-  vertical T cargo run
+  vertical T node %
 endfunction
 
 function! s:RunWithArguments(cmdline)
@@ -27,6 +36,4 @@ function! Run()
 endfunction
 
 function! Lint()
-  RustFmt
-  vertical T cargo clippy
 endfunction

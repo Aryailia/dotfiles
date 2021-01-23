@@ -88,9 +88,16 @@ process_adoc() {
   dir="$( realpath "${1}"; printf a )"; dir="${dir%?a}"
   dir="$( dirname "${dir}"; printf a )"; dir="${dir%?a}"
   target="$( realpath "${dir}/${imagesdir}"; printf a )"; target="${target%?a}"
+  #bibtex="$( gem list --local | grep '^asciidoctor-bibtex ' )" || exit "$?"
+  bibtex=''
+  if [ -n "${bibtex}" ]
+    then bibtex="--require=asciidoctor-bibtex"
+    else bibtex=""
+  fi
 
   # '-a webfonts!' disables <link> to fonts.googleapis.com
   asciidoctor "${1}" --backend html5 --destination-dir "${2%/*}" \
+    ${bibtex} \
     --attribute source-highlighter='pygments' \
     --attribute 'webfonts!' \
     --attribute imagesdir="${target}" \
