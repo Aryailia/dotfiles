@@ -21,25 +21,36 @@ main() {
 
   # Options processing
   LIST='false'
+  TMUX_PROMPT='false'
   args=''; literal='false'
   for arg in "$@"; do
     "${literal}" || case "${arg}"
-      in --)         literal='true'; continue
-      ;; -h|--help)  show_help; exit 0
-      ;; -l|--list)  LIST='true'
-      ;; -*)         die FATAL 1 "'${1}' is an invalid option"
-      ;; *) args="${args} $( outln "${arg}" | eval_escape )"
+      in --) literal='true'; continue
+
+      ;; -h|--help)    show_help; exit 0
+      ;; -l|--list)    LIST='true'
+      ;; -b|--backend) TMUX_PROMPT='false'; tmux show-buffer | prompt; exit 0
+      ;; -t|--tmux-prompt)  # Prompt inside of tmux window
+         tmux.sh test-inside-session || die FATAL 1 'Not inside a tmux session'
+         TMUX_PROMPT='true'
+
+      ;; -*) die FATAL 1 "'${1}' is an invalid option"
+      ;; *)  args="${args} $( outln "${arg}" | eval_escape )"
     esac
     "${literal}" && args="${args} $( outln "${arg}" | eval_escape )"
   done
 
-  [ -z "${args}" ] && die 1 FATAL 'No file extension specified'
   eval "set -- ${args}"
 
-  snippetFile="${SNIPPET_DIR}/${1}.sh"
-  [ -r "${snippetFile}" ] || die 1 FATAL "snippet file '${snippetFile}' missing"
+  fileType="${1:-$(
+    # Currently does not handle .[!.]* or ..?*
+    list_files | prompt
+  )}" || exit "$?"
+  snippetFile="${SNIPPET_DIR}/${fileType}.sh"
+
+  [ -r "${snippetFile}" ] || die FATAL 1 "snippet file '${snippetFile}' missing"
   . "${snippetFile}" || exit "$?"
-  lintSnippetNames "${SNIPPET_LIST}" "${1}" || exit "$?"
+  lintSnippetNames "${SNIPPET_LIST}" "${fileType}" || exit "$?"
 
   # ${SNIPPET_LIST} will already have a newline
   if "${LIST}"; then
@@ -49,7 +60,7 @@ main() {
       || exit "$?"
     is_in_list="${NL}${SNIPPET_LIST}"
     if [ "${is_in_list}" != "${is_in_list#*"${NL}${choice}",}" ]; then
-      "${1}_${choice}" "${1}"
+      "${fileType}_${choice}" "${fileType}"
     else
       die FATAL 1 \
         "There is no snippet named '${choice}'." \
@@ -67,10 +78,10 @@ NL='
 
 addPrefixedFunction() {
   [ "${1}" != "${1#*${NL}}" ] \
-    && die 1 FATAL "\`addPrefixedFunction\` - no newline in name"
+    && die FATAL 1 "\`addPrefixedFunction\` - no newline in name"
   [ "${2}" != "${2#*${NL}}" ] \
-    && die 1 FATAL "\`addPrefixedFunction\` - no newline in description"
-  [ "${1}" != "${1#*,}" ] && die 1 FATAL "'${1}' - invalid function name"
+    && die FATAL 1 "\`addPrefixedFunction\` - no newline in description"
+  [ "${1}" != "${1#*,}" ] && die FATAL 1 "'${1}' - invalid function name"
   SNIPPET_LIST="${SNIPPET_LIST}${1},${2}${NL}"
 }
 
@@ -92,18 +103,18 @@ lintSnippetNames() {
     while IFS=',' read -r LintCmd LintDesc; do
       LintCmd="${2}_${LintCmd}"
       command -V "${LintCmd}" >/dev/null 2>&1 \
-        || die 1 FATAL "snippet '${LintCmd}' does not exist"
+        || die DEV 1 "snippet '${LintCmd}' does not exist"
     done
     true
   } || exit "$?"
 
   LintBad="$( outln "${LintFirstCol}" | grep -ve '^[A-Za-z_][A-Za-z0-9_]*$' )"
-  [ -n "${LintBad}" ] && die 1 FATAL "Invalid snippet names:" "${LintBad}"
+  [ -n "${LintBad}" ] && die FATAL 1 "Invalid snippet names:" "${LintBad}"
   return 0
 
   [ "$( outln "${LintFirstCol}" | uniq | wc -l )" != \
     "$( outln "${LintFirstCol}" | wc -l )" ] \
-    && die 1 FATAL 'Duplicate names'
+    && die FATAL 1 'Duplicate names'
 }
 
 # Aligns second column by adding spaces before first comma
@@ -124,10 +135,37 @@ csvAlignFirstColumn() (
 
 )
 
+list_files() {
+  for f in "${SNIPPET_DIR}"/*; do
+    #[ -e "${f}" ] || continue
+    f="${f#"${SNIPPET_DIR}/"}"
+    f="${f%.sh}"
+    [ "${f}" != "${f#*[!A-Za-z0-9_]}" ] && die FATAL 1 \
+      "${NAME} only supports alphanumeric filetypes"
+    outln "${f}"
+  done
+}
+
 prompt() {
+  if "${TMUX_PROMPT}"; then
+    tmux load-buffer -
+    paneID="$( tmux new-window -P -F "#{pane_id}" '
+      # "--backend" reads from "tmux save-buffer" so do not pipe out on one line
+      temp="$( '"${0}"' --backend )"
+      printf %s\\n "${temp}" | tmux load-buffer -
+    ' )"
+    # Wait until the window does not exist anymore
+    while : ; do
+      tmux has-session -t "${paneID}" 2>/dev/null || break
+      sleep 0.1 # 100ms feel instantenous as per W3C recommendations for web
+    done
+    tmux save-buffer -
+    return 0
+  fi
   require fzf && { <&0 promptFzf; return 0; }
   pick "$( cat - )"
 }
+
 promptFzf() {
   { outln; <&0 sed 's/,/   - /'; } \
     | fzf --delimiter='-' --nth="1" \

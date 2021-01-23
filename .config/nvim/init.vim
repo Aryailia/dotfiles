@@ -248,7 +248,7 @@ function InsertSnippet() abort
       normal! v
       call cursor(b:complete_start[0], b:complete_start[1])
       normal! x
-      let @" = system("snippets.sh sh " . l:selection)
+      let @" = system("snippets.sh " . &filetype . " " . l:selection)
       "startinsert does not seem to work
       normal! P
     endif
@@ -257,7 +257,15 @@ function InsertSnippet() abort
   endif
 endfunction
 
+" Automatically detect from &filetype
 inoremap <unique> <LocalLeader><Tab> <C-r>=ChooseSnippet()<CR>
+" Give pop-up list (needs tmux)
+inoremap <unique> <LocalLeader>q <C-o>:silent read !snippets.sh -t<CR>
+" Move cursor and replace placeholder '<>'
+inoremap <unique> <LocalLeader>p <C-o>?<><CR><C-o>d2l
+inoremap <unique> <LocalLeader>n <C-o>/<><CR><C-o>d2l
+nnoremap <unique> <LocalLeader>p ?<><CR>c2l
+nnoremap <unique> <LocalLeader>n /<><CR>c2l
 
 augroup Snippets
   autocmd!
@@ -266,6 +274,7 @@ augroup END
 
 " Use the LocationList to display
 " Not sure how I want to approach highlighting
+" TODO: uriscan.sh on 'coolstuff.md' has some problems
 function ListUrls() abort
   let l:current_window_id = winnr()
   let l:cursor_x = line('.')
@@ -380,6 +389,8 @@ if executable('javascript-typescript-stdio')
     \ 'whitelist': ['javascript', 'typescript', 'typescript.tsx'],
   \ })
 endif
+
+" sudo npm install --global vscode-html-langserver-bin
 
 if executable('css-languageserver')
   " sudo npm install --global vscode-css-languageserver-bin

@@ -1,5 +1,5 @@
 # The Chinese like the H5 abbreviation
-addPrefixedFunction 'init_h5' 'Init for html5 files'
+addPrefixedFunction 'h5' 'Init for html5 files'
 html_h5() {
   <<EOF cat -
 <!DOCTYPE html>
@@ -30,6 +30,7 @@ html_h5() {
 EOF
 }
 
+addPrefixedFunction 'h4' 'Init for html4 files'
 html_h4() {
   <<EOF cat -
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -65,3 +66,7 @@ html_script() {
   printf %s '<script type="text/javascript"><></script>'
 }
 
+addPrefixedFunction 'table' 'Table skeleton'
+html_table() {
+  printf %s '<table><><tr><td><></td><></tr><></table>'
+}
