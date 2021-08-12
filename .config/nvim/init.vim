@@ -267,6 +267,17 @@ inoremap <unique> <LocalLeader>n <C-o>/<><CR><C-o>d2l
 nnoremap <unique> <LocalLeader>p ?<><CR>c2l
 nnoremap <unique> <LocalLeader>n /<><CR>c2l
 
+inoremap <unique> <LocalLeader>s; ‘
+inoremap <unique> <LocalLeader>s' ’
+inoremap <unique> <LocalLeader>d; “
+inoremap <unique> <LocalLeader>d' ”
+inoremap <unique> <LocalLeader>\\ ＼
+
+" section sign
+inoremap <unique> <LocalLeader>ss §
+" pilcrow or paragraph mark
+inoremap <unique> <LocalLeader>pc ¶
+
 augroup Snippets
   autocmd!
   autocmd CompleteDone * call InsertSnippet()
@@ -341,7 +352,7 @@ nnoremap <unique> K <plug>(lsp-hover)
 
 " Spelling
 nnoremap <unique> <Leader>sus :set spelllang=en_US,cjk<CR>
-nnoremap <unique> <Leader>sen :set spelllang=en_GB,cjk<CR>
+nnoremap <unique> <Leader>sgb :set spelllang=en_GB,cjk<CR>
 
 let g:asyncomplete_auto_completeopt = 0
 let g:lsp_auto_enable = 0  " Do not auto-start LSP servers on file open
