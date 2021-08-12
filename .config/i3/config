@@ -34,6 +34,10 @@ set $right l
 ################################################################################
 # Manual Input
 #bindsym $mod+Return exec --no-startup-id $term -e $tmux &
+bindsym Mod4+d exec --no-startup-id "dmenu_run"
+bindsym Mod4+Shift+q kill window
+
+bindsym Mod4+Shift+f fullscreen toggle
 bindsym Mod4+Shift+space focus mode_toggle
 bindsym Mod4+r mode "M+r"
 mode "M+r" {
@@ -117,7 +121,6 @@ bindsym Mod4+Shift+8 move container to workspace number $ws8
 bindsym Mod4+Shift+9 move container to workspace number $ws9
 bindsym Mod4+Shift+0 move container to workspace number $ws10
 
-
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
@@ -125,22 +128,46 @@ bar {
   bindsym --release button1 exec --no-startup-id statusbar-startrefresh.sh --i3
 }
 
-
 ########## automatically generated begin ##########
-bindsym Mod4+d exec --no-startup-id "shortcuts.sh 'super d'"; mode "default"
+bindsym Ctrl+Mod4+a mode "C+M+a"
+bindsym Shift+Mod4+a exec --no-startup-id "shortcuts.sh 'shift super a'"; mode "default"
+bindsym Mod4+c mode "M+c"
+bindsym Mod4+g mode "M+g"
+bindsym Ctrl+Shift+Mod4+q exec --no-startup-id "shortcuts.sh 'ctrl shift super q'"; mode "default"
 bindsym Mod4+u mode "M+u"
 bindsym Print exec --no-startup-id "shortcuts.sh 'Print'"; mode "default"
 bindsym Mod4+space mode "M+space"
 bindsym Shift+Mod4+Insert exec --no-startup-id "shortcuts.sh 'shift super Insert'"; mode "default"
 bindsym Mod4+Return exec --no-startup-id "shortcuts.sh 'super Return'"; mode "default"
 bindsym Mod1+Mod4+Return exec --no-startup-id "shortcuts.sh 'alt super Return'"; mode "default"
-bindsym Ctrl+Mod4+Return exec --no-startup-id "shortcuts.sh 'ctrl super Return'"; mode "default"
 bindsym Mod1+Ctrl+Mod4+Return exec --no-startup-id "shortcuts.sh 'alt ctrl super Return'"; mode "default"
 bindsym Shift+Mod4+Return exec --no-startup-id "shortcuts.sh 'shift super Return'"; mode "default"
 bindsym Mod1+Shift+Mod4+Return exec --no-startup-id "shortcuts.sh 'alt shift super Return'"; mode "default"
 bindsym Ctrl+Shift+Mod4+Return exec --no-startup-id "shortcuts.sh 'ctrl shift super Return'"; mode "default"
 bindsym Mod1+Ctrl+Shift+Mod4+Return exec --no-startup-id "shortcuts.sh 'alt ctrl shift super Return'"; mode "default"
 bindsym Mod4+BackSpace mode "M+BackSpace"
+bindsym XF86MonBrightnessUp exec --no-startup-id "shortcuts.sh 'XF86MonBrightnessUp'"; mode "default"
+bindsym XF86MonBrightnessDown exec --no-startup-id "shortcuts.sh 'XF86MonBrightnessDown'"; mode "default"
+
+mode "C+M+a" {
+  bindsym Mod4+Return exec --no-startup-id "shortcuts.sh 'ctrl super a ; super Return'"; mode "default"
+  bindsym Escape mode "default"
+}
+
+mode "M+c" {
+  bindsym Mod4+c exec --no-startup-id "shortcuts.sh 'super c ; super c'"; mode "default"
+  bindsym Mod4+e exec --no-startup-id "shortcuts.sh 'super c ; super e'"; mode "default"
+  bindsym Escape mode "default"
+}
+
+mode "M+g" {
+  bindsym Mod4+a exec --no-startup-id "shortcuts.sh 'super g ; super a'"; mode "default"
+  bindsym Mod4+b exec --no-startup-id "shortcuts.sh 'super g ; super b'"; mode "default"
+  bindsym Mod4+e exec --no-startup-id "shortcuts.sh 'super g ; super e'"; mode "default"
+  bindsym Mod4+g exec --no-startup-id "shortcuts.sh 'super g ; super g'"; mode "default"
+  bindsym Mod4+s exec --no-startup-id "shortcuts.sh 'super g ; super s'"; mode "default"
+  bindsym Escape mode "default"
+}
 
 mode "M+u" {
   bindsym Mod4+e mode "M+u;M+e"
@@ -194,9 +221,7 @@ mode "M+u;M+r" {
 }
 
 mode "M+u;M+t" {
-  bindsym Mod4+e exec --no-startup-id "shortcuts.sh 'super u ; super t ; super e'"; mode "default"
   bindsym Mod4+q exec --no-startup-id "shortcuts.sh 'super u ; super t ; super q'"; mode "default"
-  bindsym Mod4+w exec --no-startup-id "shortcuts.sh 'super u ; super t ; super w'"; mode "default"
   bindsym Escape mode "default"
 }
 
