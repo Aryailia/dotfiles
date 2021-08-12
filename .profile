@@ -88,6 +88,6 @@ export LESS_TERMCAP_ue="$( printf '%b' '[0m' )"
 # Login shell starts with '-bash', test if it ends with bash
 printf %s\\n "$0" | grep -q '^-bash$' \
   && test -f "$HOME/.bashrc" && . "$HOME/.bashrc" \
-  && which loadkeys >/dev/null \
-  && sudo loadkeys "$XDG_CONFIG_HOME/rc/remap-caps-rctrl.map"
+#  && which loadkeys >/dev/null \
+#  && sudo loadkeys "$XDG_CONFIG_HOME/rc/remap-caps-rctrl.map"
 
