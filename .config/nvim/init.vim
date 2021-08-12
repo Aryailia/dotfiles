@@ -249,8 +249,7 @@ function InsertSnippet() abort
       call cursor(b:complete_start[0], b:complete_start[1])
       normal! x
       let @" = system("snippets.sh " . &filetype . " " . l:selection)
-      "startinsert does not seem to work
-      normal! P
+      execute("normal! a\<C-r>\"")
     endif
 
     unlet b:complete_start

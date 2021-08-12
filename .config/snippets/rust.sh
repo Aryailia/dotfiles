@@ -1,11 +1,16 @@
 addPrefixedFunction 'pd' 'Debug print'
 rust_pd() {
-  printf %s\\n 'println!("{:?}", <>);'
+  printf %s 'println!("{:?}", <>);'
 }
 
 addPrefixedFunction 'print' 'Print'
 rust_print() {
-  printf %s\\n 'println!("{}", <>);'
+  printf %s 'println!("{}", <>);'
+}
+
+addPrefixedFunction 'dd' '#[derive(Debug)]'
+rust_dd() {
+  printf %s\\n '#[derive(Debug)]'
 }
 
 addPrefixedFunction 'macro' 'Macro rules'
