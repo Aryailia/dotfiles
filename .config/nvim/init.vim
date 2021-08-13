@@ -245,11 +245,14 @@ function InsertSnippet() abort
       let l:len =  strlen(l:selection)
 
       stopinsert
-      normal! v
+      normal! hv
       call cursor(b:complete_start[0], b:complete_start[1])
       normal! x
+      call cursor(b:complete_start[0], b:complete_start[1])
       let @" = system("snippets.sh " . &filetype . " " . l:selection)
-      execute("normal! a\<C-r>\"")
+      setlocal paste
+      execute("normal! i\<C-r>\"")
+      setlocal nopaste
     endif
 
     unlet b:complete_start
