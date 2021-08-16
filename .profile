@@ -64,6 +64,7 @@ printf %s\\n ":$PATH:" | grep -q ":$CARGO_HOME/bin:" \
 
 # Folders
 export DOTENVIRONMENT="$HOME/.environment"
+export ZETTELKASTEN_DIR="$DOTENVIRONMENT/zettelkasten"
 uname -o | grep -q 'Linux' && export TMPDIR='/tmp'  # Linux/MacOS
 uname -o | grep -q 'MSYS' &&  export TMPDIR="$HOME/AppData/Local/Temp"  # Win
 

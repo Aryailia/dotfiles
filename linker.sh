@@ -108,7 +108,7 @@ main() {
   ignore="${dotfiles}/.linkerignore.sh"
   ignore2="${dotenv}/.linkerignore.sh"
   scripts_relative_path=".config/scripts"
-  make_shortcuts="${scripts_relative_path}/shortcuts.sh"
+  make_shortcuts="${scripts_relative_path}/named-dirs.sh"
   vim_plugin_manager_save_path="${XDG_CONFIG_HOME}/nvim/autoload/plug.vim"
   vim_plugin_manager_link="$( puts \
     'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
