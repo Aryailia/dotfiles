@@ -42,6 +42,15 @@ COMMANDS
     advantage of the reasonable session count to avoid splitting random sessions
     that are not even visible. \`tmux send-keys\` all the PARAMETERS and enters.
 
+  r, run-in-new-window [COMMAND_TO_RUN [ARG1 [ARG2 ...]]]
+    Runs COMMAND_TO_RUN and its ARG1, ARG2 ... in a new window (good for
+    interactive scripts like fzf), saves the output to a temp tmux buffer,
+    waits for that to finish, prints that buffer to STDOUT for the original
+    window, and deletes the temp buffer.
+
+  wt, write-to-temp [COMMAND_TO_RUN [ARG1 [ARG2 ...]]]
+  pt, rt, pop-from-temp
+
   test-inside-session
   get-current-command
   get-current-pid
@@ -53,15 +62,17 @@ EOF
 
 # Helpers
 puts() { printf %s\\n "$@"; }
-die() { c="$1"; shift 1; for x in "$@"; do puts "$x" >&2; done; exit "$c"; }
+die() { printf %s "${1}: " >&2; shift 1; printf %s\\n "$@" >&2; exit "${1}"; }
 is_inside_tmux() { test -n "${TMUX}"; }  # Tmux sets ${TMUX}
 require() { command -v "$1" >/dev/null 2>&1; }
+eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
+
 
 
 
 main() {
   # Dependencies
-  require 'tmux' || die 1 "FATAL: Requires \`tmux\`"
+  require 'tmux' || die FATAL 1 " Requires \`tmux\`"
   # Tmux runs with login shell which sources .bashrc twice (initial login
   # and tmux session started). Running the shell as `tmux new-session`
   # makes it non-login.
@@ -76,18 +87,21 @@ main() {
   # Main
   cmd="$1"
   [ "$#" -gt "0" ] && shift 1
-  case "${cmd}" in
-    h|-h|help|--help)     show_help ;;
-    g|get)                get_next_session true ;;
-    i|insert-evaluate)    insert_into_current_pane "$@" ;;
-    ls|list-sessions)     tmux list-sessions "$@" ;;
-    o|open)               run_in_generic "$@" ;;
-    p|prune)              prune_nongenerics ;;
-    s|split)              split_into_tmux_and_run "$@" ;;
-    test-inside-session)  is_inside_tmux ;;
-    get-current-command)  get_current_command ;;
-    get-current-pid)      get_current_pid ;;
-    *)  show_help; exit 1 ;;
+  case "${cmd}"
+    in h|-h|help|--help)     show_help
+    ;; g|get)                get_next_session true
+    ;; i|insert-evaluate)    insert_into_current_pane "$@"
+    ;; ls|list-sessions)     tmux list-sessions "$@"
+    ;; o|open)               run_in_generic "$@"
+    ;; p|prune)              prune_nongenerics
+    ;; r|run-in-new-window)  run_in_new_window "$@"
+    ;; s|split)              split_into_tmux_and_run "$@"
+    ;; pt|rt|pop-from-temp)  tmux show-buffer -b temp; tmux delete-buffer -b temp
+    ;; wt|write-to-temp)     "$@" | tmux load-buffer -b temp -
+    ;; test-inside-session)  is_inside_tmux
+    ;; get-current-command)  get_current_command
+    ;; get-current-pid)      get_current_pid
+    ;; *)  show_help; exit 1
   esac
 }
 
@@ -98,11 +112,30 @@ main() {
 # The code at least once
 # Eg. `tmux.sh insert echo yo` inside a tmux session yields 'yo'
 insert_into_current_pane() {
-  is_inside_tmux || die 1 'FATAL: Use inside a tmux session'
+  is_inside_tmux || die FATAL 1 'You are not within a tmux session'
   id="$(tmux display-message -p "#{pane_id}")"
   cmd="\$(env TARGET_PANE="${id}" $*)"  # Passing a literal $( )
   tmux new-window "tmux send-keys -t '${id}' \"${cmd}\""
 }
+
+
+
+# This is useful for running interactive scripts from inside `vim`
+# Runs "$@" in new-window (so we can use interactive scripts)
+# Alternatively you could read from '/dev/tty' depending on the use case
+# Transfers to original window via 'temp' buffer
+run_in_new_window() {
+  is_inside_tmux || die FATAL 1 'You are not within tmux session'
+  cmd=""
+  for arg in "$@"; do
+    cmd="${cmd}$( printf %s\\n "${arg}" | eval_escape ) "
+  done
+
+  tmux new-window "tmux.sh write-to-temp ${cmd}; tmux wait -S ping"
+  tmux wait ping
+  tmux.sh pop-from-temp
+}
+
 
 
 

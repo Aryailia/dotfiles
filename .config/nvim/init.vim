@@ -65,7 +65,7 @@ syntax sync minlines=256  " improve syntax performance
 set nocursorcolumn
 set nocursorline
 set colorcolumn=81  " Archaic 80-character width, keep to before the line
-highlight ColorColumn ctermfg=red ctermbg=cyan guibg=cyan
+highlight ColorColumn ctermfg=red ctermbg=yellow guibg=cyan
 
 " New vertical and horizontal splits open down and right respectively by default
 set splitbelow
@@ -121,6 +121,8 @@ nnoremap <silent> <unique> yoo
 nnoremap <unique> <leader>yot
   \ :if exists("g:syntax_on")<Bar>syntax off<Bar>
   \else<Bar>syntax on<Bar>endif<CR>
+" Close location list
+nnoremap <unique> yo; :lclose<CR>
 
 " 'j' and 'k' move visual lines, Ctrl versions to move the original real lines
 nnoremap <unique> j    gj
@@ -158,6 +160,7 @@ nnoremap <unique> <Leader>rc
   \ :silent call system("    setsid reloadvim.sh --ignore-checks '"
   \. line('w0') . "' '" . line('.') . "' '" . col('.') . "' '"
   \. expand('%') . "' &")<CR>
+
 
 " ==============================================================================
 " Clipboard
@@ -258,27 +261,6 @@ function InsertSnippet() abort
   endif
 endfunction
 
-" Automatically detect from &filetype
-inoremap <unique> <LocalLeader><Tab> <C-r>=ChooseSnippet()<CR>
-" Give pop-up list (needs tmux)
-inoremap <unique> <LocalLeader>q <C-o>:silent read !snippets.sh -t<CR>
-" Move cursor and replace placeholder '<>'
-inoremap <unique> <LocalLeader>p <C-o>?<><CR><C-o>d2l
-inoremap <unique> <LocalLeader>n <C-o>/<><CR><C-o>d2l
-nnoremap <unique> <LocalLeader>p ?<><CR>c2l
-nnoremap <unique> <LocalLeader>n /<><CR>c2l
-
-inoremap <unique> <LocalLeader>s; ‘
-inoremap <unique> <LocalLeader>s' ’
-inoremap <unique> <LocalLeader>d; “
-inoremap <unique> <LocalLeader>d' ”
-inoremap <unique> <LocalLeader>\\ ＼
-
-" section sign
-inoremap <unique> <LocalLeader>ss §
-" pilcrow or paragraph mark
-inoremap <unique> <LocalLeader>pc ¶
-
 augroup Snippets
   autocmd!
   autocmd CompleteDone * call InsertSnippet()
@@ -328,11 +310,11 @@ function ListUrls() abort
 endfunction
 
 nnoremap <unique> <Leader>;l :call ListUrls()<CR>
-nnoremap <unique> yo; :lclose<CR>
 
 " ==============================================================================
 " Language Server Protocol (LSP) and autocompletion
 " ==============================================================================
+
 "" Auto complete
 "inoremap <expr> <Esc> pumvisible() ? "\<C-e>" : "\<Esc>"
 inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
@@ -476,9 +458,31 @@ nnoremap <unique> <F11> :call FollowCursorLink()<CR>
 nnoremap <unique> <F12> :call FollowBack()<CR>
 
 " ==============================================================================
-" Snippets
+" Vim Snippets
 " ==============================================================================
+" Automatically detect from &filetype
+inoremap <unique> <LocalLeader><Tab> <C-r>=ChooseSnippet()<CR>
+" Give pop-up list (needs tmux)
+inoremap <unique> <LocalLeader>q <C-o>:silent read !snippets.sh -t<CR>
+
 " The dashes
+" Move cursor and replace placeholder '<>'
+inoremap <unique> <LocalLeader>p <C-o>?<><CR><C-o>d2l
+inoremap <unique> <LocalLeader>n <C-o>/<><CR><C-o>d2l
+nnoremap <unique> <LocalLeader>p ?<><CR>c2l
+nnoremap <unique> <LocalLeader>n /<><CR>c2l
+
+inoremap <unique> <LocalLeader>s; ‘
+inoremap <unique> <LocalLeader>s' ’
+inoremap <unique> <LocalLeader>d; “
+inoremap <unique> <LocalLeader>d' ”
+inoremap <unique> <LocalLeader>\\ ＼
+
+" section sign
+inoremap <unique> <LocalLeader>ss §
+" pilcrow or paragraph mark
+inoremap <unique> <LocalLeader>sp ¶
+
 inoremap <unique> <LocalLeader>em —
 inoremap <unique> <LocalLeader>en –
 inoremap <unique> <LocalLeader>fig ‒
@@ -486,3 +490,17 @@ inoremap <unique> <LocalLeader>fig ‒
 " Insert two full-width spaces. NOTE: The following have whitespace after
 inoremap <unique> <LocalLeader>~ 　　
 inoremap <unique> ，～ 　　
+
+
+
+" Knowledge Management
+nnoremap <unique> <Leader>kt :edit <C-r>=system(
+    \"tmux.sh run-in-new-window km.sh tags -u 2>/dev/null")<CR><Del><CR>
+nnoremap <unique> <Leader>ki :edit <C-r>=system(
+    \"tmux.sh run-in-new-window km.sh incoming -u"
+    \ . " " . shellescape(expand("%:p")) . " 2>/dev/null")<CR><Del><CR>
+nnoremap <unique> <Leader>ko :edit <C-r>=system(
+    \"tmux.sh run-in-new-window km.sh outgoing -u"
+    \ . " " . shellescape(expand("%:p")) . " 2>/dev/null")<CR><Del><CR>
+nnoremap <unique> <Leader>kl :edit <C-r>=system(
+    \"tmux.sh run-in-new-window km.sh list -u 2>/dev/null")<CR><Del><CR>
