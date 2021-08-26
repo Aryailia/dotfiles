@@ -4,11 +4,6 @@
 "noremap <silent> <leader>4 :call PreviewClose()<CR>
 "noremap <silent> <leader>l :call PreviewSendLine('shellcheck ' . expand('%:p'))<CR>
 
-let b:ale_lint_on_text_changed = 'never'
-let b:ale_lint_on_insert_leave = 0
-let b:ale_lint_on_save = 1
-let b:ale_lint_on_enter = 0
-
 function! s:BuildBackground() abort
   write
   let b:build_background = 1
@@ -29,9 +24,9 @@ endfunction
 
 function! s:RunDefault() abort
   if b:build_background
-    silent !sh %
+    silent !python %
   else
-    vertical T sh %
+    vertical T python %
   endif
 endfunction
 
@@ -43,11 +38,9 @@ function! s:RunWithArguments(cmdline) abort
   endif
 endfunction
 
-function! s:Lint() abort
-  vertical T shellcheck %
-endfunction
+"function! Lint() abort
+"endfunction
 
 let b:Build = function('<SID>Build')
 let b:BuildBackground = function('<SID>BuildBackground')
 let b:Run = function('<SID>Run')
-let b:Lint = function('<SID>Lint')

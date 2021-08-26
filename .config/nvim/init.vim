@@ -201,17 +201,16 @@ function! RunCmdlineOverload(prefix, notfound, found)
   endif
 endfunction
 
-
-function! Lint()
+"function! Lint()
   "ALELint
-endfunction
+"endfunction
 
-noremap <unique> <silent> <Leader>1 :call BuildBackground()<CR>
-noremap <unique> <silent> <Leader>2 :call Build()<CR>
-noremap <unique> <silent> <Leader>3 :call Run()<CR>
+noremap <unique> <silent> <Leader>1 :call b:BuildBackground()<CR>
+noremap <unique> <silent> <Leader>2 :call b:Build()<CR>
+noremap <unique> <silent> <Leader>3 :call b:Run()<CR>
 noremap <unique> <silent> <Leader>4 <C-w><C-w>G<C-w><C-w>
 noremap <unique> <silent> <Leader>5 :vertical Tclose!<CR>
-noremap <unique> <silent> <Leader>l :call Lint()<CR>
+noremap <unique> <silent> <Leader>l :call b:Lint()<CR>
 imap <unique> <silent> <F1> <C-o><Leader>1
 imap <unique> <silent> <F2> <C-o><Leader>2
 imap <unique> <silent> <F3> <C-o><Leader>3

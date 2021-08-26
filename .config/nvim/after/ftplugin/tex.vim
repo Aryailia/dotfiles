@@ -1,25 +1,20 @@
-function! Build()
+function! s:Build() abort
   write
   vertical T compile.sh --temp % ; exit
 endfunction
 
-function! Run()
+function! s:Run() abort
   let l:path = $TMPDIR . '/' . expand('%:t:r') . '.pdf'
   if filereadable(l:path)
-    call Build()
+    call s:Build()
   endif
   call system('handle.sh --gui "' . l:path . '"')
-endfunction
-
-function! Close()
-  vertical T x
 endfunction
 
 "function! Lint()
 "endfunction
 
-
-function! GetPersonalInfo(key)
+function! GetPersonalInfo(key) abort
   let l:file = $DOTENVIRONMENT . "/name.yml"
   let l:entry = system("sed -n '/^" . a:key . ":/p' \"" . l:file . '"')
   let l:entry = substitute(l:entry, '\m^.*:\s*"', "", "")
@@ -58,3 +53,6 @@ inoremap <buffer> <LocalLeader>inithw
   \<CR>
   \\end{document}<CR>
   \<C-o>:setlocal nopaste<CR>
+
+let b:Build = function('<SID>Build')
+let b:Run = function('<SID>Run')

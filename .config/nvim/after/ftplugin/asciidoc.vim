@@ -1,14 +1,14 @@
-function! Build()
+function! s:Build() abort
   write
   vertical T compile.sh --temp %
 endfunction
 
-function! BuildBackground()
+function! s:BuildBackground() abort
   write
   silent !compile.sh --temp %
 endfunction
 
-function! Run()
+function! s:Run() abort
   " Probably should use the output of `compile.sh`
   let l:path = $TMPDIR . "/" . expand('%:t:r')
   if filereadable(l:path)
@@ -20,6 +20,9 @@ function! Run()
     \ . l:path . '.html" >/dev/null 2>&1&')
 endfunction
 
-
 "function! Lint()
 "endfunction
+
+let b:Build = function('<SID>Build')
+let b:BuildBackground = function('<SID>BuildBackground')
+let b:Run = function('<SID>Run')
