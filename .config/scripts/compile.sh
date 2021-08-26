@@ -38,30 +38,40 @@ main() {
   [ -z "${args}" ] && { show_help; exit 1; }
   eval "set -- ${args}"
 
-  for pathname in "$@"; do
+  for sourcepath in "$@"; do
     dir=""
     case "${OUTPUT}" in
-      "${ENUM_DEFAULT}")  dir="$( dirname "${pathname}"; printf a )"
+      "${ENUM_DEFAULT}")  dir="$( dirname "${sourcepath}"; printf a )"
                           dir="${dir%?a}" ;;
       "${ENUM_TEMPDIR}")  dir="${TMPDIR}" ;;
       #"${ENUM_SPECIFY}")  "" ;;
     esac
-    target="${pathname##*/}"
+    target="${sourcepath##*/}"
     target="${dir}/${target%.*}"
     case "${target}" in
       /*)  target="/.${target}" ;;
       *)   target="./${target}" ;;  # Chance for '//' but whatever
     esac
 
-    case "${pathname##*.}" in
-      tex)                      process_latex "${pathname}" "${target}" ;;
-      #tex)                      process_latex_with_tectonic "${pathname}" \
-      #  "${target}" ;;
-      ad|adoc|asciidoctor|asc)  process_adoc "${pathname}" "${target}" ;;
+    case "${sourcepath##*.}"
+      in tex)          process_latex "${sourcepath}" "${target}"
+      #;; tex)          process_latex_with_tectonic "${sourcepath}" "${target}"
+      ;; ad|adoc|asc)  process_adoc "${sourcepath}" "${target}"
+      ;; asciidoctor)  process_adoc "${sourcepath}" "${target}"
+      ;; md)           process_cmark "${sourcepath}" "${target}"
+
     esac
   done
 }
 
+process_cmark() {
+  <"$1" awk '
+    NR == 1 && $0 == "---" { frontmatter = 1; }
+    NR != 1 && $0 == "---" { frontmatter = 0; next; }
+    frontmatter == 1 { next; }
+    { print $0; }
+  ' | comrak --output "$2.html"
+}
 
 # First argument is path to source file
 # Second argument is path minus its extension with unique ././ or /./ prepended
