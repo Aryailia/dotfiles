@@ -2,9 +2,11 @@
 case "${1}"
   in "ctrl super a ; super Return") st -e tmux.sh open 
   ;; "shift super a") fcitx-remote -o 
-  ;; "super c ; super c") asdf="$( dmenu -p "Write to clipboard:" )"
-  printf %s "${asdf}" | clipboard.sh --write 
+  ;; "super c ; super b") $TERMINAL -t 'fullscreen_overlay' -e sh -c 'browser.sh print  bookmark | setsid clipboard.sh -w' 
+  ;; "super c ; super c") printf %s '' | dmenu -p "Write to clipboard:" | setsid clipboard.sh --write 
   ;; "super c ; super e") $TERMINAL -t 'fullscreen_overlay' -e sh -c 'setsid clipboard.sh -w "$(<~/.config/emoji fzf | cut -d " " -f 1)"' 
+  ;; "super c ; super g") $TERMINAL -t 'fullscreen_overlay' -e sh -c 'browser.sh print  link | setsid clipboard.sh -w' 
+  ;; "super c ; super s") $TERMINAL -t 'fullscreen_overlay' -e sh -c 'browser.sh print search | setsid clipboard.sh -w' 
   ;; "super g ; super a") handle.sh gui --file "$DOTENVIRONMENT/notes/cheatsheets/asciidoc-syntax-quick-reference.pdf" 
   ;; "super g ; super b") $TERMINAL -t 'fullscreen_overlay' -e sh -c 'tmux.sh open browser.sh menu  bookmark' 
   ;; "super g ; super e") handle.sh gui --file "$DOTENVIRONMENT/notes/cheatsheets/emacs_cheatsheet.pdf" 

@@ -32,7 +32,7 @@ cmd open ${{
         printf %s\\n "${file}"
       done | setsid sxiv -ai >/dev/null 2>&1& ;;
 
-    *) printf %s "${fx}" | xargs-split.pl '\n/\./' '/' handle.sh --file --gui ;;
+    *) printf %s "${fx}" | xargs-split.pl '\n/\./' '/' handle.sh gui --file ;;
   esac
 }}
 
@@ -117,8 +117,8 @@ map E $aunpack "${f}"
 map r prompt-rename
 # Prepend '/.' since ${filesep} acts like a join
 map R $batch-rename.sh --relative-path-to '.' --direct "/.${fx}"
-map o $handle.sh --file --terminal "${f}"
-map O &handle.sh --file --gui "${f}"
+map o $handle.sh terminal --file "${f}"
+map O &handle.sh gui --file "${f}"
 map D $rm -rf "$f"
 # This cannot deal with files with newlines
 map L $for a in $( lf -remote load | sed -e '1d' ); do ln -s "$a" ./; done

@@ -155,8 +155,11 @@ mode "C+M+a" {
 }
 
 mode "M+c" {
+  bindsym Mod4+b exec --no-startup-id "shortcuts.sh 'super c ; super b'"; mode "default"
   bindsym Mod4+c exec --no-startup-id "shortcuts.sh 'super c ; super c'"; mode "default"
   bindsym Mod4+e exec --no-startup-id "shortcuts.sh 'super c ; super e'"; mode "default"
+  bindsym Mod4+g exec --no-startup-id "shortcuts.sh 'super c ; super g'"; mode "default"
+  bindsym Mod4+s exec --no-startup-id "shortcuts.sh 'super c ; super s'"; mode "default"
   bindsym Escape mode "default"
 }
 
