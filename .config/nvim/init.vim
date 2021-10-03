@@ -309,6 +309,24 @@ function ListUrls() abort
   execute l:current_window_id . 'wincmd w'
 endfunction
 
+function ExpandCFileWithSuffix() abort
+  for l:ext in split(&suffixesadd, ",")
+    let l:path = expand('<cfile>:p') . l:ext
+    if filereadable(l:path)
+      return l:path
+    endif
+  endfor
+  return ""
+endfunction
+
+vnoremap <unique> <silent> <Leader>ot y:call system(
+  \"$TERMINAL -e handle.sh terminal --file " . @")<CR>
+nnoremap <unique> <silent> <Leader>ot :call system(
+  \"$TERMINAL -e handle.sh terminal --file " . ExpandCFileWithSuffix())<CR>
+vnoremap <unique> <silent> <Leader>og
+  \ y:call system("handle.sh gui --file " . @")<CR>
+nnoremap <unique> <silent> <Leader>og
+  \ :call system("handle.sh gui --file " . ExpandCFileWithSuffix())<CR>
 nnoremap <unique> <Leader>;l :call ListUrls()<CR>
 
 " ==============================================================================
