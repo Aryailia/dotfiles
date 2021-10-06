@@ -1,0 +1,28 @@
+# 'directory:' means include as directory, these are string literals
+# 'ignore:'    means skip, these are Perl regular expressions with
+#              the /x (ignore whitespace) flag,
+
+###
+# String literals that will exact match (no trailing slash)
+directory:.config/scripts
+directory:.config/nvim/after
+directory:.config/snippets
+
+###
+# Perl regexp with m/.../x flag but no newlines
+
+# All '.configlinker' probably want this
+ignore: \A       \.linkerconfig \z
+ignore: \A       \.git          \z #Folder
+ignore: \A       \.gitignore    \z
+ignore: \A       \.git_template \z #Folder
+ignore:          .*\.swp        \z
+ignore: (?:\A|/) .stfolder      \z #Folder
+ignore: (?:\A|/) .stversions    \z #Folder
+ignore: (?:\A|/) README.md      \z
+
+# Directory-specific
+ignore: \A       linker\.pl     \z
+ignore: \A       share          \z #Folder
+ignore: \A       install        \z #Folder
+ignore: \A       LICENSE        \z
