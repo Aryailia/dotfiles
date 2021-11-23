@@ -2,81 +2,119 @@
 #https://github.com/gokcehan/lf
 #https://godoc.org/github.com/gokcehan/lf
 
+# $f  : file under cursor
+# $fs : selected file list, seperated by {filesep}
+# $fx : $fs, but includes $f if no files are selected
+
+# ':' means lf commands
+# '%' means ??, redirect STDOUT to lf echoerr message?
+# '$' means shell commands
+# '!' means run shell command, see main screen for terminal, and do a `read -r`
+
 set shell sh
 set shellopts '-eu'  # '-e' exit on error, '-u' error on unset variables
 set previewer ~/.config/lf/preview.sh
 
 # All pathnames seem to be given as absolute paths, thus
-set filesep "\n/."  # Make pathnames unique (www.etalabs.net/sh_tricks.html)
+set filesep "\n/./"  # Make pathnames unique (www.etalabs.net/sh_tricks.html)
 set ifs "\n"        # Sets ${IFS} for shell commands
 set scrolloff 10    # Scroll offset, leave space at top/bottom of screen
 set hidden on
+set icons on
+
+################################################################################
+# Overwite default commands
 
 # Commands
 cmd open ${{
-  mimetype() { file --mime-type --brief "$1"; }
-  NEWLINE='
-'
-  case "$( mimetype "${f}" )" in
-    text/troff*)  man ./ "${f}" ;;
-    text/* ) "${EDITOR}" "${f}" ;;
-    image/* )
-      dir="$( dirname "$f"; printf a )"; dir="${dir%?a}"
-      for file in "${dir}"/* "${dir}"/.[!.]* "${dir}"/..?*; do
-        [ ! -e "${file}" ] && continue
-        # Skip files with newlines
-        [ "${file}" != "${file##*"${NEWLINE}"*}" ] && continue
-        # Skip non-images
-        case "$( mimetype "${file}" )" in image/* ) ;; *) continue ;; esac
-
-        printf %s\\n "${file}"
-      done | setsid sxiv -ai >/dev/null 2>&1& ;;
-
-    *) printf %s "${fx}" | xargs-split.pl '\n/\./' '/' handle.sh gui --file ;;
-  esac
+  notify.sh "Use e, o, or O. Edit this if you ever need to open multiple files at once."
+#  mimetype() { file --mime-type --brief "$1"; }
+#  NEWLINE='
+#'
+#  case "$( mimetype "${f}" )" in
+#    text/troff*)  man ./ "${f}" ;;
+#    text/* ) "${EDITOR}" "${f}" ;;
+#    image/* )
+#      dir="$( dirname "$f"; printf a )"; dir="${dir%?a}"
+#      for file in "${dir}"/* "${dir}"/.[!.]* "${dir}"/..?*; do
+#        [ ! -e "${file}" ] && continue
+#        # Skip files with newlines
+#        [ "${file}" != "${file##*"${NEWLINE}"*}" ] && continue
+#        # Skip non-images
+#        case "$( mimetype "${file}" )" in image/* ) ;; *) continue ;; esac
+#
+#        printf %s\\n "${file}"
+#      done | setsid sxiv -ai >/dev/null 2>&1& ;;
+#
+#    *) printf %s "${fx}" | split-as-args.pl '\n/\./' '/' handle.sh gui --file ;;
+#  esac
 }}
 
 # rename current file without overwrite
-cmd rename %[ -e "${1}" ] && printf "file exists" || mv "${f}" "${1}"
+cmd rename %[ -e "${1}" ] && printf %s "File '${1}' exists" || mv -- "${f}" "${1}"
 cmd prompt-rename ${{
-   # Delete `basename` added "\n", add 'a' as awk deletes trailing input "\n"
+   # `printf a` preserves the newline dash/bash strip in during `$( ... )`
    name="$( basename "${f}"; printf a )"; name="${name%?a}"
    newline="$( printf \\na )"; newline="${newline%a}"
-   if [ "${name}" != "${name#*${newline}*}" ]; then
+
+   if [ "${name}" != "${name#*"${newline}"}" ]; then
      lf -remote "send ${id} echoerr Contains newline(s), use 'R' instead"
    else
+     # Special case ' ', '\', and ';'
      name="$( printf %sa "${name}" | awk -v FS='' -v RS='' '
-       # One-line escape for dash/bash and probably others?
-       # lf-shell needs not single-quote and /[&"|*]/ escaped
-       { gsub(/[;]/, "'"'&'"'"); }  # Breaks lf-shell if backslashed
-       { gsub(/[\\]/, "\\\\&"); }  # \\\\& just needs four "\"
-       { gsub(/ /, "\\<space>"); }  # `push` needs " " converted to "<space>"
+       { gsub(/[\\;]/, "\\\\&"); }  # Escape "\" and ";", & is special in awk
+       { gsub(/ /, "<space>"); }  # `push` needs " " converted to "<space>"
        { printf("%s", $0); }
-     ')"
+     ' )"
      name="${name%a}"  # And remove the perserver character
      lf -remote "send ${id} push :rename<space>${name}"
    fi
 }}
 
 cmd jumpto $lf -remote "send ${id} cd '$( namedpath.sh -i )'"
-cmd delete ${{
-  #printf %s\\n "${fx}" | xargs-split.sh \
-  #  "$( printf \\n/./ )" sh -c 'trash "/$1"' _
-  printf %s "${fx}" | xargs-split.pl '\n/\./' '/' trash
-}}
+cmd delete %printf %s "${fx}" | split-as-args.pl '\n/\./' '/' trash
+# Copy/Move to a named directory
 cmd copyto ${{
-  destination="$( PROMPT='Copy > ' print-shortcut.sh )" || exit 1
-  [ -d "${destination}" ] || exit 1
-  printf %s "${fx}" | xargs-split.pl '\n/\./' '/' \
-    sh -c 'for file in "$@"; do cp -ivr "${file}" "'"${destination}"'"; done' _
+  destination="$( namedpath.sh -i )" || exit "$?"
+  [ -d "${destination}" ]  || exit 1
+
+  printf %s "${fx}" | split-as-args.pl '\n/\./' '' sh -c '
+    destination="${1}"; shift 1
+    for f in "$@"; do
+      name="${f##*/}"
+      if [ -e "${destination}/${name}" ]
+        then notify.sh "The destination \"${destination}/${name}\" already exists"
+        else cp -r -- "${f}" "${destination}/${name}"
+      fi
+    done
+  ' _ "${destination}"
+
   notify.sh "📋 File(s) copied to '${destination}'"
 }}
+
 cmd moveto ${{
-  destination="$( PROMPT='Move > ' print-shortcut.sh )" || exit 1
-  [ -d "${destination}" ] || exit 1
-  printf %s "${fx}" | xargs-split.pl '\n/\./' '/' \
-    sh -c 'for file in "$@"; do mv -iv "${file}" "'"${destination}"'"; done' _
-  notify.sh "🚚 File(s) moved to '${destination}'"
+  destination="$( namedpath.sh -i )" || exit "$?"
+  [ -d "${destination}" ]  || exit 1
+  count="$( printf %s "${fx}" | split-as-args.pl '\n/\./' '' sh -c 'printf %s $#' _ )"
+
+  printf %s "${fx}" | split-as-args.pl '\n/\./' '' sh -c '
+    destination="${1}"; shift 1
+    for f in "$@"; do
+      name="${f##*/}"
+      if [ -e "${destination}/${name}" ]
+        then notify.sh "The destination \"${destination}/${name}\" already exists"
+        else mv -- "${f}" "${destination}/${name}"
+      fi
+    done
+  ' _ "${destination}"
+
+  after="$( printf %s "${fx}" | split-as-args.pl '\n/\./' '' sh -c '
+    count=0
+    for f in "$@"; do [ -e "${f}" ] && count="$(( count + 1 ))"; done
+    printf %s "${count}"
+  ' _ )"
+
+  notify.sh "🚚 $(( count - after )) file(s) moved to '${destination}'. ${count} item(s) were selected."
 }}
 
 #cmd paste %{{
@@ -91,12 +129,14 @@ cmd moveto ${{
 #   lf -remote 'send load'
 #   lf -remote 'send clear'
 #}}
-map t ${{
+
+# Test
+map T ${{
   notify.sh "$(
     printf %s\\n \
-      "f:  $f" \
-      "fs: $fs" \
-      "fx: $fx" \
+      "f:  |$f|" \
+      "fs: |$fs|" \
+      "fx: |$fx|" \
     | tee /dev/stderr
   )"
 }}
@@ -112,9 +152,9 @@ map t ${{
 #map C $mv -i "$f" "$(print-shortcut.sh || exit 1)"
 
 # Bindings
-map <esc> clear
-map E $aunpack "${f}"
+map <esc> :clear;unselect;reload
 map r prompt-rename
+map t delete
 # Prepend '/.' since ${filesep} acts like a join
 map R $batch-rename.sh --relative-path-to '.' --direct "/.${fx}"
 map o $handle.sh terminal --file "${f}"
@@ -124,8 +164,7 @@ map D $rm -rf "$f"
 map L $for a in $( lf -remote load | sed -e '1d' ); do ln -s "$a" ./; done
 #map <c-l> $handle.sh --file --gui "${f}"
 map <enter> shell  # enter shell
-map x $${f}        # run executable
-map X !${f}        # run executable and wait for key press
+map x $aunpack "${f}"
 map Y copyto
 map c jumpto
 map M moveto

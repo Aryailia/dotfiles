@@ -90,7 +90,7 @@ main() {
     ;; g*)  COMMAND="${CMD_GUI}"
     ;; p*)  COMMAND="${CMD_PREVIEW}"
     ;; e*)  COMMAND="${CMD_EDIT}"
-    ;; *)   die FATAL "${CODE_NOPREVIEW}" "invalid subcommand" "\`$*\`"
+    ;; *)   die FATAL "${CODE_NOPREVIEW}" "invalid subcommand" '`'"$*"'`'
   esac
 
   [ "$#" != 2 ] && die FATAL 1 \
@@ -184,7 +184,10 @@ handle_extension() {
       p "${CODE_STDOUT}" 7z l -p -- "${1}"
       exit_message 'extension' "${CODE_NOPREVIEW}"  # do not fallback
 
-    # PDF
+    ;; epub)
+      g_launch "${CODE_NOPREVIEW}" zathura -- "${1}"
+      p        "${CODE_STDOUT}" exiftool "${1}"
+
     ;; pdf)
       # Preview as text conversion
       t        "${CODE_NOPREVIEW}" \
@@ -208,7 +211,7 @@ handle_extension() {
     # p "${CODE_STDOUT}" odt2txt "${1}"
     #  exit "${CODE_NOPREVIEW}"
 
-    ;; doc|docx|xls|xlsx)
+    ;; doc|docx|xls|xlsx|ppt|pptx|ods)
       g_launch "${CODE_NOPREVIEW}" libreoffice "${1}"
 
     # HTML
