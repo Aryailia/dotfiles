@@ -99,6 +99,12 @@ alias  mntu='sh -c '\''
   [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; };
   sudo mount -o "uid=$( id -u ),gid=$( id -g )" "/dev/$1" -- "$2";
 '\'' _'
+alias  mntn='sh -c '\''
+  [ "$#" = 0 ] && { echo "mntu <sd??> <path>"; lsblk; exit 1; }
+  [ -e "/dev/$1" ] || { printf %s\\n "Device not found"; exit 1; };
+  [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; };
+  sudo mount -t ntfs -o "uid=$( id -u),gid=$( id -g ),rw,auto,user,fmask=0133,dmask=0000" "/dev/$1" -- "$2";
+'\'' _'
 alias    pm='package-manager.sh'
 alias     r='trash'
 alias   rhk='pkill -USR1 sxhkd; i3-msg reload'  # `sxhkd` updates on usr1 signal
