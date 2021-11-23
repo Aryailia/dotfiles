@@ -193,13 +193,18 @@ vmap <unique> <C-l> <Esc><Plug>SelectNextURI
 " ==============================================================================
 " Build(), Run(), Lint() are defined in filetype for customisation
 function! RunCmdlineOverload(prefix, notfound, found)
-  let l:overload = searchpos('\m' . a:prefix, 'nw')
+  let l:overload = searchpos(a:prefix, 'nw')
   if l:overload[0] == 0
     call a:notfound()
   else
+    let l:path = substitute(expand('%'), '\m%', '@B', '')
     let l:cmd = getline(l:overload[0])
     let l:cmd = substitute(l:cmd, a:prefix, '', '')
-    let l:cmd = substitute(l:cmd, '%', expand('%'), '')
+    let l:cmd = substitute(l:cmd, '\m@', '@A', 'g')
+    let l:cmd = substitute(l:cmd, '\m%%', '@B', 'g')
+    let l:cmd = substitute(l:cmd, '\m%', l:path, 'g')
+    let l:cmd = substitute(l:cmd, '\m@B', '%', 'g')
+    let l:cmd = substitute(l:cmd, '\m@A', '@', 'g')
     call a:found(l:cmd)
   endif
 endfunction
