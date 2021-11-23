@@ -52,7 +52,7 @@ if ! has("gui_running")
   set guicursor=
 endif
 
-autocmd FileType * setlocal formatoptions-=cro formatoptions+=j
+autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o formatoptions+=j
 set nrformats-=octal  " Leading 0s are not recognised as octals
 set formatoptions+=j  " Delete comment leaders when joining lines
 set formatoptions-=c  " Do not auto-wrap comments when exceeding textwidth
@@ -79,6 +79,7 @@ set shiftwidth=2   " Indent with two spaces
 highlight HighlightedWhitespace ctermbg=Grey guibg=Grey
 call matchadd('HighlightedWhitespace', '\t')
 call matchadd('HighlightedWhitespace', '\s\+$')
+call matchadd('HighlightedWhitespace', '　\+$')
 
 
 " Wildmenu settings; see also plugin/wildignore.vim
@@ -348,13 +349,13 @@ nnoremap <unique> <Leader>rn :LspRename<CR>
 " e for error
 nnoremap <unique> yoe :call ToggleVimLsp()<CR>
 
-nnoremap <unique> gr <plug>(lsp-references)
-nnoremap <unique> gt <plug>(lsp-type-definition)
-nnoremap <unique> gi <plug>(lsp-implementation)
-nnoremap <unique> gd <plug>(lsp-definition)
-nnoremap <unique> [g <plug>(lsp-previous-diagnostic)
-nnoremap <unique> ]g <plug>(lsp-next-diagnostic)
-nnoremap <unique> K <plug>(lsp-hover)
+nnoremap <unique> gr :LspReferences<CR>
+nnoremap <unique> gt :LspTypeDefinition<CR>
+nnoremap <unique> gi :LspImplementation<CR>
+nnoremap <unique> gd :LspDefinition<CR>
+nnoremap <unique> [g :LspPreviousDiagnostic<CR>
+nnoremap <unique> ]g :LspNextDiagnostic<CR>
+nnoremap <unique> K  :LspHover<CR>
 
 " Spelling
 nnoremap <unique> <Leader>sus :set spelllang=en_US,cjk<CR>
@@ -383,40 +384,40 @@ if executable('rls')
   "\ })
 endif
 
-if executable('vim-language-server')
-  " npm install --global vim-languageserver
-  augroup LspVim
-    autocmd!
-    autocmd User lsp_setup call lsp#register_server({
-      \ 'name': 'vim-language-server',
-      \ 'cmd': { server_info->['vim-language-server', '--stdio'] },
-      \ 'whitelist': ['vim'],
-      \ 'initialization_options': {
-        \ 'vimruntime': $VIMRUNTIME,
-        \ 'runtimepath': &rtp,
-      \ }
-    \ })
-endif
-
-if executable('javascript-typescript-stdio')
-  " sudo npm install --global vscode-css-languageserver-bin
-  au User lsp_setup call lsp#register_server({
-    \ 'name': 'sourcegraph-typescript-javascript',
-    \ 'cmd': { server_info->['javascript-typescript-stdio'] },
-    \ 'whitelist': ['javascript', 'typescript', 'typescript.tsx'],
-  \ })
-endif
-
-" sudo npm install --global vscode-html-langserver-bin
-
-if executable('css-languageserver')
-  " sudo npm install --global vscode-css-languageserver-bin
-  au User lsp_setup call lsp#register_server({
-    \ 'name': 'vscode-css',
-    \ 'cmd': { server_info->['css-languageserver', '--stdio'] },
-    \ 'whitelist': ['css', 'less', 'sass'],
-  \ })
-endif
+"if executable('vim-language-server')
+"  " npm install --global vim-languageserver
+"  augroup LspVim
+"    autocmd!
+"    autocmd User lsp_setup call lsp#register_server({
+"      \ 'name': 'vim-language-server',
+"      \ 'cmd': { server_info->['vim-language-server', '--stdio'] },
+"      \ 'whitelist': ['vim'],
+"      \ 'initialization_options': {
+"        \ 'vimruntime': $VIMRUNTIME,
+"        \ 'runtimepath': &rtp,
+"      \ }
+"    \ })
+"endif
+"
+"if executable('javascript-typescript-stdio')
+"  " sudo npm install --global vscode-css-languageserver-bin
+"  au User lsp_setup call lsp#register_server({
+"    \ 'name': 'sourcegraph-typescript-javascript',
+"    \ 'cmd': { server_info->['javascript-typescript-stdio'] },
+"    \ 'whitelist': ['javascript', 'typescript', 'typescript.tsx'],
+"  \ })
+"endif
+"
+"" sudo npm install --global vscode-html-langserver-bin
+"
+"if executable('css-languageserver')
+"  " sudo npm install --global vscode-css-languageserver-bin
+"  au User lsp_setup call lsp#register_server({
+"    \ 'name': 'vscode-css',
+"    \ 'cmd': { server_info->['css-languageserver', '--stdio'] },
+"    \ 'whitelist': ['css', 'less', 'sass'],
+"  \ })
+"endif
 
 " ==============================================================================
 " vim-lsp enable/disable/init stuff
