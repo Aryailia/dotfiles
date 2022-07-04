@@ -258,6 +258,7 @@ local_handle_mime() {
 
     # Video and audio
     ;; video/* | audio/* | application/octet-stream)
+      t        "${CODE_NOPREVIEW}" mpv "${1}"
       g        "${CODE_NOPREVIEW}" mpv "${1}"
       p        "${CODE_NOPREVIEW}" exiftool "${1}"
       #p        "${CODE_NOPREVIEW}" mediainfo "${1}"
