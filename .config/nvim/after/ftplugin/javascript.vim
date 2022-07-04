@@ -33,7 +33,7 @@ function! s:RunWithArguments(cmdline) abort
 endfunction
 
 function! s:Run() abort
-  call s:RunCmdlineOverload(s:cmdline_prefix_regexp,
+  call RunCmdlineOverload(s:cmdline_prefix_regexp,
     \function('<SID>RunDefault'), function('<SID>RunWithArguments'))
 endfunction
 

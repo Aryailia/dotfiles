@@ -70,7 +70,7 @@ process_cmark() {
     NR != 1 && $0 == "---" { frontmatter = 0; next; }
     frontmatter == 1 { next; }
     { print $0; }
-  ' | comrak --output "$2.html"
+  ' | comrak --unsafe --output "$2.html"
 }
 
 # First argument is path to source file

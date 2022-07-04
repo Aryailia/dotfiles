@@ -1,11 +1,11 @@
-function! s:Build() abort
-  write
-  vertical T compile.sh --temp %
-endfunction
-
 function! s:BuildBackground() abort
   write
   silent !compile.sh --temp %
+endfunction
+
+function! s:Build() abort
+  write
+  vertical T compile.sh --temp %
 endfunction
 
 function! s:Run() abort

@@ -15,6 +15,7 @@ call plug#begin($VIMDOTDIR . '/package')
   Plug 'aryailia/vim-markdown-toc'  " Table of contents woo
   Plug 'godlygeek/tabular'          " Primarily for markdown table formatting
   Plug 'kassio/neoterm'             " Terminal for vim and neovim
+  Plug 'skywind3000/asyncrun.vim'   " Run scripts in the background async
   Plug 'rlue/vim-barbaric'          " Swap IME on entering insert mode
 
   "Plug 'dpelle/vim-LanguageTool'    " LanguageTool
@@ -186,6 +187,7 @@ nmap <unique> <C-l> <Plug>SelectNextURI
 imap <unique> <C-l> <C-o><Plug>SelectNextURI
 vmap <unique> <C-l> <Esc><Plug>SelectNextURI
 
+
 " Cannot have <CR> and <C-m> mapped to different things (99% sure)
 "inoremap <unique> <C-m> <C-o>o
 
@@ -316,13 +318,18 @@ function ListUrls() abort
 endfunction
 
 function ExpandCFileWithSuffix() abort
+  let l:path = expand('<cfile>:p')
+  let l:path = substitute(l:path, '\\', '\\\\', 'g')
+  let l:path = substitute(l:path, '"', '\\"', 'g')
+  "echo "sh -c 'printf %s \"" . l:path . "\"'"
+  let l:path = system("sh -c 'printf %s \"" . l:path . "\"'")
   for l:ext in split(&suffixesadd, ",")
-    let l:path = expand('<cfile>:p') . l:ext
-    if filereadable(l:path)
-      return l:path
+    let l:path_with_ext = l:path . l:ext
+    if filereadable(l:path_with_ext)
+      return l:path_with_ext
     endif
   endfor
-  return ""
+  return l:path
 endfunction
 
 vnoremap <unique> <silent> <Leader>ot y:call system(
@@ -516,15 +523,14 @@ inoremap <unique> <LocalLeader>~ 　　
 inoremap <unique> ，～ 　　
 
 
-
 " Knowledge Management
 nnoremap <unique> <Leader>kt :edit <C-r>=system(
-    \"tmux.sh run-in-new-window km.sh tags -u 2>/dev/null")<CR><Del><CR>
+    \"tmux.sh run-in-new-window zet.sh tags -u 2>/dev/null")<CR><Del><CR>
 nnoremap <unique> <Leader>ki :edit <C-r>=system(
-    \"tmux.sh run-in-new-window km.sh incoming -u"
+    \"tmux.sh run-in-new-window zet.sh incoming -u"
     \ . " " . shellescape(expand("%:p")) . " 2>/dev/null")<CR><Del><CR>
 nnoremap <unique> <Leader>ko :edit <C-r>=system(
-    \"tmux.sh run-in-new-window km.sh outgoing -u"
+    \"tmux.sh run-in-new-window zet.sh outgoing -u"
     \ . " " . shellescape(expand("%:p")) . " 2>/dev/null")<CR><Del><CR>
 nnoremap <unique> <Leader>kl :edit <C-r>=system(
-    \"tmux.sh run-in-new-window km.sh list -u 2>/dev/null")<CR><Del><CR>
+    \"tmux.sh run-in-new-window zet.sh list -u 2>/dev/null")<CR><Del><CR>

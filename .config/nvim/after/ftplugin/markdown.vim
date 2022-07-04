@@ -1,3 +1,5 @@
+let s:cmdline_prefix_regexp = '<!--run:'
+
 " autocmd FileType markdown noremap <F2> :call PreviewSendLine('pandoc | lynx -stdin')<CR>
 " autocmd FileType markdown noremap <F3> :call PreviewOpenWindow(terminal_execute)<CR>
 " nnoremap <F2> :silent w !pandoc -o /tmp/preview.pdf<CR>
@@ -19,18 +21,29 @@
 "  \ # Table of Contents<C-o>:GenTocCommonMark<CR>
 "  \<C-o>o
 
-" The same as 'asciidoc.vim'
-function! s:Build() abort
-  write
-  vertical T compile.sh --temp %
-endfunction
 
+" Maintain parity with 'asciidoc.vim'
 function! s:BuildBackground() abort
   write
   silent !compile.sh --temp %
 endfunction
 
+function! s:Build() abort
+  call RunCmdlineOverload(s:cmdline_prefix_regexp,
+    \function('s:BuildDefault'), function('s:RunWithArguments'))
+endfunction
+
+function! s:BuildDefault() abort
+  write
+  vertical T compile.sh --temp %
+endfunction
+
 function! s:Run() abort
+  call RunCmdlineOverload(s:cmdline_prefix_regexp,
+    \function('s:RunDefault'), function('s:RunWithArguments'))
+endfunction
+
+function! s:RunDefault() abort
   " Probably should use the output of `compile.sh`
   let l:path = $TMPDIR . "/" . expand('%:t:r') . ".html"
   if !filereadable(l:path)
@@ -40,6 +53,10 @@ function! s:Run() abort
   " `falkon` has live reload
   call system('falkon --private-browsing --no-extensions --new-window '
     \ . shellescape(l:path) . ' >/dev/null 2>&1&')
+endfunction
+
+function! s:RunWithArguments(cmdline) abort
+  execute('vertical T ' . a:cmdline)
 endfunction
 
 "function! Lint()

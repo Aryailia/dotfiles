@@ -1,8 +1,7 @@
-let s:cmdline_prefix_regexp = '%run:'
+let s:cmdline_prefix_regexp = '<!--run:'
 
 function! s:BuildBackground() abort
-  write
-  silent !build.sh background --temp % &
+  AsyncRun build.sh build --temp %
   "call system('build.sh build --temp ' . shellescape(expand("%:p")) . ' &')
 endfunction
 
