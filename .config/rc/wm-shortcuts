@@ -63,7 +63,11 @@
 # clipboard.sh seems to need setsid after `$TERMINAL -e`
 # browser.sh seems to need 'nohup' and 'setsid' after 'exec' (interior details)
 |super g ; super {{s, b, g}}| $TERMINAL -t 'fullscreen_overlay' -e sh -c 'tmux.sh open browser.sh menu {{search, bookmark, link}}'
-|super c ; super {{s, b, g}}| $TERMINAL -t 'fullscreen_overlay' -e sh -c 'browser.sh print {{search, bookmark, link}} | setsid clipboard.sh -w'
+|super c ; super {{s, b, g}}| $TERMINAL -t 'fullscreen_overlay' -e sh -c '
+  url="$( browser.sh print {{search, bookmark, link}}; printf a )"
+  url="${url%a}" # preserve and cut the $() newline shreding
+  setsid clipboard.sh -w "${url}"
+  '
 
 |super g ; super {{a, e}}| handle.sh gui --file "$DOTENVIRONMENT/notes/cheatsheets/{{asciidoc-syntax-quick-reference.pdf,emacs_cheatsheet.pdf}}"
 |super + c ; super + e| $TERMINAL -t 'fullscreen_overlay' -e sh -c 'setsid clipboard.sh -w "$(<~/.config/emoji fzf | cut -d " " -f 1)"'

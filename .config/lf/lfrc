@@ -67,7 +67,7 @@ cmd prompt-rename ${{
        { printf("%s", $0); }
      ' )"
      name="${name%a}"  # And remove the perserver character
-     lf -remote "send ${id} push :rename<space>${name}"
+     lf -remote "send ${id} push :rename<space>\"${name}\""
    fi
 }}
 
@@ -160,6 +160,7 @@ map R $batch-rename.sh --relative-path-to '.' --direct "/.${fx}"
 map o $handle.sh terminal --file "${f}"
 map O &handle.sh gui --file "${f}"
 map D $rm -rf "$f"
+map w $clipboard.sh -w "$f"
 # This cannot deal with files with newlines
 map L $for a in $( lf -remote load | sed -e '1d' ); do ln -s "$a" ./; done
 #map <c-l> $handle.sh --file --gui "${f}"
