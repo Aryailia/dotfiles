@@ -18,8 +18,12 @@ export npm_config_userconfig="$XDG_CONFIG_HOME/rc/npmrc"
 export npm_config_cache="$XDG_DATA_HOME/npm"
 export npm_config_prefix="$HOME/.local" # No XDG var for ~/.local
 export NODE_REPL_HISTORY=''
-export CARGO_HOME="$HOME/.local/lib/cargo"
-export RUSTUP_HOME="$HOME/.local/bin/rustup"
+export CARGO_HOME="$HOME/.local/lib/cargo"   # For source files
+export CARGO_INSTALL_ROOT="$HOME/.local"     # For binaries
+export RUSTUP_HOME="$HOME/.local/lib/rustup" # Rustup source files
+export GOPATH="$HOME/.local"                 # Go adds './lib/go'
+export GOBIN="$HOME/.local/bin"              # For binaries
+export R_HISTFILE="/dev/null"
 export GEM_HOME="$HOME/.local/lib/gem"
 export GEM_PATH="$GEM_HOME"
 export GEM_SPEC_CACHE="$XDG_CACHE_HOME/lib/gem"
@@ -61,6 +65,9 @@ printf %s\\n ":$PATH:" | grep -q ":$HOME/.local/bin:" \
   || export PATH="$PATH:$HOME/.local/bin"
 printf %s\\n ":$PATH:" | grep -q ":$CARGO_HOME/bin:" \
   || export PATH="$PATH:$CARGO_HOME/bin"
+test -d /opt/texlive/2021/bin/x86_64-linux/ \
+  && export PATH="$PATH:/opt/texlive/2021/bin/x86_64-linux/"
+
 
 # Folders
 export DOTENVIRONMENT="$HOME/.environment"

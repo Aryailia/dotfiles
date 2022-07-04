@@ -9,9 +9,9 @@ first="$( if [ "${1}" = "-" ]; then
 )"; first="${first%a}"
 shift 1  # ${first} eats the first argument
 
-if [ -n "${DISPLAY}" ]; then
+if [ -n "${DISPLAY}" ] && command -v "notify-send" 2>&1 >/dev/null; then
   notify-send "${first}" "$@"
-elif [ -n "$TMUX" ]; then
+elif [ -n "${TMUX}" ]; then
   tmux display-message "${first}" "$@"
 else
   printf %s "${first}" >&2

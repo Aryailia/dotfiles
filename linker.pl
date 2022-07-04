@@ -25,8 +25,7 @@ use Cwd 'realpath';
 use File::Basename 'dirname';
 
 my $LINKER_CONFIG = '.linkerconfig';
-my $DESCRIPTION = <<EOF ;
-
+my $DESCRIPTION = <<EOF;
   This deploys this \$dotfiles directory (the directory that this file resides
   in) and the \$DOTENVIRONMENT directory, with the same file structure,
   by symlinks those into '--output DIR' (which defaults to \$HOME).
@@ -120,7 +119,7 @@ sub main {
   my $i = 0;
 
   while ($i < $#$opts) {
-    if    ($opts->[$i] eq $valid_opt{'h'}) { show_help("short"); exit 1; }
+    if    ($opts->[$i] eq $valid_opt{'h'}) { show_help("long"); exit 1; }
     elsif ($opts->[$i] eq $valid_opt{'v'}) { $CONFIG{'verbose'} = 1; }
     elsif ($opts->[$i] eq $valid_opt{'o'}) { $CONFIG{'output'} = $opts->[$i+1]; }
     elsif ($opts->[$i] eq $valid_opt{'c'}) { $CONFIG{'level'} = $CAUTIOUS; }
@@ -128,6 +127,11 @@ sub main {
     else { die "DEV: Did not handle --$OPTIONS[$opts->[$i+1]][$LONG]"; }
 
     $i += 2;
+  }
+  if (scalar(@$args) > 0) {
+    say STDERR "No arguments expected";
+    show_help("short");
+    exit 1;
   }
 
   ######
@@ -446,10 +450,14 @@ sub parse_args {
       my $index = $valid_options{$o};
 
       if (not exists $valid_options{$o} or not defined $valid_options{$o}) {
-        die "FATAL: Invalid option '" . (length($o) <= 1 ? "-$o" : "--$o") . "'";
+        say STDERR "FATAL: Invalid option '" . (length($o) <= 1 ? "-$o" : "--$o") . "'";
+        show_help("short");
+        exit 1;
       } elsif ($OPTIONS[$index][$TAKE_ARG]) {
         if ($i != $#to_check) {
-          die "FATAL: Option '$o' takes an argument";
+          say STDERR "FATAL: Option '$o' takes an argument";
+          show_help("short");
+          exit 1;
         } else {
           push @opts, $index;
           push @opts, decode_utf8(shift(@_));

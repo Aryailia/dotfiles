@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#/bin/sh
 
 # Intended to be a portable clipboard interface
 # Useful tmux as clipboard info: https://unix.stackexchange.com/questions/56477/
@@ -48,11 +48,9 @@ NL='
 # Handles options that need arguments
 main() {
   # Flags
-  READ='false'
-  WRITE='false'
+  CMD=""
   CLIPBOARD_CHOICE=''
   VERBOSE='false'
-
 
   # Options processing
   args=''; literal='false'
@@ -61,8 +59,8 @@ main() {
       in --)  no_options="true"; shift 1; continue
       ;; -h|--help)  show_help; exit 0
       ;; -x|--clipboard)  CLIPBOARD_CHOICE="${2}"; shift 1
-      ;; -r|--read)       READ="true"
-      ;; -w|--write)      WRITE="true"
+      ;; -r|--read)       CMD="read"
+      ;; -w|--write)      CMD="writ"
       ;; -v|--verbose)    VERBOSE="true"
       ;; *)   args="${args} $( outln "${1}" | eval_escape )"
     esac
@@ -71,118 +69,51 @@ main() {
   done
 
   eval "set -- ${args}"
+  if [ -n "${CMD}" ]; then
+    choice=""
+    for board in ${CLIPBOARDS}; do
+      "${board}_need" && choice="${board}" && break
+    done
 
-  if   "${READ}"; then
-    c="$( find_clipboard "${CLIPBOARD_CHOICE}" "read" )" || exit "$?"
-    case "${c}"
-      in xclip)                "${c}" -out -selection clipboard
-      ;; termux-clipboard-get) "${c}"
-      #;; tmux)                 "${c}" save-buffer -b clipboard -
-      ;; "${FILE_READ}")       "${c}" "${FILE_CLIPBOARD}"
-      ;; *) die DEV 1 "Probably forgot to implement clipboard '${clipboard}'"
-    esac
-  elif "${WRITE}"; then
-    c="$( find_clipboard "${CLIPBOARD_CHOICE}" "write" )" || exit "$?"
-    notify.sh "📋" &
-    read_stdin_if_no_parameters "$@" | case "${c}"
-      in xclip)                "${c}" -in -selection clipboard
-      ;; termux-clipboard-set) "${c}"
-      #;; tmux)                 "${c}" save-buffer -b clipboard -
-      ;; "${FILE_WRITE}")       "${c}" - >"${FILE_CLIPBOARD}"
-      ;; *) die DEV 1 "Probably forgot to implement clipboard '${clipboard}'"
+    [ -z "${choice}" ] && die FATAL 1 "No clipboard supported"
+    case "${CMD}"
+      in "read") "${board}_read"
+      ;; "writ")
+        printf %s\\n "${board}"
+        read_stdin_if_no_parameters "$@" | "${board}_writ"
+      ;; *) die DEV 1 "Should only be read or writ"
     esac
   else
-    show_help
     die FATAL 1 "Specify either --write or --read"
   fi
 }
 
-FILE_READ='cat'
-FILE_WRITE='cat'
-
-# Order by first presidence to last
-# 'file' is a terminating condition
-CLIPBOARD_LIST="
-xclip	read	xclip
-xclip	write	xclip
-termux	read	termux-clipboard-get
-termux	write	termux-clipboard-set
-file	read	${FILE_READ}
-file	write	${FILE_WRITE}
-	read	
-	write	
+NL="
 "
-CMD_LIST="$( printf %s "${CLIPBOARD_LIST}" | {
-  while IFS= read -r line; do
-    [ "${line}" !=  "${line#file}" ] && break
-    printf %s\\n "${line##*	}"
-  done
-})"
+CLIPBOARDS=""
 
-find_clipboard() {
-  [ "${1}" != "${1#*[!a-z]}" ] && die FATAL 1 \
-    "The clipboard option specified '${1}' contains non a-z characters"
+# Name just add to ${CLIPBOARDS} as to be the same as the functions
+CLIPBOARDS="${CLIPBOARDS}winclip${NL}"
+winclip_need() { require "clip.exe"; }
+winclip_read() { <&0 clip.exe; }
+winclip_writ() { powershell.exe -noprofile Get-Clipboard; }
 
-  clip=''
-  choice_error=''
-  if [ "${CLIPBOARD_LIST}" != "${CLIPBOARD_LIST#*"${NL}${1}	"}" ]; then
-    clip="${CLIPBOARD_LIST#*"${NL}${1}	${2}	"}"
-    clip="${clip%%${NL}*}"
-  else
-    choice_error="Clipboard '${1}' is not supported by \`${NAME}\`."
-  fi
+CLIPBOARDS="${CLIPBOARDS}xclip${NL}"
+xclip_need() { require "xclip"; }
+xclip_read() { <&0 xclip -in -selection clipboard; }
+xclip_writ() { xclip -out -selection clipboard; }
 
-  if [ -z "${choice_error}" ] \
-    && [ -n "${clip}" ] \
-    && [ "${clip}" != 'file' ] \
-    && ! require "${clip}" \
-  ; then
-    choice_error="Clipboard '${clip}' was not found on the current system."
-  fi
+CLIPBOARDS="${CLIPBOARDS}termux${NL}"
+termux_need() { require "termux-clipboard-get"; }
+termux_read() { <&0 termux-clipboard-set; }
+termux_writ() { <&0 termux-clipboard-get; }
 
-  #TODO Benchmark, also benchmark with `command -v` for `require`
-  # Default is the longest
-  if [ -z "${choice_error}" ]; then
-    for cmd in $( outln "${CMD_LIST}" | uniq ); do
-    #[ -z "${choice_error}" ] && for cmd in ${CMD_LIST}; do
-      if require "${cmd}"; then
-        #if [ "${cmd}" = 'tmux' ] && tmux_on; then
-          clip="${cmd}"
-          break
-        #fi
-      fi
-    done
-
-    # DESIGN: File copy must be done explicitly, keep below commented
-    #if [ -z "${clip}" ]; then
-    #  if [ "${2}" = "read" ]
-    #    then clip='cat'
-    #  else
-    #    else clip='printf'
-    #  fi
-    #fi
-  fi
-
-  if [ -n "${choice_error}" ]; then
-    die FATAL 1 "${choice_error} Available clipboards:" "$(
-      outln "${CLIPBOARD_LIST}" | cut -f 1 | uniq
-    )"
-  fi
+CLIPBOARDS="${CLIPBOARDS}tmux${NL}"
+tmux_need() { [ -n "${TMUX}" ]; }
+tmux_read() { <&0 tmux load-buffer -b clipboard -; }
+tmux_writ() { tmux show-buffer -b clipboard; }
 
 
-  if [ -z "${clip}" ]; then
-    die 1 "No valid clipboards found"
-  elif [ "${clip}" = "${FILE_READ}" ]; then
-    [ ! -r "${FILE_CLIPBOARD}" ] && die FATAL 1 \
-      "Cannot read '${FILE_CLIPBOARD}'"
-  elif [ "${clip}" = "${FILE_WRITE}" ]; then
-    [ ! -w "${FILE_CLIPBOARD}" ] && die FATAL 1 \
-      "Cannot write to '${FILE_CLIPBOARD}'"
-  fi
-
-
-  outln "${clip}"
-}
 
 # Like GNU utils, ignore STDIN if parameter-specified input given
 read_stdin_if_no_parameters() {
@@ -197,11 +128,7 @@ read_stdin_if_no_parameters() {
   fi
 }
 
-#tmux_on() { tmux info >/dev/null 2>&1; }
-
 # Helpers
-out() { printf %s "$@"; }
-outln() { printf %s\\n "$@"; }
 die() { printf %s "${1}: " >&2; shift 1; printf %s\\n "$@" >&2; exit "${1}"; }
 require() {
   for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
