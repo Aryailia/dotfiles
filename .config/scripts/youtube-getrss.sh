@@ -54,18 +54,25 @@ youtube() {
       ;;
     *)
       printf '%s%s%s' "${rss_base}" 'channel_id=' \
-        "$(curl -L -s "${url}" | get_channel_id_from_meta)"
+        "$( curl -L -s "${url}" | get_channel_id_from_meta )"
+        #"$( <testfile get_channel_id_from_meta )"
       ;;
   esac
 }
 
 get_channel_id_from_meta() {
-  <&0 awk '/itemprop="channelId"/ {
-    gsub(/^.*content="/, "");
-    gsub(/".*$/, "");
-    print($0);
-    exit 0;  # Only print the first one
+  # NOTE: grep -o is not POSIX
+  <&0 awk -v FS="" 'match($0, /videos.xml\?channel_id=[^",]*/) {
+    prefix = length("videos.xml?channel_id=");
+    print substr($0, RSTART + prefix, RLENGTH - prefix);
+    exit 0;
   }'
+  #<&0 awk '/itemprop="channelId"/ {
+  #  gsub(/^.*content="/, "");
+  #  gsub(/".*$/, "");
+  #  print($0);
+  #  exit 0;  # Only print the first one
+  #}'
 }
 
 # Could extract just from the url without curling but less confident in
