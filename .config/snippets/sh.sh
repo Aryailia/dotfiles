@@ -2,6 +2,8 @@
 
 # TODO: read_from
 
+#https://www.w3.org/QA/2002/04/valid-dtd-list.html
+
 addPrefixedFunction 'hashbang_sh' 'Shebang env for POSIX shell'
 sh_hashbang_sh() { outln '#!/usr/bin/env sh'; }
 addPrefixedFunction 'hashbang_awk' 'Shebang for awk'
@@ -15,7 +17,19 @@ sh_glob() { out "* .[!.]* ..?*"; }
 
 addPrefixedFunction 'match_to' \
   'Parameter subtitution to check for containing a string and is not-empty'
-sh_match_to() { out '[ "${<1>}" != "${<1>#*<2>}" ] && <3>'; }
+sh_match_to() { out '[ "${<>}" != "${<>#*<>}" ] && <>'; }
+
+addPrefixedFunction 'set_preserve' 'Set and preserve newlines'
+sh_set_preserve() { out '<>="$( <>; printf a )"; <>="${<>%?a}"'; }
+
+addPrefixedFunction 'cd_mydir' '`cd` to the directory of this script'
+sh_cd_mydir() {
+  <<EOF cat -
+mydir="\$( dirname "\${0}"; printf a )"; mydir="\${mydir%?a}"
+cd "\${mydir}" || { printf %s\\\\n "Cannot cd to project dir" >&2; exit 1; }
+mydir="\$( pwd -P; printf a )"; mydir="\${mydir%?a}"
+EOF
+}
 
 
 addPrefixedFunction 'fg_RED'     'Red foreground escape'
@@ -168,7 +182,7 @@ addPrefixedFunction 'help' 'Display the help file'
 sh_help() {
   ifNotRootIsReadableAndHas "${1}" sh_name || { sh_name; outln; }
   <<EOH cat -
-show_help() {
+exit_help() {
   <<EOF cat - >&2
 SYNOPSIS
   \${NAME}
@@ -184,8 +198,35 @@ OPTIONS
     Special argument that prevents all following arguments from being
     intepreted as options.
 EOF
+  exit 1
 }
 EOH
+}
+
+addPrefixedFunction 'awk_help' 'Display the help file'
+sh_awk_help() {
+  ifNotRootIsReadableAndHas "${1}" sh_name || { sh_name; outln; }
+  <<EOF cat -
+exit_help() {
+  printf %s\\n "SYNOPSIS" >&2
+  printf %s\\n "  ${NAME} <JOB> [<arg> ...]" >&2
+
+  printf %s\\n "" "OPTIONS" >&2
+  <"${NAME}" awk '
+    /^    "\\\${literal}" || case "\\\${1}/ { run = 1; }
+    /^    esac/ { run = 0; }
+    run && /^    in|^    ;;/ {
+      sub(/^ *in /, "  ", \$0);
+      sub(/^ *;; /, "  ", \$0);
+      sub(/\\) *#/, "\\t", \$0);
+      sub(/\\).*/, "", \$0);
+      print \$0;
+    }
+  ' >&2
+
+  exit 1
+}
+EOF
 }
 
 addPrefixedFunction 'main_fixed' \
@@ -199,8 +240,8 @@ main() {
   args=''; literal='false'
   for a in "\$@"; do
     "\${literal}" || case "\${a}"
-      in --)        literal='true'; continue
-      ;; -h|--help) show_help; exit 0
+      in --)         literal='true'; continue
+      ;; -h|--help)  exit_help
 
       ;; -*) die FATAL 1 $(
         out "\"Invalid option '\${a}'. See \\\`\${NAME} -h\\\` for help\"" )
@@ -209,7 +250,7 @@ main() {
     "\${literal}" && args="\${args} \$( outln "\${a}" | eval_escape )"
   done
 
-  [ -z "\${args}" ] && { show_help; exit 1; }
+  [ -z "\${args}" ] && exit_help
   eval "set -- \${args}"
 
 }
@@ -230,7 +271,7 @@ main() {
   while [ "\$#" -gt 0 ]; do
     "\${literal}" || case "\${1}"
       in --)        literal='true'; shift 1; continue
-      ;; -h|--help) show_help; exit 0
+      ;; -h|--help) exit_help
 
       ;; -f)            echo 'do not need to shift'
       ;; -e|--example2) outln "-\${2}-"; shift 1
@@ -243,7 +284,7 @@ main() {
     shift 1
   done
 
-  [ -z "\${args}" ] && { show_help; exit 1; }
+  [ -z "\${args}" ] && exit_help
   eval "set -- \${args}"
 
 }
@@ -276,7 +317,7 @@ main() {
 
       # Process arguments properly now
       for x in \${opts}; do case "\${x}"
-        in -h|--help)  show_help; exit 0
+        in -h|--help)     exit_help
         ;; -e|--example)  outln "-\${2}-"; shift 1
 
         ;; -*) die FATAL 1 $(
@@ -289,7 +330,7 @@ main() {
     shift 1
   done
 
-  [ -z "\${args}" ] && { show_help; exit 1; }
+  [ -z "\${args}" ] && exit_help
   eval "set -- \${args}"
 
 }
@@ -318,13 +359,13 @@ main() {
     "Enter one of the options: \${CYAN}" \\
   )" )"
   cmd="\${1}"; shift 1
-  case "\${cmd}" in
-    h*)  show_help; exit 0 ;;
+  case "\${cmd}"
+    in h*)  exit_help
 
-    e*)  echo 1 ;;
-    2)   echo 2 ;;
+    ;; e*)  echo 1
+    ;; 2)   echo 2
 
-    *)   show_help; exit 1 ;;
+    *)      exit_help
   esac
 }
 EOF
@@ -336,7 +377,7 @@ sh_init_default() {
   <<EOF cat -
 $( sh_hashbang_sh '/' )
 
-$( sh_name '/' )
+$( sh_awk_name '/' )
 
 $( sh_help '/' )
 
@@ -347,7 +388,34 @@ $( sh_outln '/' )
 $( sh_die '/' )
 $( sh_eval_escape '/' )
 
-<&1 main "\$@"
+<&0 main "\$@"
+EOF
+}
+
+addPrefixedFunction 'init_menu' 'Init for a script with menu of options'
+sh_init_make() {
+  <<EOF cat -
+$( sh_hashbang_sh '/' )
+
+$( sh_name '/' )
+
+$( sh_awk_help '/' )
+
+$( sh_main_fixed '/' )
+
+my_make() {
+  case "\${1}"
+    in hel)
+    ;; help|*)  printf %s\\n "'\${1}' is not a supported command" >&2; exit_help
+  esac
+}
+
+# Helpers
+$( sh_outln '/' )
+$( sh_die '/' )
+$( sh_eval_escape '/' )
+
+<&0 main "\$@"
 EOF
 }
 
@@ -358,7 +426,7 @@ $( sh_hashbang_sh '/' )
 
 $( sh_name '/' )
 
-$( sh_help '/' )
+$( sh_awk_help '/' )
 
 $( sh_main_fixed '/' )
 
@@ -370,6 +438,6 @@ $( sh_eval_escape '/' )
 
 $( sh_prompt_color '/' )
 
-<&1 main "\$@"
+<&0 main "\$@"
 EOF
 }

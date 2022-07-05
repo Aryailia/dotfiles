@@ -19,3 +19,15 @@ binmode STDERR, ':encoding(utf8)';
 EOF
 }
 
+addPrefixedFunction 'all_stdin' 'Read all of stdin as a str'
+perl_all_stdin() { printf %s 'my $stdin = do { local $/ = ""; <STDIN> };'; }
+
+addPrefixedFunction 'regexp_parse' 'Parse via regex'
+perl_regexp_parse() {
+  <<EOF cat -
+while (\$<> =~ /\G<>/gc) {
+  <>
+}
+EOF
+}
+
