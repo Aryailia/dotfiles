@@ -58,10 +58,19 @@ main() {
     "${literal}" || case "${1}"
       in --)  no_options="true"; shift 1; continue
       ;; -h|--help)  show_help; exit 0
-      ;; -x|--clipboard)  CLIPBOARD_CHOICE="${2}"; shift 1
       ;; -r|--read)       CMD="read"
       ;; -w|--write)      CMD="writ"
       ;; -v|--verbose)    VERBOSE="true"
+      ;; -x|--clipboard)  #CLIPBOARD_CHOICE="${2}"; shift 1
+        if [ "$#" -gt 1 ]; then
+          CLIPBOARD_CHOICE="${2}"; shift 1
+        else
+          CLIPBOARD_CHOICE="$( prompt \
+            "[0-9][0-9]*" \
+            "$( printf %s "${CLIPBOARDS}" | nl )" \
+            "Enter the clipboard you want: "
+          )"
+        fi
       ;; *)   args="${args} $( outln "${1}" | eval_escape )"
     esac
     "${literal}" && args="${args} $( outln "${1}" | eval_escape )"
@@ -71,17 +80,22 @@ main() {
   eval "set -- ${args}"
   if [ -n "${CMD}" ]; then
     choice=""
-    for board in ${CLIPBOARDS}; do
-      "${board}_need" && choice="${board}" && break
-    done
+    if [ -z "${CLIPBOARD_CHOICE}" ]; then
+      for board in ${CLIPBOARDS}; do
+        "${board}_need" && choice="${board}" && break
+      done
+    else
+      choice="${CLIPBOARD_CHOICE}"
+    fi
 
-    [ -z "${choice}" ] && die FATAL 1 "No clipboard supported"
+    t="$( type "${choice}_need" 2>/dev/null )"
+    [ "${t#"${choice}_need is a shell function"}" != "${t}" ] \
+      || die FATAL 1 "'${choice}' is an unsupported clipboard."
     case "${CMD}"
-      in "read") "${board}_read"
-      ;; "writ")
-        printf %s\\n "${board}"
-        read_stdin_if_no_parameters "$@" | "${board}_writ"
-      ;; *) die DEV 1 "Should only be read or writ"
+      in "read")  "${choice}_read"
+      ;; "writ")  read_stdin_if_no_parameters "$@" | "${choice}_writ"
+                  notify.sh "📋"
+      ;; *)       die DEV 1 "Should only be read or writ"
     esac
   else
     die FATAL 1 "Specify either --write or --read"
@@ -93,25 +107,27 @@ NL="
 CLIPBOARDS=""
 
 # Name just add to ${CLIPBOARDS} as to be the same as the functions
-CLIPBOARDS="${CLIPBOARDS}winclip${NL}"
-winclip_need() { require "clip.exe"; }
-winclip_read() { <&0 clip.exe; }
-winclip_writ() { powershell.exe -noprofile Get-Clipboard; }
-
 CLIPBOARDS="${CLIPBOARDS}xclip${NL}"
 xclip_need() { require "xclip"; }
-xclip_read() { <&0 xclip -in -selection clipboard; }
-xclip_writ() { xclip -out -selection clipboard; }
+xclip_read() { xclip -out -selection clipboard; }
+xclip_writ() { <&0 xclip -in -selection clipboard; }
 
 CLIPBOARDS="${CLIPBOARDS}termux${NL}"
 termux_need() { require "termux-clipboard-get"; }
-termux_read() { <&0 termux-clipboard-set; }
-termux_writ() { <&0 termux-clipboard-get; }
+termux_read() { <&0 termux-clipboard-get; }
+termux_writ() { <&0 termux-clipboard-set; }
 
 CLIPBOARDS="${CLIPBOARDS}tmux${NL}"
 tmux_need() { [ -n "${TMUX}" ]; }
-tmux_read() { <&0 tmux load-buffer -b clipboard -; }
-tmux_writ() { tmux show-buffer -b clipboard; }
+tmux_read() { tmux show-buffer -b clipboard; }
+tmux_writ() { <&0 tmux load-buffer -b clipboard -; }
+
+CLIPBOARDS="${CLIPBOARDS}winclip${NL}"
+winclip_need() { require "clip.exe"; }
+# BUG: If anything is in STDIN, powershell.exe resizes all linux terminals
+# TODO: Make a bug report on the github
+winclip_read() { powershell.exe -noprofile Get-Clipboard; }
+winclip_writ() { <&0 clip.exe; }
 
 
 
@@ -120,15 +136,16 @@ read_stdin_if_no_parameters() {
   if [ "$#" = 0 ]; then
     <&0 cat -
   elif [ "$#" = 1 ]; then
-    out "${1}"
+    printf %s "${1}"
   else
-    out "${1}"
+    printf %s "${1}"
     shift 1
     printf \\n%s "$@"
   fi
 }
 
 # Helpers
+outln() { printf %s\\n "$@"; }
 die() { printf %s "${1}: " >&2; shift 1; printf %s\\n "$@" >&2; exit "${1}"; }
 require() {
   for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
