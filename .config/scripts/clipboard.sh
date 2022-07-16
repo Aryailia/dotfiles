@@ -24,7 +24,7 @@ OPTIONS
     Copy either STDIN or <inputs> to the clipboard
     Specifying <inputs> will ignore STDIN
 
-  -x, --clipboard CLIPBOARD
+  -x, --clipboard [CLIPBOARD]
     Use CLIPBOARD as the program. If left blank, it will try what is supported
 
   -v, --verbose
@@ -44,6 +44,7 @@ EOF
 FILE_CLIPBOARD="${XDG_CONFIG_HOME:-"${HOME}/.config"}/clipboard"
 NL='
 '
+CLIPBOARDS="${NL}"
 
 # Handles options that need arguments
 main() {
@@ -61,13 +62,13 @@ main() {
       ;; -r|--read)       CMD="read"
       ;; -w|--write)      CMD="writ"
       ;; -v|--verbose)    VERBOSE="true"
-      ;; -x|--clipboard)  #CLIPBOARD_CHOICE="${2}"; shift 1
+      ;; -x|--clipboard)
         if [ "$#" -gt 1 ]; then
           CLIPBOARD_CHOICE="${2}"; shift 1
         else
           CLIPBOARD_CHOICE="$( prompt \
             "[0-9][0-9]*" \
-            "$( printf %s "${CLIPBOARDS}" | nl )" \
+            "$( printf %s "${CLIPBOARDS#?}" | nl )" \
             "Enter the clipboard you want: "
           )"
         fi
@@ -88,8 +89,7 @@ main() {
       choice="${CLIPBOARD_CHOICE}"
     fi
 
-    t="$( type "${choice}_need" 2>/dev/null )"
-    [ "${t#"${choice}_need is a shell function"}" != "${t}" ] \
+    [ "${CLIPBOARDS#*"${NL}${choice}${NL}"}" != "${CLIPBOARDS}" ] \
       || die FATAL 1 "'${choice}' is an unsupported clipboard."
     case "${CMD}"
       in "read")  "${choice}_read"
@@ -102,11 +102,24 @@ main() {
   fi
 }
 
-NL="
-"
-CLIPBOARDS=""
+#run: clipboard.sh -r -x tmux
 
+# The order of these clipboards is the priority order
 # Name just add to ${CLIPBOARDS} as to be the same as the functions
+
+CLIPBOARDS="${CLIPBOARDS}winclip${NL}"
+winclip_need() { require "clip.exe"; }
+# BUG: powershell.exe changes font for all WSL terminals
+#      You must set WSL console font to cmd.exe default (lucida console)
+# https://github.com/microsoft/terminal/issues/367
+# powershell.exe always adds \r\n
+winclip_read() {
+  t="$( powershell.exe -noprofile Get-Clipboard )" # strip \n
+  printf %s "${t%?}"                               # strip \r
+}
+winclip_writ() { <&0 clip.exe; }
+
+# Although WSL has xclip, it does not really interface with Windows' clipboard
 CLIPBOARDS="${CLIPBOARDS}xclip${NL}"
 xclip_need() { require "xclip"; }
 xclip_read() { xclip -out -selection clipboard; }
@@ -121,13 +134,6 @@ CLIPBOARDS="${CLIPBOARDS}tmux${NL}"
 tmux_need() { [ -n "${TMUX}" ]; }
 tmux_read() { tmux show-buffer -b clipboard; }
 tmux_writ() { <&0 tmux load-buffer -b clipboard -; }
-
-CLIPBOARDS="${CLIPBOARDS}winclip${NL}"
-winclip_need() { require "clip.exe"; }
-# BUG: If anything is in STDIN, powershell.exe resizes all linux terminals
-# TODO: Make a bug report on the github
-winclip_read() { powershell.exe -noprofile Get-Clipboard; }
-winclip_writ() { <&0 clip.exe; }
 
 
 
@@ -149,11 +155,11 @@ outln() { printf %s\\n "$@"; }
 die() { printf %s "${1}: " >&2; shift 1; printf %s\\n "$@" >&2; exit "${1}"; }
 require() {
   for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
-    [ -f "${dir}/$1" ] && [ -x "${dir}/$1" ] && return 0
+    [ -f "${dir}/${1}" ] && [ -x "${dir}/${1}" ] && return 0
   done
   return 1
 }
-#require() { command -v "${1}" >/dev/null 2>&1; }
+
 
 eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 
