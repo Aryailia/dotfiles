@@ -1,4 +1,4 @@
-addPrefixedFunction 'main' 'Main'
+addPrefixedFunction 'java' 'main' 'Main'
 java_main() {
   <<EOF cat -
 public class <> {
@@ -8,7 +8,7 @@ public class <> {
 EOF
 }
 
-addPrefixedFunction 'out' 'Print STDOUT'
+addPrefixedFunction 'java' 'out' 'Print STDOUT'
 java_out() {
   printf %s 'System.out.println("'
 }

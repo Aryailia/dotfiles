@@ -4,25 +4,25 @@
 
 #https://www.w3.org/QA/2002/04/valid-dtd-list.html
 
-addPrefixedFunction 'hashbang_sh' 'Shebang env for POSIX shell'
+addPrefixedFunction 'sh' 'hashbang_sh' 'Shebang env for POSIX shell'
 sh_hashbang_sh() { outln '#!/usr/bin/env sh'; }
-addPrefixedFunction 'hashbang_awk' 'Shebang for awk'
+addPrefixedFunction 'sh' 'hashbang_awk' 'Shebang for awk'
 sh_hashbang_awk() { outln '#!/usr/bin/awk -f'; }
 
-addPrefixedFunction 'name' 'Basename of current script'
+addPrefixedFunction 'sh' 'name' 'Basename of current script'
 sh_name() { outln 'NAME="$( basename "${0}"; printf a )"; NAME="${NAME%?a}"'; }
 
-addPrefixedFunction 'glob' 'Glob to match normal and hidden files'
+addPrefixedFunction 'sh' 'glob' 'Glob to match normal and hidden files'
 sh_glob() { out "* .[!.]* ..?*"; }
 
-addPrefixedFunction 'match_to' \
+addPrefixedFunction 'sh' 'match_to' \
   'Parameter subtitution to check for containing a string and is not-empty'
 sh_match_to() { out '[ "${<>}" != "${<>#*<>}" ] && <>'; }
 
-addPrefixedFunction 'set_preserve' 'Set and preserve newlines'
+addPrefixedFunction 'sh' 'set_preserve' 'Set and preserve newlines'
 sh_set_preserve() { out '<>="$( <>; printf a )"; <>="${<>%?a}"'; }
 
-addPrefixedFunction 'cd_mydir' '`cd` to the directory of this script'
+addPrefixedFunction 'sh' 'cd_mydir' '`cd` to the directory of this script'
 sh_cd_mydir() {
   <<EOF cat -
 mydir="\$( dirname "\${0}"; printf a )"; mydir="\${mydir%?a}"
@@ -32,13 +32,13 @@ EOF
 }
 
 
-addPrefixedFunction 'fg_RED'     'Red foreground escape'
-addPrefixedFunction 'fg_GREEN'   'Green foreground escape'
-addPrefixedFunction 'fg_YELLOW'  'Yellow foreground escape'
-addPrefixedFunction 'fg_BLUE'    'Blue foreground escape'
-addPrefixedFunction 'fg_MAGENTA' 'Magenta foreground escape'
-addPrefixedFunction 'fg_CYAN'    'Cyan foreground escape'
-addPrefixedFunction 'fg_CLEAR'   'Clear foreground escape'
+addPrefixedFunction 'sh' 'fg_RED'     'Red foreground escape'
+addPrefixedFunction 'sh' 'fg_GREEN'   'Green foreground escape'
+addPrefixedFunction 'sh' 'fg_YELLOW'  'Yellow foreground escape'
+addPrefixedFunction 'sh' 'fg_BLUE'    'Blue foreground escape'
+addPrefixedFunction 'sh' 'fg_MAGENTA' 'Magenta foreground escape'
+addPrefixedFunction 'sh' 'fg_CYAN'    'Cyan foreground escape'
+addPrefixedFunction 'sh' 'fg_CLEAR'   'Clear foreground escape'
 sh_fg_RED() {     outln "RED='\\001\\033[31m\\002'"; }
 sh_fg_GREEN() {   outln "GREEN='\\001\\033[32m\\002'"; }
 sh_fg_YELLOW() {  outln "YELLOW='\\001\\033[33m\\002'"; }
@@ -52,14 +52,14 @@ sh_fg_CLEAR() {   outln "CLEAR='\\001\\033[0m\\002'"; }
 
 # `p` is for /dev/tty, the `c` in `pc` represents colour
 # /dev/tty in case `pc` is run in a subshell
-addPrefixedFunction 'p'     'Print to tty'
-addPrefixedFunction 'pln'   'Print to tty with newlines'
-addPrefixedFunction 'pc'    'Print %b to tty'
-addPrefixedFunction 'pcln'  'Print %b to tty with newlines'
-addPrefixedFunction 'out'   'Print to stdout'
-addPrefixedFunction 'outln' 'Print to stdout with newlines'
-addPrefixedFunction 'err'   'Print to stderr'
-addPrefixedFunction 'errln' 'Print to stderr with newlines'
+addPrefixedFunction 'sh' 'p'     'Print to tty'
+addPrefixedFunction 'sh' 'pln'   'Print to tty with newlines'
+addPrefixedFunction 'sh' 'pc'    'Print %b to tty'
+addPrefixedFunction 'sh' 'pcln'  'Print %b to tty with newlines'
+addPrefixedFunction 'sh' 'out'   'Print to stdout'
+addPrefixedFunction 'sh' 'outln' 'Print to stdout with newlines'
+addPrefixedFunction 'sh' 'err'   'Print to stderr'
+addPrefixedFunction 'sh' 'errln' 'Print to stderr with newlines'
 sh_p() { outln 'p() { printf %s "$@" >/dev/tty; }'; }
 sh_pln() { outln 'pln() { printf %s\\n "$@" >/dev/tty; }'; }
 sh_pc() { outln 'pc() { printf %b "$@" >/dev/tty; }'; }
@@ -69,7 +69,7 @@ sh_outln() { outln 'outln() { printf %s\\n "$@"; }'; }
 sh_err() { outln 'err() { printf %s "$@" >&2; }'; }
 sh_errln() { outln 'errln() { printf %s\\n "$@" >&2; }'; }
 
-addPrefixedFunction 'die' 'Message stderr and exit'
+addPrefixedFunction 'sh' 'die' 'Message stderr and exit'
 sh_die() {
   out 'die() { printf %s "${1}: " >&2; '
   # print error code ${1} (was ${2}) and exit with it
@@ -77,13 +77,13 @@ sh_die() {
 }
 # Defends against malicious ${2} but not malicious ${1}
 # ${1} must be valid varname
-addPrefixedFunction 'eval_assign' 'Specify variable name at runtime to assign'
+addPrefixedFunction 'sh' 'eval_assign' 'Specify variable name at runtime to assign'
 sh_eval_assign() { outln 'eval_assign() { eval "${1}"=\"${2}\"; }'; }
 
 # Much thanks to Rich (https://www.etalabs.net/sh_tricks.html)
 # Keeping to the analogy, this is ruby's p, but not really, so renamed
-addPrefixedFunction 'eval_escape'     "Escape for use in \`eval\`"
-addPrefixedFunction 'awk_eval_escape' "DOUBLE CHECK THIS WORKS"
+addPrefixedFunction 'sh' 'eval_escape'     "Escape for use in \`eval\`"
+addPrefixedFunction 'sh' 'awk_eval_escape' "DOUBLE CHECK THIS WORKS"
 #addPrefixedFunction 'awk_eval_escape' "Escape for use in \`eval\` in awkscript"
 sh_eval_escape() { <<EOF cat -
 eval_escape() { <&0 sed "s/'/'\\\\\\\\''/g;1s/^/'/;\\\$s/\\\$/'/"; }
@@ -101,7 +101,7 @@ awk_eval_escape='
 EOF
 }
 
-addPrefixedFunction 'require' 'POSIX way to test program exists in ${PATH}'
+addPrefixedFunction 'sh' 'require' 'POSIX way to test program exists in ${PATH}'
 sh_require() {
   <<EOF cat -
 require() {
@@ -114,7 +114,7 @@ EOF
 }
 
 
-addPrefixedFunction 'prompt_color' \
+addPrefixedFunction 'sh' 'prompt_color' \
   'Prompt with color and Basic Regular Expression validation'
 # Want to use >/dev/tty (in `pc`) in case we are running this in subshell
 sh_prompt_color() {
@@ -132,7 +132,7 @@ prompt() {
 EOF
 }
 
-addPrefixedFunction 'prompt_stderr' \
+addPrefixedFunction 'sh' 'prompt_stderr' \
   'Prompt without color and with Basic Regular Expression validation'
 sh_prompt_stderr() {
   <<EOF cat -
@@ -149,7 +149,7 @@ EOF
 # TODO: Pick
 
 
-addPrefixedFunction 'match_any' "Same as 'contains' but match for many"
+addPrefixedFunction 'sh' 'match_any' "Same as 'contains' but match for many"
 sh_match_any() {
   matchee="$1"; shift 1
   [ -z "${matchee}" ] && return 1
@@ -159,7 +159,7 @@ sh_match_any() {
   return 1
 }
 
-addPrefixedFunction 'absolute_path' "Converts any path to an absolute path"
+addPrefixedFunction 'sh' 'absolute_path' "Converts any path to an absolute path"
 sh_absolute_path() {
   <<EOF cat -
 absolute_path() (
@@ -178,7 +178,7 @@ EOF
 
 ################################################################################
 # Main
-addPrefixedFunction 'help' 'Display the help file'
+addPrefixedFunction 'sh' 'help' 'Display the help file'
 sh_help() {
   ifNotRootIsReadableAndHas "${1}" sh_name || { sh_name; outln; }
   <<EOH cat -
@@ -203,7 +203,7 @@ EOF
 EOH
 }
 
-addPrefixedFunction 'awk_help' 'Display the help file'
+addPrefixedFunction 'sh' 'awk_help' 'Display the help file'
 sh_awk_help() {
   ifNotRootIsReadableAndHas "${1}" sh_name || { sh_name; outln; }
   <<EOF cat -
@@ -229,7 +229,7 @@ exit_help() {
 EOF
 }
 
-addPrefixedFunction 'main_fixed' \
+addPrefixedFunction 'sh' 'main_fixed' \
   'Main loop that handles options with no arguments'
 sh_main_fixed() {
   <<EOF cat -
@@ -257,7 +257,7 @@ main() {
 EOF
 }
 
-addPrefixedFunction 'main_variable' \
+addPrefixedFunction 'sh' 'main_variable' \
   'Main loop that handles options with arguments'
 sh_main_variable() {
   <<EOF cat -
@@ -291,7 +291,7 @@ main() {
 EOF
 }
 
-addPrefixedFunction 'main_condensed' \
+addPrefixedFunction 'sh' 'main_condensed' \
   'Main loop that where single-letter options can be combined'
 sh_main_condensed() {
   <<EOF cat -
@@ -338,7 +338,7 @@ EOF
 }
 
 
-addPrefixedFunction 'main_menu' \
+addPrefixedFunction 'sh' 'main_menu' \
   'For offering named choices, but no option processing yet'
 sh_main_menu() {
   <<EOF cat -
@@ -372,7 +372,7 @@ EOF
 }
 
 
-addPrefixedFunction 'init_default' 'Init for a standard shell script'
+addPrefixedFunction 'sh' 'init_default' 'Init for a standard shell script'
 sh_init_default() {
   <<EOF cat -
 $( sh_hashbang_sh '/' )
@@ -392,7 +392,7 @@ $( sh_eval_escape '/' )
 EOF
 }
 
-addPrefixedFunction 'init_menu' 'Init for a script with menu of options'
+addPrefixedFunction 'sh' 'init_menu' 'Init for a script with menu of options'
 sh_init_make() {
   <<EOF cat -
 $( sh_hashbang_sh '/' )
@@ -419,7 +419,7 @@ $( sh_eval_escape '/' )
 EOF
 }
 
-addPrefixedFunction 'init_menu' 'Init for a script with menu of options'
+addPrefixedFunction 'sh' 'init_menu' 'Init for a script with menu of options'
 sh_init_menu() {
   <<EOF cat -
 $( sh_hashbang_sh '/' )

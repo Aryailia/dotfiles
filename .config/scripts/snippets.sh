@@ -14,8 +14,10 @@ OPTIONS
 EOF
 }
 
+#run: sh % adoc fn
+
 # Using camelCase to avoid namespace conflicts with sourced snippet file
-SNIPPET_DIR="${XDG_CONFIG_HOME}/snippets"
+SNIPPET_DIR="$( c.sh snippets )"
 main() {
   # Dependencies
 
@@ -58,9 +60,13 @@ main() {
   else
     choice="${2:-$( out "${SNIPPET_LIST}" | csvAlignFirstColumn | prompt )}" \
       || exit "$?"
-    is_in_list="${NL}${SNIPPET_LIST}"
-    if [ "${is_in_list}" != "${is_in_list#*"${NL}${choice}",}" ]; then
-      "${fileType}_${choice}" "${fileType}"
+
+    # @VOLATILE: The check for valid characters occurs here
+    <<EOF IFS=, read -r prefix cmd _
+$( outln "${SNIPPET_LIST}" | grep "^[^,]*,${choice}," )
+EOF
+    if [ -n "${cmd}" ]; then
+      "${prefix}_${cmd}" "${fileType}"
     else
       die FATAL 1 \
         "There is no snippet named '${choice}'." \
@@ -78,11 +84,11 @@ NL='
 
 addPrefixedFunction() {
   [ "${1}" != "${1#*${NL}}" ] \
-    && die FATAL 1 "\`addPrefixedFunction\` - no newline in name"
+    && die FATAL 1 '`addPrefixedFunction`'" - no newline in name"
   [ "${2}" != "${2#*${NL}}" ] \
-    && die FATAL 1 "\`addPrefixedFunction\` - no newline in description"
+    && die FATAL 1 '`addPrefixedFunction`'" - no newline in description"
   [ "${1}" != "${1#*,}" ] && die FATAL 1 "'${1}' - invalid function name"
-  SNIPPET_LIST="${SNIPPET_LIST}${1},${2}${NL}"
+  SNIPPET_LIST="${SNIPPET_LIST}${1},${2},${3}${NL}"
 }
 
 ifNotRootIsReadableAndHasRegexp() {
@@ -98,23 +104,30 @@ ifNotRootIsReadableAndHas() {
 # Need this in the same namespace as ${0}
 lintSnippetNames() {
   # the snippet list ${1} will already have a trailing newline
-  LintFirstCol="$( out "${1}" | cut -d ',' -f 1 )"
+  LintFirstCol="$( out "${1}" | cut -d ',' -f 1,2 )"
   outln "${LintFirstCol}" | {
-    while IFS=',' read -r LintCmd LintDesc; do
-      LintCmd="${2}_${LintCmd}"
+    while IFS=',' read -r LintPrefix LintCmd LintDesc; do
+      LintCmd="${LintPrefix}_${LintCmd}"
       command -V "${LintCmd}" >/dev/null 2>&1 \
         || die DEV 1 "snippet '${LintCmd}' does not exist"
     done
     true
   } || exit "$?"
 
-  LintBad="$( outln "${LintFirstCol}" | grep -ve '^[A-Za-z_][A-Za-z0-9_]*$' )"
+  # @VOLATILE: This must ban commas
+  LintBad="$( outln "${LintFirstCol}" \
+    | cut -d ',' -f 2 \
+    | grep -ve '^[A-Za-z_][A-Za-z0-9_]*$'
+  )"
   [ -n "${LintBad}" ] && die FATAL 1 "Invalid snippet names:" "${LintBad}"
+
+
+
   return 0
 
-  [ "$( outln "${LintFirstCol}" | uniq | wc -l )" != \
-    "$( outln "${LintFirstCol}" | wc -l )" ] \
-    && die FATAL 1 'Duplicate names'
+  #[ "$( outln "${LintFirstCol}" | uniq | wc -l )" != \
+  #  "$( outln "${LintFirstCol}" | wc -l )" ] \
+  #  && die FATAL 1 'Duplicate names'
 }
 
 # Aligns second column by adding spaces before first comma
@@ -124,7 +137,7 @@ csvAlignFirstColumn() (
   _len=0
   #_input="$( cat - )"
   _input=''
-  while IFS=',' read -r _first _rest; do
+  while IFS=',' read -r _prefix _first _rest; do
     _input="${_input}${_first},${_rest}${NL}"
     [ "${#_first}" -gt "${_len}" ] && _len="${#_first}"
   done
@@ -132,7 +145,6 @@ csvAlignFirstColumn() (
   outln "${_input%${NL}}" | while IFS=',' read -r _first _rest; do
     printf "%-${_len}s,%s\\n" "${_first}" "${_rest}"
   done
-
 )
 
 list_files() {

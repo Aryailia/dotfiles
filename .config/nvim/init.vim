@@ -269,8 +269,8 @@ function ChooseSnippet() abort
     let l:csv = split(line, ',')
     if len(l:csv) >= 2
       call add(l:choices, {
-        \ 'word': l:csv[0],
-        \ 'menu': l:csv[1],
+        \ 'word': l:csv[1],
+        \ 'menu': l:csv[2],
       \ })
     endif
   endfor

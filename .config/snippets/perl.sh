@@ -1,4 +1,4 @@
-addPrefixedFunction 'init' 'Init'
+addPrefixedFunction 'perl' 'init' 'Init'
 perl_init() {
   <<EOF cat -
 #!/usr/bin/perl
@@ -19,10 +19,10 @@ binmode STDERR, ':encoding(utf8)';
 EOF
 }
 
-addPrefixedFunction 'all_stdin' 'Read all of stdin as a str'
+addPrefixedFunction 'perl' 'all_stdin' 'Read all of stdin as a str'
 perl_all_stdin() { printf %s 'my $stdin = do { local $/ = ""; <STDIN> };'; }
 
-addPrefixedFunction 'regexp_parse' 'Parse via regex'
+addPrefixedFunction 'perl' 'regexp_parse' 'Parse via regex'
 perl_regexp_parse() {
   <<EOF cat -
 while (\$<> =~ /\G<>/gc) {
