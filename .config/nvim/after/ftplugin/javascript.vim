@@ -1,4 +1,4 @@
-let s:cmdline_prefix_regexp = '//run:'
+let s:cmdline_prefix_regexp = '//run:\(.*\)'
 
 function! s:BuildBackground() abort
   call RunCmdlineOverload(s:cmdline_prefix_regexp,

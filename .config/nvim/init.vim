@@ -194,15 +194,21 @@ vmap <unique> <C-l> <Esc><Plug>SelectNextURI
 " ==============================================================================
 " Compilation
 " ==============================================================================
-" Build(), Run(), Lint() are defined in filetype for customisation
-function! RunCmdlineOverload(prefix, notfound, found)
-  let l:overload = searchpos(a:prefix, 'nw')
+" b:Build(), b:Run(), b:Lint() are defined in filetype for customisation
+" Detects the line specified by {s:regexp}, and
+" runs the command the follows (allows regexp capture groups)
+"
+" Replaces '%' with the path to file
+" Use '%%' to get literal '%'
+function! RunCmdlineOverload(regexp, notfound, found) abort
+  let l:overload = searchpos(a:regexp, 'nw')
   if l:overload[0] == 0
     call a:notfound()
   else
+    " the '@' substitutions are just to map '%' and '%%' properly
     let l:path = substitute(expand('%'), '\m%', '@B', '')
-    let l:cmd = getline(l:overload[0])
-    let l:cmd = substitute(l:cmd, a:prefix, '', '')
+    " By convention, all these custom runners will be only on one line
+    let l:cmd = matchlist(getline(l:overload[0]), a:regexp)[1]
     let l:cmd = substitute(l:cmd, '\m@', '@A', 'g')
     let l:cmd = substitute(l:cmd, '\m%%', '@B', 'g')
     let l:cmd = substitute(l:cmd, '\m%', l:path, 'g')
@@ -212,9 +218,35 @@ function! RunCmdlineOverload(prefix, notfound, found)
   endif
 endfunction
 
-"function! Lint()
-  "ALELint
-"endfunction
+" Probably to what you want to set b:BuildBackground() and b:Build()
+function! Make(is_run_in_split, build_type, temp) abort
+  write
+  let l:path = ' ' . shellescape(expand('%'))
+  if a:is_run_in_split
+    execute('vertical T build.sh ' . a:build_type . ' ' . a:temp . l:path)
+  else
+    execute('AsyncRun setsid build.sh  ' . a:build_type . ' ' . a:temp . l:path)
+  endif
+endfunction
+
+" For calling when there are arguments by CustomisableMake()
+function! MakeWithArguments(cmdline) abort
+  write
+  execute('vertical T ' . a:cmdline)
+endfunction
+
+" Probably to what you want to set b:Run()
+function! CustomisableMake(regexp, build_type, temp) abort
+  call RunCmdlineOverload(a:regexp
+  \, function('Make', [1, a:build_type, a:temp])
+  \, function('MakeWithArguments')
+  \)
+endfunction
+
+" Probably to what you want to set b:Lint()
+function! Lint() abort
+  vertical T build.sh lint %
+endfunction
 
 noremap <unique> <silent> <Leader>1 :call b:BuildBackground()<CR>
 noremap <unique> <silent> <Leader>2 :call b:Build()<CR>
@@ -259,7 +291,8 @@ function InsertSnippet() abort
       call cursor(b:complete_start[0], b:complete_start[1])
       normal! x
       call cursor(b:complete_start[0], b:complete_start[1])
-      let @" = system("snippets.sh " . &filetype . " " . l:selection)
+      let @" = system("snippets.sh " . &filetype . " " . l:selection
+        \ . " 2>/dev/null")
       setlocal paste
       execute("normal! i\<C-r>\"")
       setlocal nopaste

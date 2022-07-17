@@ -1,18 +1,8 @@
-function! s:BuildBackground() abort
-  write
-  silent !compile.sh --temp %
-endfunction
-
-function! s:Build() abort
-  write
-  vertical T compile.sh --temp %
-endfunction
-
 function! s:Run() abort
   " Probably should use the output of `compile.sh`
   let l:path = $TMPDIR . "/" . expand('%:t:r') . ".html"
   if !filereadable(l:path)
-    call s:Build()
+    call b:Build()
   endif
   " Do not want necessarily need setsid
   " `falkon` has live reload
@@ -23,6 +13,6 @@ endfunction
 "function! Lint()
 "endfunction
 
-let b:Build = function('<SID>Build')
-let b:BuildBackground = function('<SID>BuildBackground')
+let b:BuildBackground = function('Make', [0, 'build', '--temp'])
+let b:Build = function('Make', [1, 'build', '--temp'])
 let b:Run = function('<SID>Run')

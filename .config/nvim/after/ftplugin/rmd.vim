@@ -1,40 +1,11 @@
-let s:cmdline_prefix_regexp = '<!--run:'
-
-function! s:BuildBackground() abort
-  AsyncRun build.sh build --temp %
-  "call system('build.sh build --temp ' . shellescape(expand("%:p")) . ' &')
-endfunction
-
-function! s:Build() abort
-  write
-  call RunCmdlineOverload(s:cmdline_prefix_regexp,
-    \function('s:BuildDefault'), function('s:BuildWithArguments'))
-endfunction
-
-function! s:BuildDefault() abort
-  write
-  vertical T build.sh build --temp %
-endfunction
-
-function! s:BuildWithArguments(cmdline) abort
-  execute('vertical T ' . a:cmdline)
-endfunction
-
-function! s:Run() abort
-  silent !build.sh run --temp %
-endfunction
-
-function! s:RunDefault() abort
-endfunction
-
-
+let s:run_line = '<!--run:\(.*\)-->'
 
 "function! Lint()
 "endfunction
 
-let b:Build = function('<SID>Build')
-let b:BuildBackground = function('<SID>BuildBackground')
-let b:Run = function('<SID>Run')
+let b:BuildBackground = function('Make', [0, 'build', '--temp'])
+let b:Build = function('CustomisableMake', [s:run_line, 'build', '--temp'])
+let b:Run = function('Make', [0, 'run', '--temp'])  " run falkon
 
 "function! s:Build() abort
 "  write

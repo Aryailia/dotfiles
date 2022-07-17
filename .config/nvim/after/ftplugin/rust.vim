@@ -1,4 +1,4 @@
-let s:cmdline_prefix_regexp = '//run:'
+let s:run_line = '//run:\(.*\)'
 
 function! s:BuildBackground() abort
   vertical T cargo check
@@ -13,25 +13,12 @@ function! s:Build() abort
   execute "normal! \<C-w>\<C-w>"
 endfunction
 
-function! s:Run() abort
-  call RunCmdlineOverload(s:cmdline_prefix_regexp,
-    \function('s:RunDefault'), function('s:RunWithArguments'))
-endfunction
-
-function! s:RunDefault() abort
-  vertical T cargo run
-endfunction
-
-function! s:RunWithArguments(cmdline) abort
-  execute('vertical T ' . a:cmdline)
-endfunction
-
 function! s:Lint() abort
   RustFmt
   vertical T cargo clippy
 endfunction
 
-let b:Build = function('<SID>Build')
 let b:BuildBackground = function('<SID>BuildBackground')
-let b:Run = function('<SID>Run')
+let b:Build = function('<SID>Build')
+let b:Run = function('CustomisableMake', [s:run_line, 'run', ''])
 let b:Lint = function('<SID>Lint')

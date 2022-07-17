@@ -20,6 +20,12 @@ show_help() {
   exit 1
 }
 
+tetra() {
+  project_path="${HOME}/projects/personal-project"
+  [ ! -x "${project_path}/target/release/tetra-cli" ] \
+    && cargo build --release --manifest-path "${project_path}/Cargo.toml"
+  "${project_path}/target/release/tetra-cli" parse "$1"
+}
 
 ENUM_DEFAULT=0
 ENUM_TEMP=1
@@ -63,7 +69,7 @@ main() {
   shift 2
   name="${file##*/}"
   stem="${name%.*}"
-  ext="${name##*.}"
+  ext="$( printf %s "${name##*.}" | awk '{print tolower($0)}' )"
   target_dir=''
   case "${OUTPUT}"
     in "${ENUM_DEFAULT}") target_dir="$( dirname "${1}"; printf a )"
@@ -87,26 +93,64 @@ main() {
 
   "${BUILD}" && case "${ext}"
     in java)    run_from_project_home "${file}" "make.sh" "build" || exit "$?"
+    ;; py)      run_relative_to_project_home "${file}" "requirements.txt" "${file}" python
     ;; rs)      print_do cargo build || exit "$?"
     # TODO: Make this use argv instead of dealing with string escaping
-    ;; rmd)     Rscript -e "rmarkdown::render('${file}', output_file='${target_dir}/${stem}.pdf')"
+    ;; sass)    sassc "${file}" >"${target_dir}/${stem}.css"
+    ;; sh)      sh "${file}"
+
+    ;; adoc|ad|asc)
+      process_adoc "${file}" "${target_dir}/${stem}"
+    ;; rmd)     Rscript -e "rmarkdown::render('${file}', output_file='${target_dir}/${stem}')"
+    ;; md)      rustdoc "${file}" --output "${target_dir}"
     ;; tex)     tectonic "${file}" --print --outdir "${target_dir}" "$@"
     ;; latex)   process_latex "${file}" "${target_dir}/${stem}"
-    ;; py)      run_relative_to_project_home "${file}" "requirements.txt" "${file}" python
     ;; *)  printf %s\\n "Unsupported filetype for building file '${file}'" >&2
   esac
   "${BUILD}" && notify.sh "Compiled ${file}"
 
 
 
+  new_target="${target_dir}/${stem}"
   "${RUN}" && case "${ext}"
     in java)  run_from_project_home "${file}" "make.sh" "run" || exit "$?"
-    ;; rs)    print_do cargo run
-    ;; rmd|latex|tex)
-              handle.sh gui "${target_dir}/${stem}.pdf"
     ;; py)    run_relative_to_project_home "${file}" "requirements.txt" "${file}" python
+    ;; rs)    print_do cargo run
+    ;; sh)    print_do sh "${file}"
+
+    ;; md|rmd|latex|tex)
+      if [ -f "${new_target}.pdf" ]; then
+        handle.sh gui "${new_target}.pdf"
+      else
+        setsid falkon "${new_target}.html"
+      fi
     ;; *)  printf %s\\n "Unsupported filetype for running file '${file}'" >&2
   esac
+  #"${RUN}" && notify.sh "Ran ${file}"
+}
+
+
+process_adoc() {
+  imagesdir="$( <"${1}" sed -n '/^:imagesdir:/{s/^:.*: *//p}' )"
+  dir="$( realpath "${1}"; printf a )"; dir="${dir%?a}"
+  dir="$( dirname "${dir}"; printf a )"; dir="${dir%?a}"
+  target="$( realpath "${dir}/${imagesdir}"; printf a )"; target="${target%?a}"
+  #bibtex="$( gem list --local | grep '^asciidoctor-bibtex ' )" || exit "$?"
+  bibtex=''
+  if [ -n "${bibtex}" ]
+    then bibtex="--require=asciidoctor-bibtex"
+    else bibtex=""
+  fi
+
+  # '-a webfonts!' disables <link> to fonts.googleapis.com
+  #tetra "${1}" | asciidoctor - --backend html5 --destination-dir "${2%/*}" \
+  tetra "${1}" | asciidoctor - --backend html5 \
+    ${bibtex} \
+    --attribute source-highlighter='pygments' \
+    --attribute 'webfonts!' \
+    --attribute imagesdir="${target}" \
+  >"${2}.html"
+  errln "${2}.html"
 }
 
 
@@ -167,7 +211,7 @@ run_from_project_home() (
 )
 
 
-ut() {
+ut() { # unit test
   if [ "${1}" = "${2}" ]
     then printf %s\\n "pass ${3}" >&2
     else die FATAL 1 "${3}: '${1}' != '${2}'"
@@ -250,6 +294,7 @@ setv_find_project_base() {
   return 1
 }
 
+errln() { printf %s\\n "$@" >&2; }
 outln() { printf %s\\n "$@"; }
 eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 die() { printf %s "${1}: " >&2; shift 1; printf %s\\n "$@" >&2; exit "${1}"; }

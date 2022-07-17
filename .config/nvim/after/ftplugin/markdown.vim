@@ -1,4 +1,4 @@
-let s:cmdline_prefix_regexp = '<!--run:'
+let s:run_line = '<!--run:\(.*\)-->'
 
 " autocmd FileType markdown noremap <F2> :call PreviewSendLine('pandoc | lynx -stdin')<CR>
 " autocmd FileType markdown noremap <F3> :call PreviewOpenWindow(terminal_execute)<CR>
@@ -22,25 +22,11 @@ let s:cmdline_prefix_regexp = '<!--run:'
 "  \<C-o>o
 
 
-" Maintain parity with 'asciidoc.vim'
-function! s:BuildBackground() abort
-  write
-  silent !compile.sh --temp %
-endfunction
-
-function! s:Build() abort
-  call RunCmdlineOverload(s:cmdline_prefix_regexp,
-    \function('s:BuildDefault'), function('s:RunWithArguments'))
-endfunction
-
-function! s:BuildDefault() abort
-  write
-  vertical T compile.sh --temp %
-endfunction
-
+" Maintain parity with 'asciidoc.vim' and 'rmd.vim'
 function! s:Run() abort
-  call RunCmdlineOverload(s:cmdline_prefix_regexp,
-    \function('s:RunDefault'), function('s:RunWithArguments'))
+  call RunCmdlineOverload(s:run_line,
+    \function('s:RunDefault'),
+    \function('s:RunWithArguments'))
 endfunction
 
 function! s:RunDefault() abort
@@ -62,6 +48,6 @@ endfunction
 "function! Lint()
 "endfunction
 
-let b:Build = function('<SID>Build')
-let b:BuildBackground = function('<SID>BuildBackground')
+let b:BuildBackground = function('Make', [0, 'build', '--temp'])
+let b:Build = function('Make', [1, 'build', '--temp'])
 let b:Run = function('<SID>Run')
