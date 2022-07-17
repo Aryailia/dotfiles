@@ -47,6 +47,7 @@ EOF
 ACCOUNTS_DIR="${XDG_CONFIG_HOME}/neomutt/accounts"
 DOMAINS_CSV="${DOTENVIRONMENT}/domains.csv"
 MSMTP_CONFIG="${XDG_CONFIG_HOME}/msmtp/config"
+MUTT_TOKEN="${DOTENVIRONMENT}/mutt-token.csv"
 
 # Handles options that need arguments
 main() {
@@ -79,7 +80,7 @@ main() {
       exec neomutt -F "${ACCOUNTS_DIR}/${config}"
 
     ;; add-imap)    #    # Adds an email address only accessed online
-      add_imap_address
+      add_muttrc "imap"
       printf >&2 '' "Dont forget to run" "    $NAME add-msmtp"
 
     ;; add-mailbox) #    # Adds an address stored locally with mailbox format
@@ -87,12 +88,44 @@ main() {
 
     ;; add-msmtp)   # [<email>]  # Adds the send mail settings
       add_msmtp "${2}"
+
+    ;; add-oauth)   # [<email>]  # Adds the send mail settings
+      add_muttrc "oauth"
+
+    # https://github.com/neomutt/neomutt/blob/main/contrib/oauth2/mutt_oauth2.py.README
+    ;; dl-oauth2)   #    # Download the semi-official mutt oauth python script
+      #url="https://raw.githubusercontent.com/google/gmail-oauth2-tools/master/python/oauth2.py"
+      url="https://raw.githubusercontent.com/neomutt/neomutt/main/contrib/oauth2/mutt_oauth2.py"
+
+      curl -L -o "${HOME}/.local/bin/mutt_oauth2.py" "${url}" \
+        && chmod 755 -- "${HOME}/.local/bin/mutt_oauth2.py"
+
+    ;; oauth-token) #    # Obtain the token
+      mutt_oauth2.py \
+        --provider "google" \
+        --encryption-pipe 'gpg --encrypt --recipient my-pass' \
+        --client-id "$( pass show 'mutt-api-id' )" \
+        --client-secret "$( pass show 'mutt-api-secret' )" \
+        --authorize "${MUTT_TOKEN}"
+
+    ;; oauth-test) #     # Test the token
+      # https://github.com/neomutt/neomutt/issues/3442
+      # https://github.com/neomutt/neomutt/blob/main/contrib/oauth2/mutt_oauth2.py.README
+      #gtool_oauth2.py --generate_oauth2_token #\
+
+      mutt_oauth2.py \
+        --provider "google" \
+        --encryption-pipe 'gpg --encrypt --recipient my-pass' \
+        --client-id "$( pass show 'mutt-api-id' )" \
+        --client-secret "$( pass show 'mutt-api-secret' )" \
+        --test "${MUTT_TOKEN}"
+      #
     ;; *)  exit_help
   esac
 }
 
 #run: sh % add-msmtp
-add_imap_address() {
+add_muttrc() {
   printf 'Enter name: ' >&2; read -r name || exit "$?"
   printf 'Enter email address: ' >&2; read -r address || exit "$?"
 
@@ -106,10 +139,19 @@ EOF
   [ -e "${filepath}" ] && die FATAL 1 "Config for '${filepath}' already exists"
 
   printf >&2 %s\\n "Saving neomuttrc to '${ACCOUNTS_DIR}/${filename}' ..."
-  imap_muttrc_template "${name}" "${address}" \
-    "${in_server}" "${in_port}" \
-    "${out_server}" "${out_port}" \
-  >"${filepath}"
+  case "${1}"
+    in "imap")
+      imap_muttrc_template "${name}" "${address}" \
+        "${in_server}" "${in_port}" \
+        "${out_server}" "${out_port}" \
+      >"${filepath}"
+    ;; "oauth")
+      oauth_muttrc_template "${name}" "${address}" \
+        "${in_server}" "${in_port}" \
+        "${out_server}" "${out_port}" \
+      >"${filepath}"
+    ;; *)  die DEV "Invalid argument for add_muttrc '${1}'"
+  esac
   exec "${EDITOR}" "${filepath}"
 }
 
@@ -117,6 +159,7 @@ EOF
 add_msmtp() {
   address="${1:-"$(
     printf 'Enter email address: ' >&2; read -r address || exit "$?"
+    printf %s "${address}"
   )"}"
   [ -z "${address}" ] && die FATAL 1 "Please enter a non-empty email address"
   server_info="$( find_domain_for "${address}" )" || {
@@ -177,21 +220,20 @@ imap_muttrc_template() {
 source ~/.config/neomutt/neomuttrc
 
 # Some custom variables
-set my_name = "${1}"
 set my_address = "${2}"
 
 ################################################################################
 # General
 ################################################################################
 # The in/out servers
-set realname = \$my_name
+set realname = \${my_name}
 set imap_pass = "\`pass show email/\$my_address\`"
-set folder = "imaps://\$my_address@${3}:${4}"
+set folder = "imaps://\${my_address}@${3}:${4}"
 
 ## Using sendmail command intsead
-#set smtp_url = "smtp://\$my_address@${5}:${6}"
-#set smtp_pass = "\`pass show email/\$my_address\`"
-set sendmail = "msmtp -a \$my_address"
+#set smtp_url = "smtps://\${my_address}@${5}:${6}"
+#set smtp_pass = "\`pass show email/\${my_address}\`"
+set sendmail = "msmtp -a \${my_address}"
 
 set spoolfile = "+INBOX"
 
@@ -212,7 +254,7 @@ set postponed = "+Drafts"
 
 # Populates the sidebar and subscribes to mailboxes
 # '=' is replaced {folder}
-named-mailboxes "\$my_address" =x       # Fake mailbox for sidebar
+named-mailboxes "\${my_address}" =x       # Fake mailbox for sidebar
 named-mailboxes "箱 Inbox"  =INBOX
 named-mailboxes "稿 Drafts" ='Drafts'
 named-mailboxes "送 Sent"   ='Sent'
@@ -220,10 +262,76 @@ named-mailboxes "廢 Junk"   ='Junk'
 named-mailboxes "垃 Trash"  ='Deleted/'
 
 # If we want multiple mailboxes at once, probably need this line
-# account-hook $folder "set imap_pass=..."
+# account-hook \$folder "set imap_pass=..."
 EOF
 }
 
+# $1: name
+# $2: email address
+# $3: in server address
+# $4: in server port
+# $5: out server address
+# $6: out server port
+oauth_muttrc_template() {
+  <<EOF cat -
+# vim: filetype=neomuttrc
+# https://github.com/neomutt/neomutt/blob/main/contrib/oauth2/mutt_oauth2.py.README
+
+source ~/.config/neomutt/neomuttrc
+
+# Some custom variables
+set my_address = "${2}"
+
+################################################################################
+# General
+################################################################################
+# The in/out servers
+set realname = "${1}"
+set folder = "imaps://\${my_address}@${3}:${4}"
+
+set imap_authenticators = "oauthbearer:xoauth2"
+set imap_oauth_refresh_command = "mutt_oauth2.py ${MUTT_TOKEN}"
+
+# Not sure why this doesn't work
+set smtp_url = "smtp://\${imap_user}@${5}:${6}/"
+set smtp_authenticators = \${imap_authenticators}
+set smtp_oauth_refresh_command = \${imap_oauth_refresh_command}
+
+## Using sendmail command intsead
+#set smtp_url = "smtps://\${my_address}@${5}:${6}"
+#set smtp_pass = "\`pass show email/\${my_address}\`"
+#set sendmail = "msmtp -a \${my_address}"
+
+set spoolfile = "+INBOX"
+
+# Identity configuration
+set from = "\${realname} <\${my_address}>"
+set use_from = "yes"
+
+################################################################################
+# Mailboxes
+################################################################################
+# Use 'c' (change mailbox) then '<tab>' (toggle mailboxes) 
+# So mutt knows where to move emails after you delete, etc.
+# '+' is replaced {folder}
+# ''... = +'Sent' '' or ''... = "+Sent" '' are both acceptable
+set record = "+[Gmail]/Sent Mail"
+set trash = "+[Gmail]/Trash"
+set postponed = "+[Gmail]/Drafts"
+
+# Populates the sidebar and subscribes to mailboxes
+# '=' is replaced {folder}
+named-mailboxes "\${my_address}" =x  # Fake mailbox for sidebar
+named-mailboxes "箱 Inbox"  =INBOX
+named-mailboxes "稿 Drafts" ='[Gmail]/Drafts'
+named-mailboxes "送 Sent"   ='[Gmail]/Sent Mail'
+named-mailboxes "廢 Junk"   ='[Gmail]/Spam'
+named-mailboxes "垃 Trash"  ='[Gmail]/Trash'
+
+# If we want multiple mailboxes at once, probably need this line
+# account-hook \$folder "set imap_pass=..."
+EOF
+}
 
 
 
