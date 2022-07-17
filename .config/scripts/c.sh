@@ -11,9 +11,9 @@ main() {
     in -h|--help)  puts "Outputs constants. I think this adds transparency."
     ;; cdpath)          p "${HOME}/.config/named_directories"
     ;; docs|documents)
-      if   [ -d "/sdcard/Documents" ]; then    p '/sdcard/Documents'
+      if   [ -d "/sdcard/Document" ]; then     p '/sdcard/Document'
       elif [ -d "${HOME}/me/Downloads" ]; then p "${HOME}/me/Documents"
-      else                                     p "${HOME}/Downloads"
+      else                                     p "${HOME}/Documents"
       fi
     ;; dl|downloads)
       if   [ -d "/sdcard/Download" ]; then     p '/sdcard/Download'
@@ -21,6 +21,8 @@ main() {
       else                                     p "${HOME}/Downloads"
       fi
     ;; dq|download-queue)  main 'dl'; p "/queue"
+    ;; snippets)           p "${XDG_CONFIG_HOME}/snippets"
+
     ;; scihub)             p 'http://sci-hub.tw'  # changes frequently
     # https://stackoverflow.com/questions/19306771/
     ;; current-user)       ps -o user= "$$" | awk '{ printf("%s", $1); }'

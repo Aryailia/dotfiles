@@ -26,7 +26,7 @@ sub help {
     "Supports:\n",
   ;
 
-  open(FILE, "<$0") or "Trouble reading help from source file '$0'";
+  open(FILE, "<$0") or die "Trouble reading help from source file '$0'";
   foreach (<FILE>) {
     $_ =~ / +# help: (.+)/ and say("  $1");
   }
@@ -38,7 +38,7 @@ sub help {
 my ($local_rates, %abrv);
 
 # run: perl % local 250 jp to us
-#run: perl % tz
+# run: perl % tz
 sub main {
   my $arg = join(" ", @ARGV);
   # help: Celsius (C), Fahrenheit (F), Kelvin (K)
