@@ -5,7 +5,7 @@
 # Because of the breaking across newlines, fish needs semicolons
 
 alias    ab='abook --datafile "$HOME/.config/abook/addressbook"'
-alias   bcb='browser.sh menu bookmarks --browser clipboard'
+alias   bcb='browser.sh print bookmarks | clipboard.sh --write'
 alias   bgl='browser.sh gui link'
 alias   bgb='browser.sh gui bookmarks'
 alias   bgs='browser.sh gui search'
