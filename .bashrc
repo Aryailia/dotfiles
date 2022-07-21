@@ -40,8 +40,8 @@ rrc() {
 
 # Android Termux: Bash never ran as login shell, thus '.profile' never sourced
 [ -z "${XDG_CONFIG_HOME}" ] && source "${HOME}/.profile"
-# Nee
 rrc 'Avoid infinite loop'
+. "${DOTENVIRONMENT}/post-bashrc.sh" # Mostly for server-specifc configs
 
 # Use `cat` instead of a function so we do not pollute namespace
 # https://stackoverflow.com/questions/24839271 for using \001 and \002
@@ -77,3 +77,4 @@ if test -z "${XDG_RUNTIME_DIR}"; then
     chmod 0700 "${XDG_RUNTIME_DIR}"
   fi
 fi
+

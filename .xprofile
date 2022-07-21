@@ -12,13 +12,16 @@
 ## TODO: Check on fresh install
 #[ -n "$DBUS_SESSION_BUS_ADDRESS" ] && \
 #  dbus-launch --sh-syntax --exit-with-session
+# https://fcitx-im.org/wiki/Configure_(Other)#Use_Slim_.28.7E.2F.xinitrc.29.2Fstartx
 #[ -n "$DBUS_SESSION_BUS_ADDRESS" ] && \
 #  eval 'dbus-launch --sh-syntax --exit-with-session'
+dbus-launch --sh-syntax --exit-with-session >/dev/null
 
 # Export fcitx variables before running graphical programs
 export XMODIFIERS="@im=fcitx"
 export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
+export SDL_IM_MODULE=fcitx
 killall fcitx; fcitx  # Restart fcitx
 
 # Startup up stuff
@@ -27,6 +30,8 @@ xbacklight -set 40&            # Screen brightness
 x.sh set-wallpaper&            # Desktop Wallpaper
 xcompmgr -c&                   # Window Transparency
 dunst&                         # Notifications
+pipewire&                      # Sound
+mpd&                           # For music playing
 #sxhkd&                         # For hotkeys
 
 ## Swap CapsLock and ControlR

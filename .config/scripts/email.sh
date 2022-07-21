@@ -100,7 +100,7 @@ main() {
       curl -L -o "${HOME}/.local/bin/mutt_oauth2.py" "${url}" \
         && chmod 755 -- "${HOME}/.local/bin/mutt_oauth2.py"
 
-    ;; oauth-token) #    # Obtain the token
+    ;; oauth-auth) #    # Authorise obtained token
       mutt_oauth2.py \
         --provider "google" \
         --encryption-pipe 'gpg --encrypt --recipient my-pass' \
