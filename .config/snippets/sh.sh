@@ -22,12 +22,12 @@ sh_match_to() { out '[ "${<>}" != "${<>#*<>}" ] && <>'; }
 addPrefixedFunction 'sh' 'set_preserve' 'Set and preserve newlines'
 sh_set_preserve() { out '<>="$( <>; printf a )"; <>="${<>%?a}"'; }
 
-addPrefixedFunction 'sh' 'cd_mydir' '`cd` to the directory of this script'
-sh_cd_mydir() {
+addPrefixedFunction 'sh' 'cd_project' "Run from dir where the script resides"
+sh_cd_project() {
   <<EOF cat -
-mydir="\$( dirname "\${0}"; printf a )"; mydir="\${mydir%?a}"
-cd "\${mydir}" || { printf %s\\\\n "Cannot cd to project dir" >&2; exit 1; }
-mydir="\$( pwd -P; printf a )"; mydir="\${mydir%?a}"
+WD="\$( dirname "\$0"; printf a )"; WD="\${WD%?a}"
+cd "\${WD}" || { printf "Could not cd to directory of '%s'" "\$0" >&2; exit 1; }
+#WD="\$( pwd -P; printf a )"; WD="\${WD%?a}"
 EOF
 }
 
@@ -173,6 +173,7 @@ absolute_path() (
 )
 EOF
 }
+
 
 
 
@@ -441,3 +442,50 @@ $( sh_prompt_color '/' )
 <&0 main "\$@"
 EOF
 }
+
+################################################################################
+# For other languages
+
+addPrefixedFunction 'sh' 'py_make' "Python virtual environment runner"
+sh_py_make() {
+  <<EOF cat -
+#!/bin/sh
+# Prefix commands with ./make.sh to run with virtual environment, e.g.
+#     ./make.sh pip install -e .[dev]
+#     ./make.sh python app.py
+
+$( sh_cd_project )
+
+. venv/bin/activate || { printf %s\\n "Error sourcing venv" >&2; exit 1; }
+"\$@"
+
+EOF
+}
+
+addPrefixedFunction 'sh' 'post_data' "POST default Content-Type header"
+sh_post_data() {
+  <<EOF cat -
+curl -X POST -d 'lang=en&amount=12' "localhost:8000/api"
+EOF
+}
+
+addPrefixedFunction 'sh' 'post_form' "POST default x-www-form-urlencoded header"
+sh_post_form() {
+  <<EOF cat -
+curl -X POST -F 'lang=en' -F 'amount=12' "localhost:8000/api"
+EOF
+}
+
+addPrefixedFunction 'sh' 'post_json' "POST JSON"
+sh_post_json() {
+  <<EOF cat -
+curl -X POST \\
+  -H "Content-Type: application/json" \\
+  -d '{"lang": "en", "amount": 12}' \\
+  "localhost:8000/api"
+EOF
+}
+
+
+
+
