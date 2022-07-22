@@ -1,35 +1,11 @@
-let s:cmdline_prefix_regexp = '#run:'
-
-function! s:BuildBackground() abort
-  silent !cal.sh %
-
-endfunction
+let s:run_line = '#run:\(.*\)'
 
 function! s:Build() abort
-  " `%` is the full path, `expand("%")` is just the current file name
-  "execute("vertical T rustc % -o \"${TMPDIR}/" . expand("%") . '"')
-  vertical T cal.sh '%'
+  vertical T <% remind -c+4 -
 endfunction
 
-function! s:Run() abort
-  call RunCmdlineOverload(s:cmdline_prefix_regexp,
-    \function('s:RunDefault'), function('s:RunWithArguments'))
-endfunction
 
-function! s:RunDefault() abort
-  vertical T cal.sh %
-endfunction
-
-function! s:RunWithArguments(cmdline) abort
-  execute('vertical T ' . a:cmdline)
-endfunction
-
-function! s:Lint() abort
-  RustFmt
-  vertical T cargo clippy
-endfunction
-
+let b:BuildBackground = function('ShellMake', [s:run_line])
 let b:Build = function('<SID>Build')
-let b:BuildBackground = function('<SID>BuildBackground')
-let b:Run = function('<SID>Run')
-let b:Lint = function('<SID>Lint')
+let b:Run = b:BuildBackground
+"let b:Lint = function('<SID>Lint')

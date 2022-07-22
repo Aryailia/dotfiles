@@ -235,6 +235,15 @@ function! MakeWithArguments(cmdline) abort
   execute('vertical T ' . a:cmdline)
 endfunction
 
+" Run the comment as a shell command
+function! ShellMake(regexp) abort
+  " 'getpid' is just a no-op
+  call RunCmdlineOverload(a:regexp
+  \, function('getpid')
+  \, function('MakeWithArguments')
+  \)
+endfunction
+
 " Probably to what you want to set b:Run()
 function! CustomisableMake(regexp, build_type, temp) abort
   call RunCmdlineOverload(a:regexp
