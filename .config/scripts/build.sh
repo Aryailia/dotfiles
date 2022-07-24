@@ -22,9 +22,10 @@ show_help() {
 
 tetra() {
   project_path="${HOME}/projects/personal-project"
-  [ ! -x "${project_path}/target/release/tetra-cli" ] \
-    && cargo build --release --manifest-path "${project_path}/Cargo.toml"
-  "${project_path}/target/release/tetra-cli" parse "$1"
+  #[ ! -x "${project_path}/target/debug/tetra-cli" ] \
+    #&& cargo build --manifest-path "${project_path}/Cargo.toml"
+  #"${project_path}/target/debug/tetra-cli" parse "$1"
+  cargo run --manifest-path "${project_path}/Cargo.toml" parse "${1}"
 }
 
 ENUM_DEFAULT=0
@@ -93,6 +94,7 @@ main() {
 
   "${BUILD}" && case "${ext}"
     in java)    run_from_project_home "${file}" "make.sh" "build" || exit "$?"
+    ;; mjs|js)  node "${file}"
     ;; py)      run_relative_to_project_home "${file}" "requirements.txt" "${file}" python
     ;; rs)      print_do cargo build || exit "$?"
     # TODO: Make this use argv instead of dealing with string escaping
@@ -101,7 +103,10 @@ main() {
 
     ;; adoc|ad|asc)
       process_adoc "${file}" "${target_dir}/${stem}"
-    ;; rmd)     Rscript -e "rmarkdown::render('${file}', output_file='${target_dir}/${stem}')"
+    ;; rmd)
+      [ "${file}" != "/tmp/${stem}.rmd" ] || die FATAL 1 "Cannot build temp files"
+      tetra "${file}" >"/tmp/${stem}.rmd"
+      Rscript -e "rmarkdown::render('/tmp/tetra.rmd', output_file='${target_dir}/${stem}')"
     ;; md)      rustdoc "${file}" --output "${target_dir}"
     ;; tex)     tectonic "${file}" --print --outdir "${target_dir}" "$@"
     ;; latex)   process_latex "${file}" "${target_dir}/${stem}"
@@ -113,10 +118,11 @@ main() {
 
   new_target="${target_dir}/${stem}"
   "${RUN}" && case "${ext}"
-    in java)  run_from_project_home "${file}" "make.sh" "run" || exit "$?"
-    ;; py)    run_relative_to_project_home "${file}" "requirements.txt" "${file}" python
-    ;; rs)    print_do cargo run
-    ;; sh)    print_do sh "${file}"
+    in java)    run_from_project_home "${file}" "make.sh" "run" || exit "$?"
+    ;; mjs|js)  npm run "${file}"
+    ;; py)      run_relative_to_project_home "${file}" "requirements.txt" "${file}" python
+    ;; rs)      print_do cargo run
+    ;; sh)      print_do sh "${file}"
 
     ;; md|rmd|latex|tex)
       if [ -f "${new_target}.pdf" ]; then
@@ -126,7 +132,7 @@ main() {
       fi
     ;; *)  printf %s\\n "Unsupported filetype for running file '${file}'" >&2
   esac
-  #"${RUN}" && notify.sh "Ran ${file}"
+  "${RUN}" && notify.sh "Ran ${file}"
 }
 
 

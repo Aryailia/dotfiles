@@ -175,6 +175,21 @@ EOF
 }
 
 
+addPrefixedFunction 'sh' 'print_do' "Prints or executes a command"
+sh_print_do() {
+  <<EOF cat -
+print_do() {
+  if "\${DRYRUN}"; then
+    printf '"%s" ' "\$@"
+    printf \\\\n
+  else
+    "\$@"
+  fi
+}
+EOF
+}
+
+
 
 
 ################################################################################

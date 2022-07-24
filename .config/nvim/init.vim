@@ -225,7 +225,8 @@ function! Make(is_run_in_split, build_type, temp) abort
   if a:is_run_in_split
     execute('vertical T build.sh ' . a:build_type . ' ' . a:temp . l:path)
   else
-    execute('AsyncRun setsid build.sh  ' . a:build_type . ' ' . a:temp . l:path)
+    " NOTE: .tex files need this to not be `AsyncRun setsid build.sh`
+    execute('AsyncRun build.sh  ' . a:build_type . ' ' . a:temp . l:path)
   endif
 endfunction
 
@@ -564,6 +565,56 @@ inoremap <unique> <LocalLeader>fig ‒
 inoremap <unique> <LocalLeader>~ 　　
 inoremap <unique> ，～ 　　
 
+
+" Greek symbols
+inoremap <unique> <LocalLeader>Alpha Α
+inoremap <unique> <LocalLeader>alpha α
+inoremap <unique> <LocalLeader>Beta Β
+inoremap <unique> <LocalLeader>beta β
+inoremap <unique> <LocalLeader>Gamma Γ
+inoremap <unique> <LocalLeader>gamma γ
+inoremap <unique> <LocalLeader>Delta Δ
+inoremap <unique> <LocalLeader>delta δ
+inoremap <unique> <LocalLeader>Epsilon Ε
+inoremap <unique> <LocalLeader>epsilon ε
+inoremap <unique> <LocalLeader>Zeta Ζ
+inoremap <unique> <LocalLeader>zeta ζ
+inoremap <unique> <LocalLeader>Eta Η
+inoremap <unique> <LocalLeader>eta η
+inoremap <unique> <LocalLeader>Theta Θ
+inoremap <unique> <LocalLeader>theta θ
+inoremap <unique> <LocalLeader>Iota Ι
+inoremap <unique> <LocalLeader>iota ι
+inoremap <unique> <LocalLeader>Kappa Κ
+inoremap <unique> <LocalLeader>kappa κ
+inoremap <unique> <LocalLeader>Lambda Λ
+inoremap <unique> <LocalLeader>lambda λ
+inoremap <unique> <LocalLeader>Mu Μ
+inoremap <unique> <LocalLeader>mu μ
+inoremap <unique> <LocalLeader>Nu Ν
+inoremap <unique> <LocalLeader>nu ν
+inoremap <unique> <LocalLeader>Xi Ξ
+inoremap <unique> <LocalLeader>xi ξ
+inoremap <unique> <LocalLeader>Omicron Ο
+inoremap <unique> <LocalLeader>omicron ο
+inoremap <unique> <LocalLeader>Pi Π
+inoremap <unique> <LocalLeader>pi π
+inoremap <unique> <LocalLeader>Rho Ρ
+inoremap <unique> <LocalLeader>rho ρ
+inoremap <unique> <LocalLeader>Sigma Σ
+inoremap <unique> <LocalLeader>sigma σ
+inoremap <unique> <LocalLeader>Tau Τ
+inoremap <unique> <LocalLeader>tau τ
+inoremap <unique> <LocalLeader>Upsilon Υ
+inoremap <unique> <LocalLeader>upsilon υ
+inoremap <unique> <LocalLeader>Phi Φ
+inoremap <unique> <LocalLeader>phi φ
+inoremap <unique> <LocalLeader>Chi Χ
+inoremap <unique> <LocalLeader>chi χ
+inoremap <unique> <LocalLeader>Psi Ψ
+inoremap <unique> <LocalLeader>psi ψ
+inoremap <unique> <LocalLeader>Omega Ω
+inoremap <unique> <LocalLeader>omega ω
 
 " Knowledge Management
 nnoremap <unique> <Leader>kt :edit <C-r>=system(
