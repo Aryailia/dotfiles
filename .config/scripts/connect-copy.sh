@@ -1,33 +1,16 @@
 #!/bin/sh
 
-NAME="$( basename "${0}"; printf a )"; NAME="${NAME%?a}"
-
-show_help() {
-  <<EOF cat - >&2
-SYNOPSIS
-  ${NAME}
-
-DESCRIPTION
-  
-
-OPTIONS
-  -v, --verbose
-     Good for for testing which ssh authentication methods are available
-     for checking if we set server up correctly
-
-EOF
-}
-
 ADDRESSES="${DOTENVIRONMENT}/addr.csv"
 KEY="${HOME}/.ssh/was"
 SSH_DIR="${HOME}/.ssh"
+
 DRYRUN='false'
 VERBOSE=''
 QUIET='-q'
+ABSPATH=''
 
 # Handles options that need arguments
 main() {
-
   # Options processing
   args=''
   literal='false'
@@ -35,10 +18,12 @@ main() {
     "${literal}" || case "${1}"
       in --)        literal='true'; shift 1; continue
       ;; -h|--help) show_help; exit 0
-      ;; -v|--verbose)    VERBOSE='-v'; QUIET=''
-      ;; -D|--dry-run)    DRYRUN='true'
+      ;; -v|--verbose)   VERBOSE='-v'; QUIET=''
+      ;; -D|--dry-run)   DRYRUN='true'
 
-      ;; -i|--identity)   KEY="${2}"; shift 1
+      ;; -p|--path)      ABSPATH="${2}"; shift 1
+      ;; -i|--identity)  KEY="${2}"; shift 1
+      #;; -e|--example2) outln "-${2}-"; shift 1
 
       ;; -*) die FATAL 1 "Invalid option '${1}'. See \`${NAME} -h\` for help"
       ;; *)  args="${args} $( outln "${1}" | eval_escape )"
@@ -50,20 +35,40 @@ main() {
   #[ -z "${args}" ] && { show_help; exit 1; }
   eval "set -- ${args}"
 
-  [ -r "${ADDRESSES}" ] || die FATAL 1 "Missing addr.csv"
-  line="$( <"${ADDRESSES}" fzf --delimiter=, --with-nth="1,4" ),"
-  #line="test,1.1.1.1,33,user,"
-  line="${line#*,}"
-  ip="${line%%,*}";   line="${line#"${ip}"}"; line="${line#,}"
-  port="${line%%,*}"; line="${line#"${port}"}"; line="${line#,}"
-  port="${port:-22}"
-  user="${line%%,*}"; line="${line#"${user}"}"; line="${line#,}"
-
   if [ ! -e "${KEY}" ]; then
     KEY="$( list_files | fzf )"
   fi
 
-  print_do exec ssh ${VERBOSE} ${QUIET} -p "${port}" -i "${KEY}" "${user}@${ip}"
+  case "$#"
+    in 0)  choose_scp_URI; print_do scp ${VERBOSE} -i "${KEY}" "${URI}" ./
+    ;; 1)  choose_scp_URI; print_do scp ${VERBOSE} -i "${KEY}" "${1}" "${URI}"
+  esac
+}
+
+print_do() {
+  if "${DRYRUN}"; then
+    printf '"%s" ' "$@"
+    printf \\n
+  else
+    "$@"
+  fi
+}
+
+choose_scp_URI() {
+  [ -r "${ADDRESSES}" ] || die FATAL 1 "Missing addr.csv"
+  line="$( <"${ADDRESSES}" fzf --with-nth='1,4' --delimiter=, ),"
+  line="${line#*,}"
+  host="${line%%,*}"; line="${line#"${host}"}"; line="${line#,}"
+  port="${line%%,*}"; line="${line#"${port}"}"; line="${line#,}"
+  port="${port:-22}"
+  user="${line%%,*}"; line="${line#"${user}"}"; line="${line#,}"
+
+  while [ -z "${ABSPATH}" ] || [ "${ABSPATH}" = "${ABSPATH#/}" ]; do
+    printf %s "Enter absolute path: "
+    read -r ABSPATH
+  done
+
+  URI="scp://${user:+"${user}@"}${host}:${port}/${ABSPATH}"
 }
 
 list_files() {
@@ -74,15 +79,6 @@ list_files() {
     f="${f%.sh}"
     outln "${f}"
   done
-}
-
-print_do() {
-  if "${DRYRUN}"; then
-    printf '"%s" ' "$@"
-    printf \\n
-  else
-    "$@"
-  fi
 }
 
 # Helpers
