@@ -169,12 +169,12 @@ sub main {
 
   say STDERR "======== Special case ========";
   say STDERR "Set execute flag \$SCRIPTS in dotfiles directory... ";
-  system("/bin/find", $source_scripts, "-exec", "/bin/chmod", "755", "{}", "+");
+  system("/usr/bin/find", $source_scripts, "-exec", "/bin/chmod", "755", "{}", "+");
 
   # Named directories
   say STDERR "Making named directories...";
   if (-x "${make_shortcuts}") {
-    `/bin/env PATH="$my_env{'PATH'}" /bin/sh "$make_shortcuts"`;
+    `/usr/bin/env PATH="$my_env{'PATH'}" /bin/sh "$make_shortcuts"`;
   } else {
     say STDERR "! Shortcuts script '$make_shortcuts' not found/executable"
   }
@@ -182,7 +182,7 @@ sub main {
   if (-f $vim_plugin_manager_saveto) {
     $CONFIG{'verbose'} and say STDERR "✓ Already downloaded vim plugin manager";
   } else {
-    system("curl", "--create-dirs", "-fLo",
+    system("/usr/bin/curl", "--create-dirs", "-fLo",
       $vim_plugin_manager_saveto, $vim_plugin_manager_dllink);
     say STDERR "✓ Downloaded vim plugin manager";
   }
@@ -329,8 +329,8 @@ sub link_fromto_according_to_config {
 # Quotes on the delimiter disable variable expansions
 # See: https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_02
 sub source {
-  #`/bin/env -i HOME="$HOME" /bin/sh -c '. $_[0];/bin/env'`;
-  my $exports = `/bin/env -i HOME="/home/rai" /bin/sh -c '. $_[0];/bin/env'`
+  #`/usr/bin/env -i HOME="$HOME" /bin/sh -c '. $_[0];/bin/env'`;
+  my $exports = `/usr/bin/env -i HOME="$ENV{'HOME'}" /bin/sh -c '. $_[0]; /usr/bin/env'`
     or die "Failed to source '$_[0]'";
 
   my $row = 0;

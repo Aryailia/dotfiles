@@ -19,10 +19,11 @@ export npm_config_userconfig="$XDG_CONFIG_HOME/rc/npmrc"
 export npm_config_cache="$XDG_DATA_HOME/npm"
 export npm_config_prefix="$HOME/.local" # No XDG var for ~/.local
 export NODE_REPL_HISTORY=''
+export NODE_PATH="$npm_config_prefix/lib/node_modules"
 export CARGO_HOME="$HOME/.local/lib/cargo"   # For source files
 export CARGO_INSTALL_ROOT="$HOME/.local"     # For binaries
 export RUSTUP_HOME="$HOME/.local/lib/rustup" # Rustup source files
-export GOPATH="$HOME/.local"                 # Go adds './lib/go'
+export GOPATH="$HOME/.local/lib/go"
 export GOBIN="$HOME/.local/bin"              # For binaries
 export R_HISTFILE="/dev/null"
 export GEM_HOME="$HOME/.local/lib/gem"
@@ -57,9 +58,8 @@ export HISTCONTROL='ignoreboth'  # 'ignoreboth' is the following:
 export HISTIGNORE='ls:bg:fg:history'  # Do not log these commands
 
 # PATH
+export PAGER='less'
 export SCRIPTS="$XDG_CONFIG_HOME/scripts"
-export NODE_PATH="$npm_config_prefix/lib/node_modules"
-export GOPATH="$HOME/.local/lib/go"
 printf %s\\n ":$PATH:" | grep -q ":$SCRIPTS:" \
   || export PATH="$PATH:$SCRIPTS"
 printf %s\\n ":$PATH:" | grep -q ":$HOME/.local/bin:" \
