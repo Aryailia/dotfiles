@@ -111,6 +111,7 @@ alias    pm='package-manager.sh'
 alias     r='trash'
 alias   rhk='pkill -USR1 sxhkd; i3-msg reload'  # `sxhkd` updates on usr1 signal
 alias    rx='xrdb ~/.Xresources'
+alias  rgpg='gpgconf --kill gpg-agent; gpg-connect-agent relodagent /bye'
 #alias  rrc=''  # In individual rc files, reminder to not re-alias this
 alias    od='handle.sh d --'
 alias    oe='handle.sh e --'

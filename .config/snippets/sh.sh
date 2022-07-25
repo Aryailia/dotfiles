@@ -5,7 +5,7 @@
 #https://www.w3.org/QA/2002/04/valid-dtd-list.html
 
 addPrefixedFunction 'sh' 'hashbang_sh' 'Shebang env for POSIX shell'
-sh_hashbang_sh() { outln '#!/usr/bin/env sh'; }
+sh_hashbang_sh() { outln '#!/bin/sh'; }
 addPrefixedFunction 'sh' 'hashbang_awk' 'Shebang for awk'
 sh_hashbang_awk() { outln '#!/usr/bin/awk -f'; }
 
@@ -224,13 +224,26 @@ sh_awk_help() {
   ifNotRootIsReadableAndHas "${1}" sh_name || { sh_name; outln; }
   <<EOF cat -
 exit_help() {
-  printf %s\\n "SYNOPSIS" >&2
-  printf %s\\n "  ${NAME} <JOB> [<arg> ...]" >&2
+  printf %s\\\\n "SYNOPSIS" >&2
+  printf %s\\\\n "  \${NAME} <JOB> [<arg> ...] [OPTIONS]" >&2
 
-  printf %s\\n "" "OPTIONS" >&2
-  <"${NAME}" awk '
-    /^    "\\\${literal}" || case "\\\${1}/ { run = 1; }
-    /^    esac/ { run = 0; }
+  printf %s\\\\n "" "OPTIONS" >&2
+  <"\${NAME}" awk '
+    / case "\\$\\{.\\}"  # OPTIONS$/ { run = 1; }
+    /^    esac/                   { exit }
+    run && /^      in|^      ;;/ {
+      sub(/^ *in /, "  ", \$0);
+      sub(/^ *;; /, "  ", \$0);
+      sub(/\\) *#/, "\\t", \$0);
+      sub(/\\).*/, "", \$0);
+      if (\$0 !~ /\\*/) print \$0;
+    }
+  ' >&2
+
+  printf %s\\\\n "" "JOBS" >&2
+  <"\${NAME}" awk '
+    /^  case "\\$\\{1\\}"  # JOBS/ { run = 1; }
+    /^  esac/                        { exit; }
     run && /^    in|^    ;;/ {
       sub(/^ *in /, "  ", \$0);
       sub(/^ *;; /, "  ", \$0);
@@ -239,7 +252,6 @@ exit_help() {
       print \$0;
     }
   ' >&2
-
   exit 1
 }
 EOF
@@ -255,7 +267,7 @@ main() {
   # Options processing
   args=''; literal='false'
   for a in "\$@"; do
-    "\${literal}" || case "\${a}"
+    "\${literal}" || case "\${a}"  # OPTIONS
       in --)         literal='true'; continue
       ;; -h|--help)  exit_help
 
@@ -285,7 +297,7 @@ main() {
   args=''
   literal='false'
   while [ "\$#" -gt 0 ]; do
-    "\${literal}" || case "\${1}"
+    "\${literal}" || case "\${1}"  # OPTIONS
       in --)        literal='true'; shift 1; continue
       ;; -h|--help) exit_help
 
@@ -303,6 +315,10 @@ main() {
   [ -z "\${args}" ] && exit_help
   eval "set -- \${args}"
 
+  case "\${1}"  # JOBS
+    in a)  # <>
+    ;; *)  # <>
+  esac
 }
 EOF
 }
@@ -332,7 +348,7 @@ main() {
       esac
 
       # Process arguments properly now
-      for x in \${opts}; do case "\${x}"
+      for x in \${opts}; do case "\${x}"  # OPTIONS
         in -h|--help)     exit_help
         ;; -e|--example)  outln "-\${2}-"; shift 1
 
@@ -349,6 +365,10 @@ main() {
   [ -z "\${args}" ] && exit_help
   eval "set -- \${args}"
 
+  case "\${1}"  # JOBS
+    in a)  # <>
+    ;; *)  # <>
+  esac
 }
 EOF
 }
@@ -375,7 +395,7 @@ main() {
     "Enter one of the options: \${CYAN}" \\
   )" )"
   cmd="\${1}"; shift 1
-  case "\${cmd}"
+  case "\${cmd}"  # ARGUMENTS
     in h*)  exit_help
 
     ;; e*)  echo 1
@@ -393,9 +413,10 @@ sh_init_default() {
   <<EOF cat -
 $( sh_hashbang_sh '/' )
 
-$( sh_awk_name '/' )
+$( sh_name '/' )
+$( sh_cd_project '/' )
 
-$( sh_help '/' )
+$( sh_awk_help '/' )
 
 $( sh_main_variable '/' )
 
@@ -420,7 +441,7 @@ $( sh_awk_help '/' )
 $( sh_main_fixed '/' )
 
 my_make() {
-  case "\${1}"
+  case "\${1}"  # JOBS
     in hel)
     ;; help|*)  printf %s\\n "'\${1}' is not a supported command" >&2; exit_help
   esac
