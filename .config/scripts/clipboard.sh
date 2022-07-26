@@ -114,8 +114,10 @@ winclip_need() { require "clip.exe"; }
 # https://github.com/microsoft/terminal/issues/367
 # powershell.exe always adds \r\n
 winclip_read() {
-  t="$( powershell.exe -noprofile Get-Clipboard )" # strip \n
-  printf %s "${t%?}"                               # strip \r
+  printf %s "$(
+    powershell.exe -noprofile Get-Clipboard  \
+    | sed 's/\r//' # Strip \r at every line
+  )"               # Strip \n
 }
 winclip_writ() { <&0 clip.exe; }
 
