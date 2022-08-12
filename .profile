@@ -14,7 +14,10 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
 #XDG_RUNTIME_DIR set in .bashrc
 
+################################################################################
 # $HOME directory cleanup, https://superuser.com/questions/874901/
+
+# Programming
 export npm_config_userconfig="$XDG_CONFIG_HOME/rc/npmrc"
 export npm_config_cache="$XDG_DATA_HOME/npm"
 export npm_config_prefix="$HOME/.local" # No XDG var for ~/.local
@@ -30,12 +33,16 @@ export GEM_HOME="$HOME/.local/lib/gem"
 export GEM_PATH="$GEM_HOME"
 export GEM_SPEC_CACHE="$XDG_CACHE_HOME/lib/gem"
 
+# Important
 export GNUPGHOME="$HOME/.local/gnupg"
 export PASSWORD_STORE_DIR="$HOME/.local/password-store"
 
+# Non-programming
 export EMACSINIT="$XDG_CONFIG_HOME/emacs"
 export VIMINIT='let $MYVIMRC="$XDG_CONFIG_HOME/nvim/init.vim" | source $MYVIMRC'
 export VIMDOTDIR="$XDG_CONFIG_HOME/nvim"
+export LYNX_CFG="$XDG_CONFIG_HOME/lynx/lynx.cfg"
+export LYNX_LSS="$XDG_CONFIG_HOME/lynx/lynx.lss"
 export WGETRC="$XDG_CONFIG_HOME/rc/wgetrc"
 export PYTHONSTARTUP="$XDG_CONFIG_HOME/rc/pythonrc"
 export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/rc/notmuch-config"
@@ -44,6 +51,7 @@ export LESSHISTFILE='/dev/null'
 export INPUTRC="$XDG_CONFIG_HOME/rc/inputrc"
 export ZDOTDIR="$HOME/.config/zsh"
 
+################################################################################
 export STARDICT_DATA_DIR="$XDG_DATA_HOME/stardict" # looks in ./dic
 export SDCV_HISTSIZE="0"
 
@@ -58,7 +66,6 @@ export HISTCONTROL='ignoreboth'  # 'ignoreboth' is the following:
 export HISTIGNORE='ls:bg:fg:history'  # Do not log these commands
 
 # PATH
-export PAGER='less'
 export SCRIPTS="$XDG_CONFIG_HOME/scripts"
 printf %s\\n ":$PATH:" | grep -q ":$SCRIPTS:" \
   || export PATH="$PATH:$SCRIPTS"
@@ -70,7 +77,7 @@ test -d /opt/texlive/2021/bin/x86_64-linux/ \
   && export PATH="$PATH:/opt/texlive/2021/bin/x86_64-linux/"
 
 
-# Folders
+# Directories
 export DOTENVIRONMENT="$HOME/.environment"
 export ZETTELKASTEN_DIR="$DOTENVIRONMENT/zettelkasten"
 export BIBLIOGRAPHY="$DOTENVIRONMENT/Library/bibliography.bib"
@@ -84,6 +91,7 @@ uname -o | grep -q 'MSYS' &&  export TMPDIR="$HOME/AppData/Local/Temp"  # Win
 #printf %s "$PATH" | xargs -n1 -d: -IZ test --e '/.Z/st' && export TEMRINAL=st
 
 # Less/manpages colors, 'fish' uses `sed` to read these
+export PAGER='less'  # for perldoc
 export LESS=-R
 export LESS_TERMCAP_mb="$( printf '%b' '[1;31m' )"
 export LESS_TERMCAP_md="$( printf '%b' '[1;36m' )"
