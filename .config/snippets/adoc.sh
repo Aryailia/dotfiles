@@ -20,4 +20,4 @@
 #}
 
 addPrefixedFunction 'adoc' 'fn' 'Footnote'
-adoc_fn() { printf %s '{wj}footnote:[]'; }
+adoc_fn() { printf %s '{wj}footnote:[<>]'; }

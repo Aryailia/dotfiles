@@ -522,6 +522,15 @@ curl -X POST \\
 EOF
 }
 
-
+addPrefixedFunction 'sh' 'ssh_temp' "SSH that doesn't save to known_hosts"
+sh_ssh_temp() {
+  <<EOF cat -
+  ssh -i <> \
+    -o "StrictHostKeyChecking no"
+    -o "GlobalKnownHostsFile=/dev/null"
+    -o "UserKnownHostsFile=/dev/null"
+    "<>"
+EOF
+}
 
 

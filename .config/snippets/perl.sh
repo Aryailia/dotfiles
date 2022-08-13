@@ -15,7 +15,43 @@ binmode STDOUT, ':encoding(utf8)';
 binmode STDERR, ':encoding(utf8)';
 
 #run: perl -T %
+my %cmds = (
+  "--local" => ["description", sub {
+  }],
 
+  "clean" => ["Remove the direcotry", sub {
+    say STDERR "Removing public dir (WIP on cache too)...";
+    `rm -r \\Qdirectory\\E`;
+  }],
+
+  "all" => ["Clean and build everything", sub {
+    my_make("clean", "--local");
+  }],
+);
+
+sub help {
+  print(<<'EOF  ');
+SYNOPSIS
+  $0
+
+DESCRIPTION
+  Functions much like a Makefile
+
+SUBCOMMANDS
+  EOF
+
+  my $len = max(map { length $_ } keys %cmds);
+  for my $key (keys %cmds) {
+    printf "  %-${len}s    %s\n", $key, $cmds{$key}[0];
+  }
+  exit 1;
+}
+
+sub main {
+}
+
+
+main
 EOF
 }
 
@@ -30,4 +66,30 @@ while (\$<> =~ /\G<>/gc) {
 }
 EOF
 }
+
+
+
+
+addPrefixedFunction 'perl' 'find' 'Recursively walk through each directory'
+perl_find() {
+<<EOF cat -
+  my @files;
+find({
+  # After readdir() before wanted(), for editing which dirs to process
+  #preprocess => sub {
+  #  my @list = @_;
+  #  return grep { $_ !~ /pattern/ } @_;
+  #},
+  wanted => sub {
+    my $path = $File::Find::name;
+    return if -d $path;
+    say "blah: $path";
+  },
+
+  # Not sure exactly what this needs to be, but enables `perl -T %`
+  untaint => sub {},
+}, cwd() . "/published" );
+EOF
+}
+
 

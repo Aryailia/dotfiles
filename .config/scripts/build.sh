@@ -95,6 +95,7 @@ main() {
   "${BUILD}" && case "${ext}"
     in java)    run_from_project_home "${file}" "make.sh" "build" || exit "$?"
     ;; mjs|js)  node "${file}"
+    ;; pl)      perl -T "${file}"
     ;; py)      run_relative_to_project_home "${file}" "requirements.txt" "${file}" python
     ;; rs)      print_do cargo build || exit "$?"
     # TODO: Make this use argv instead of dealing with string escaping
@@ -120,6 +121,7 @@ main() {
   "${RUN}" && case "${ext}"
     in java)    run_from_project_home "${file}" "make.sh" "run" || exit "$?"
     ;; mjs|js)  npm run "${file}"
+    ;; pl)      perl "${file}"
     ;; py)      run_relative_to_project_home "${file}" "requirements.txt" "${file}" python
     ;; rs)      print_do cargo run
     ;; sh)      print_do sh "${file}"

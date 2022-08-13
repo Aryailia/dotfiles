@@ -20,6 +20,11 @@ rust_init() {
 EOF
 }
 
+addPrefixedFunction 'rust' 'push_str_format' 'Include for the push_str(format!()) null pattern'
+rust_push_str_format() {
+  printf %s 'use std::fmt::Write as _;'
+}
+
 addPrefixedFunction 'rust' 'print' 'Print'
 rust_print() {
   printf %s 'println!("{}", <>);'
