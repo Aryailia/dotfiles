@@ -150,7 +150,7 @@ sub main {
   my $dotenv = $my_env{'DOTENVIRONMENT'};
   my $rel_scripts = ".config/scripts";
   my $make_shortcuts = "$dotfiles/$rel_scripts/named-dirs.sh";
-  my $vim_plugin_manager_saveto="$my_env{'XDG_CONFIG_HOME'}/nvim/autoload/plug.vim";
+  my $vim_plugin_manager_saveto="$my_env{'XDG_CONFIG_HOME'}/vim/autoload/plug.vim";
   my $vim_plugin_manager_dllink="https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim";
 
   my $source_scripts = "$dotfiles/$rel_scripts";

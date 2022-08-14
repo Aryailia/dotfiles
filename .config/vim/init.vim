@@ -4,12 +4,17 @@ mapclear
 mapclear!
 
 "execute pathogen#infect()
-"syntax on
-"filetype plugin indent on
+syntax on
+filetype plugin indent on
+
+set directory=$XDG_CACHE_HOME/vim/swap,/tmp
+set backupdir=$XDG_CACHE_HOME/vim/backup,/tmp
+set viminfofile=$XDG_CACHE_HOME/vim/viminfo
+set runtimepath=$XDG_CONFIG_HOME/vim,$XDG_CONFIG_HOME/nvim/after,$VIM,$VIMRUNTIME
 
 " Automatically executes `filetype plugin indent on` and `syntax enable`
 " :PlugInstall to install
-call plug#begin($VIMDOTDIR . '/package')
+call plug#begin($XDG_CONFIG_HOME . '/vim/package')
   Plug 'tpope/vim-unimpaired'       " Setting toggles, back/next nav shortcuts
   Plug 'tpope/vim-surround'         " Adding quotes
   Plug 'aryailia/vim-markdown-toc'  " Table of contents woo

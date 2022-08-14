@@ -5,7 +5,7 @@
 ###
 # String literals that will exact match (no trailing slash)
 directory:.config/scripts
-directory:.config/nvim/after
+directory:.config/vim/after
 directory:.config/snippets
 
 ###

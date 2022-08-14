@@ -39,8 +39,7 @@ export PASSWORD_STORE_DIR="$HOME/.local/password-store"
 
 # Non-programming
 export EMACSINIT="$XDG_CONFIG_HOME/emacs"
-export VIMINIT='let $MYVIMRC="$XDG_CONFIG_HOME/nvim/init.vim" | source $MYVIMRC'
-export VIMDOTDIR="$XDG_CONFIG_HOME/nvim"
+export VIMINIT='let $MYVIMRC="$XDG_CONFIG_HOME/vim/init.vim" | source $MYVIMRC'
 export LYNX_CFG="$XDG_CONFIG_HOME/lynx/lynx.cfg"
 export LYNX_LSS="$XDG_CONFIG_HOME/lynx/lynx.lss"
 export WGETRC="$XDG_CONFIG_HOME/rc/wgetrc"

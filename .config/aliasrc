@@ -120,7 +120,7 @@ alias    op='handle.sh v --'
 alias    ot='handle.sh t --'
 alias     t='tmux.sh'
 alias     w='weather.sh'
-alias     v='nvim'
+alias     v='vim'
 
 # Enable aliases in sudo commands
 alias   sudo='sudo '
