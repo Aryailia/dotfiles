@@ -85,38 +85,21 @@ if true; then
 
 
     ;; isbn:*)
-      handle.sh gui "http://www.ottobib.com"
-      exit 1
-
-      #isbn="$( printf %s\\n "${1#isbn:}" \
-      #  | awk -v FS='' '{gsub(/-/, ""); print $0;}'
-      #)"
-
-      #curl -L -X POST -F "search=${isbn}" -F "citetype=bibtex" "http://ottobib.com/"
-      #curl -L -X POST -F "search=${1#isbn:}" -F "citetype=bibtex" "http://ottobib.com/"
-      #curl -L http://ottobib.com/ | grep 'authenticity_token'
-      #curl -L http://ottobib.com/ >asdf
-
-      #token="gyVBgtHK/$( curl -L "http://www.ottobib.com" \
-      #  | pup 'form input[name="authenticity_token"] attr{value}'
-      #)"
-      agent="Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0"
-      token="$( curl -sL "http://www.ottobib.com" -A "${agent}" \
-        | pup 'form input[name="authenticity_token"] attr{value}' \
-      )"
+      curl -s -X POST \
+        -H "Content-Type: application/json" \
+        -d '{"fromIds":true,"input":"'"${1#isbn:}"'","targetFormat":"Bibtex"}' \
+        "https://api.paperpile.com/api/public/convert" \
+      | jq -r '.output'
 
 
-      printf %s\\n "${token}" "${1#isbn:}" >&2
-      # You can test this with the netcat (see 'start-webserver' case)
-      # - utf8 = checkmark emoji
-      curl -vL -X POST \
-        -A "${agent}" \
-        -d "utf8=%E2%9C%93" \
-        --data-urlencode "authenticity_token=${token}" \
-        --data-urlencode "search=${1#isbn:}" \
-        -d "citetype=bibtex" \
-        "http://www.ottobib.com/"
-        #"http://localhost:8000/"
+      # How to reverse engineer:
+      # 1. Disable extensions so you can debug step
+      # 2. Open developer tools on Firefox or Chrome while on the website
+      # 3. Navigate to "Debugger" or "Sources" ta
+      # 4. Press '{}' in bottom left of the source code view to unminify
+      # 5. F8 to step through immediately proceeding JavaScript execution
+      # 6. Trigger javascript
+      # 7. Add break points as you see fit
 
       # https://go-to-hellman.blogspot.com/2015/12/xisbn-rip.html
       # https://kitchingroup.cheme.cmu.edu/blog/2015/01/31/Turn-an-ISBN-to-a-bibtex-entry
