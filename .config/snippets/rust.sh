@@ -90,3 +90,32 @@ impl <> {
 }
 EOF
 }
+
+
+addPrefixedFunction 'rust' 'command' 'Basic external command caller'
+rust_command() {
+  <<EOF cat -
+fn pipe(input: &str, cmd: &str, args: &[&str]) -> String {
+    use std::io::Write;
+    use std::process::{Command, Stdio};
+    let child = Command::new(cmd)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .args(args)
+        .spawn()
+        .expect(cmd);
+    write!(child.stdin.as_ref().unwrap(), "{}", input)
+        .expect("Could not write to STIDN");
+    let output = child.wait_with_output().expect("jq failed to run");
+    if !output.status.success() {
+        panic!(
+            "{}\\n=== STDIN ===\\n{}",
+            std::str::from_utf8(&output.stderr).expect("Did not return utf8 error"),
+            input,
+        );
+    }
+    String::from_utf8(output.stdout).unwrap()
+}
+EOF
+}

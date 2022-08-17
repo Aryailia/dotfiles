@@ -14,9 +14,11 @@ symbols_section() { printf %s §; }
 addPrefixedFunction 'symbols' 'pilcrow'   'paragraph mark ¶'
 symbols_pilcrow() { printf %s ¶; }
 
-addPrefixedFunction 'symbols' 'fig'   'figure dash ‒'
-symbols_em() { printf %s —; }
-symbols_en() { printf %s –; }
+addPrefixedFunction 'symbols' 'em'  'en dash     —'
+addPrefixedFunction 'symbols' 'en'  'en dash     –'
+addPrefixedFunction 'symbols' 'fig' 'figure dash –'
+symbols_em()  { printf %s —; }
+symbols_en()  { printf %s –; }
 symbols_fig() { printf %s –; }
 
 # The greek symbols

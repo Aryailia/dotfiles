@@ -82,11 +82,14 @@ main() {
   # Run
   "${LINT}" && case "${ext}"
     # https://tex.stackexchange.com/questions/173621/how-to-validate-check-a-biblatex-bib-file
-    in bib)  cp "${file}" "${TMPDIR}/${name}"
-             biber --tool --validate-datamodel "${TMPDIR}/${name}" \
-               | sed "/Invalid field 'publisher' for entrytype 'article'/d"
+    in bib)   cp "${file}" "${TMPDIR}/${name}"
+              biber --tool --validate-datamodel "${TMPDIR}/${name}" \
+                | sed "/Invalid field 'publisher' for entrytype 'article'/d"
 
-    ;; sh)   shellcheck "${file}"
+    ;; sh)    shellcheck "${file}"
+    ;; yml)   require "yq-go" && yq-go '.' "${file}"
+              require "yq"    && yq    '.' "${file}"
+    ;; json)  jq '.' "${file}"
     ;; *)  printf %s\\n "Unsupported filetype for linting file '${file}'" >&2
   esac
 
@@ -306,5 +309,12 @@ errln() { printf %s\\n "$@" >&2; }
 outln() { printf %s\\n "$@"; }
 eval_escape() { <&0 sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"; }
 die() { printf %s "${1}: " >&2; shift 1; printf %s\\n "$@" >&2; exit "${1}"; }
+require() {
+  for dir in $( printf %s "${PATH}" | tr ':' '\n' ); do
+    [ -f "${dir}/${1}" ] && [ -x "${dir}/${1}" ] && return 0
+  done
+  return 1
+}
+
 
 <&1 main "$@"
