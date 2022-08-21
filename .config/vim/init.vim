@@ -14,6 +14,7 @@ set showmode       " Display insert/command/normal mode as a status bar
 " ==============================================================================
 
 " Respect XDG Base Directory Specification, https://tlvince.com/vim-respect-xdg
+" Need this for vim, but not neovim
 set directory  =$XDG_CACHE_HOME/vim/swap,/tmp
 set backupdir  =$XDG_CACHE_HOME/vim/backup,/tmp
 set viminfofile=$XDG_CACHE_HOME/vim/viminfo
@@ -36,28 +37,27 @@ set nowritebackup
 set splitbelow     " New horizontal window splits open below
 set splitright     " New vertical window splits open to the right
 
-set t_vb=  " Disable visual bell
-"set ttyfast
-"set showcmd
+set t_vb=    " Disable visual bell
+set ttyfast  " are slow terminals even relevant in 2020+?
+set showcmd  " show partial normal mode keys
 
 set norelativenumber      " this kills performance
 syntax sync minlines=256  " improve syntax performance
-set nocursorcolumn        " is default off, but better performance
-set nocursorline          " is default off, but better performance
+set nocursorcolumn        " on in nvim, explicit for better performance
+set nocursorline          " on in nvim, explicit for better performance
 
-
-set ignorecase
+" neovim adds inccommand for highlightin searches and :s// :g//
+set ignorecase  " Prefix with \C in searches to be case sensitive again
 set incsearch   " Search highlights only next result as you type
 
 " The all-important default indent settings; filetypes to tweak
 set expandtab      " Use spaces instead of tabs, use C-v to enter tabs
 set shiftwidth=2   " Indent with two spaces
 
-
 if v:version >= 800
   set nofixendofline      " Do not auto-change the last character in a file
   set foldmethod=indent   " I dislike automatic collapsing
-  "set nofoldenable        " Expand all collapsed sections
+  set nofoldenable        " Expand all collapsed sections
 endif
 set bg=light          " Readable on light background
 
@@ -105,7 +105,6 @@ endif
 augroup GeneralCustom
   autocmd!
   autocmd FileType * set formatoptions-=c formatoptions-=r formatoptions-=o formatoptions+=j
-  autocmd FileType * normal zR
 augroup END
 
 set nrformats-=octal  " Leading 0s are not recognised as octals
@@ -124,13 +123,15 @@ set listchars=nbsp:¬,extends:»,precedes:«,trail:• " Visually show these hid
 nnoremap <unique> Q <Nul>
 
 " Inspired by 'tpope/vim-unimpaired'
-nnoremap <unique> yor :setlocal <C-r>=&rnu      ? "no":""<CR>rnu<bar>setlocal rnu?<CR>
-nnoremap <unique> yop :setlocal <C-r>=&paste    ? "no":""<CR>paste<bar>setlocal paste?<CR>
+nnoremap <unique> yor :setlocal <C-r>=&rnu        ? "no":""<CR>rnu<bar>setlocal rnu?<CR>
+nnoremap <unique> yoi :setlocal <C-r>=&ignorecase ? "no":""<CR>ignorecase<bar>setlocal ignorecase?<CR>
+nnoremap <unique> yop :setlocal <C-r>=&paste      ? "no":""<CR>paste<bar>setlocal paste?<CR>
 nnoremap <silent> <expr> <unique> yos &spell
   \? ':setlocal nospell<Bar>setlocal spell?<CR>'
   \: ':setlocal spell spelllang=' . input('spelllang=', 'en_gb') . '<Bar>setlocal spelllang?<CR>'
-nnoremap <unique> yoh :setlocal <C-r>=&hlsearch ? "no":""<CR>hlsearch<bar>setlocal hlsearch?<CR>
-nnoremap <unique> yon :setlocal <C-r>=&number   ? "no":""<CR>number<bar>setlocal number?<CR>
+nnoremap <unique> yof :setlocal <C-r>=&foldenable ? "no":""<CR>foldenable<bar>setlocal foldenable?<CR>
+nnoremap <unique> yoh :setlocal <C-r>=&hlsearch   ? "no":""<CR>hlsearch<bar>setlocal hlsearch?<CR>
+nnoremap <unique> yon :setlocal <C-r>=&number     ? "no":""<CR>number<bar>setlocal number?<CR>
 nnoremap <unique> [q  :colder
 nnoremap <unique> ]q  :cnewer
 nnoremap <unique> [l  :lolder
@@ -518,7 +519,7 @@ if has('multi_byte') && !exists('$LANG') && &encoding ==# 'latin1'
 endif
 " Neovim prints random 'q' if ${TERM} is set wrong in the first login terminal
 " See https://stackoverflow.com/questions/4229658
-if ! has("gui_running") |  set guicursor= | endif
+"if ! has("gui_running") |  set guicursor= | endif
 
 "set termguicolors
 
