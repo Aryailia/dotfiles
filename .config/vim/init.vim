@@ -17,7 +17,7 @@ set showmode       " Display insert/command/normal mode as a status bar
 set directory  =$XDG_CACHE_HOME/vim/swap,/tmp
 set backupdir  =$XDG_CACHE_HOME/vim/backup,/tmp
 set viminfofile=$XDG_CACHE_HOME/vim/viminfo
-set runtimepath=$XDG_CONFIG_HOME/vim,$XDG_CONFIG_HOME/vim/after,$VIM,$VIMRUNTIME
+set runtimepath=$VIM,$XDG_CONFIG_HOME/vim,$VIM,$VIMRUNTIME,$XDG_CONFIG_HOME/vim/after
 let g:vimdotdir=$XDG_CONFIG_HOME . "/vim"
 "" Let '$VIMINIT' handle this
 "let $MYVIMRC="$XDG_CONFIG_HOME/vim/init.vim"
@@ -90,7 +90,7 @@ if filereadable(g:vimdotdir . '/autoload/plug.vim')
     Plug 'kassio/neoterm'             " Terminal for vim and neovim
     Plug 'skywind3000/asyncrun.vim'   " Run scripts in the background async
 
-    Plug 'ap/vim-css-color', { 'commit': 'bb34fb4'} " Color hex colour values
+    Plug 'ap/vim-css-color'           " Color hex colour values
     Plug 'rust-lang/rust.vim'         " Rust syntax highlighting
     Plug 'habamax/vim-asciidoctor'    " Stock adoc syntax highlighting is slow
     Plug 'hashivim/vim-terraform'     " Syntax highlighting for terraform
