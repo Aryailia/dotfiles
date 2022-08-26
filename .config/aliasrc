@@ -26,9 +26,11 @@ alias    cw='cd_of sh -c '\''
   printf %s "$( dirname "$( command -v "$1" )" )"
 '\'' _'
 alias     d='sdcv'
+alias    da='podman attach'
+alias    dr='podman run -it --rm'
+alias  diso='dd status=progress conv=fdatasync'
+
 alias    dc='sdcv --data-dir $STARDICT_DATA_DIR/ca'
-alias   dca='docker attach'
-alias dcrun='docker run -it --rm'
 alias  dcsa='sh -c '\''docker start  "${1}"; docker attach "${1}"'\'' _'
 alias    de='sdcv --data-dir $STARDICT_DATA_DIR/en'
 alias    dj='sdcv --data-dir $STARDICT_DATA_DIR/jp'
@@ -39,8 +41,9 @@ alias   dkj='sdcv --data-dir $STARDICT_DATA_DIR/kanji'
 alias    dw='sdcv --data-dir $STARDICT_DATA_DIR/wy'
 alias    dz='sdcv --data-dir $STARDICT_DATA_DIR/zh'
 alias   dza='sdcv --data-dir $STARDICT_DATA_DIR/zha'
+
 #alias     e='emacs-sandbox.sh --user-dir "$EMACSINIT" -P -O'
-alias     e='emacs-sandbox.sh --user-dir ~/.config/emacs2 -P -O'
+#alias     e='emacs-sandbox.sh --user-dir ~/.config/emacs2 -P -O'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='browser.sh edit search'
 alias    es='browser.sh edit search'
@@ -107,12 +110,18 @@ alias  mntn='sh -c '\''
   [ -d "$2" ] || { printf %s\\n "Invalid directory"; exit 1; };
   sudo mount -t ntfs -o "uid=$( id -u),gid=$( id -g ),rw,auto,user,fmask=0133,dmask=0000" "/dev/$1" -- "$2";
 '\'' _'
+alias  nixc='sudo $EDITOR /etc/nixos/configuration.nix'
+alias  nixl='nix-store -q --references /run/current-system/sw \
+  | sed "s/^[^-]*-//"'
+alias  nixr='sudo nixos-rebuild switch'
+alias  nixs='nix --extra-experimental-features "nix-command flakes" search nixpkgs'
 alias    pm='package-manager.sh'
 alias     r='trash'
 alias   rhk='pkill -USR1 sxhkd; i3-msg reload'  # `sxhkd` updates on usr1 signal
-alias    rx='xrdb ~/.Xresources'
 alias  rgpg='gpgconf --kill gpg-agent; gpg-connect-agent relodagent /bye'
 #alias  rrc=''  # In individual rc files, reminder to not re-alias this
+alias    rp='pass show refresh'
+alias    rx='xrdb ~/.Xresources'
 alias    od='handle.sh d --'
 alias    oe='handle.sh e --'
 alias    og='handle.sh g --'
@@ -120,7 +129,7 @@ alias    op='handle.sh v --'
 alias    ot='handle.sh t --'
 alias     t='tmux.sh'
 alias     w='weather.sh'
-alias     v='vim'
+alias     v='$EDITOR'
 
 # Enable aliases in sudo commands
 alias   sudo='sudo '
