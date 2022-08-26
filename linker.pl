@@ -193,7 +193,7 @@ sub main {
   if (-f $vim_plugin_manager_saveto) {
     $CONFIG{'verbose'} and say STDERR "✓ Already downloaded vim plugin manager";
   } else {
-    system("/usr/bin/curl", "--create-dirs", "-fLo",
+    system("curl", "--create-dirs", "-fLo",
       $vim_plugin_manager_saveto, $vim_plugin_manager_dllink);
     say STDERR "✓ Downloaded vim plugin manager";
   }
@@ -367,7 +367,7 @@ sub custom_symlink {
   my $rel_part = defined $_[2] ? $_[2] : die 'Empty arg: 2';
 
   my $act = $CONFIG{'level'};
-kk  if (($act == $FORCE && -e $into) or ($act == $CAUTIOUS && -l $into)) {
+  if (($act == $FORCE && -e $into) or ($act == $CAUTIOUS && -l $into)) {
     unlink $into or die "Could not remove '$into'";
   }
 
