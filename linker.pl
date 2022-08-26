@@ -9,20 +9,25 @@
 # - easily deployable in a virtual machine environment
 # - target bash, but sourceable with feature-parity to other shells (eg. ion)
 
+# We cannot use perl -T (taint mode) because of NixOS (see commit 9515f07
+# for when this was functional on taint mode)
+
 # TODO: backup bookmarks?
 # TODO: if folder is a symlink, it will delete the config file in dotfiles
 # TODO: Check if foward-slash is reserved character on MSYGIT (windows)
 
 use v5.28;                     # in perluniintro, latest bug fix for unicode
 use feature 'unicode_strings'; # enable perl functions to use Unicode
-use Encode 'decode_utf8';      # so we do not need -CA flag in perl
+use Encode  'decode_utf8';     # so we do not need -CA flag in perl
 use utf8;                      # source code in utf8
 use strict;
 use warnings;
 
-use File::Find 'find';
-use Cwd 'realpath';
 use File::Basename 'dirname';
+use File::Find 'find';
+use File::Path 'make_path';
+use LWP::Simple 'get';
+use Cwd 'realpath';
 
 my $LINKER_CONFIG = '.linkerconfig';
 my $DESCRIPTION = <<EOF;
@@ -49,7 +54,7 @@ my $DESCRIPTION = <<EOF;
 EOF
 
 
-binmode(STDIN, ":utf8");
+binmode(STDIN,  ":utf8");
 binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
 
@@ -98,7 +103,7 @@ my @OPTIONS = sort { $a->[$LONG] cmp $b->[$LONG] } (
 
 #TODO: test on termux
 
-$ENV{'PATH'} = '/bin';  # For -T taint
+#$ENV{'PATH'} = '/bin';  # For -T taint
 my $HOME = $ENV{'HOME'};
 -d $HOME or die "\$HOME does not exist. \$HOME provided: '$HOME'";
 
@@ -138,7 +143,6 @@ sub main {
   # Args
   my $dotfiles = dirname(realpath(__FILE__));
   $dotfiles = $dotfiles =~ /([\s\S]+)/ ? $1 : die '$dotfiles empty?'; # detaint
-  #my $dotfiles = "/home/rai/dotfiles";
   my $target = defined $CONFIG{'output'} ? $CONFIG{'output'} : $HOME;
 
   ############################
@@ -164,12 +168,20 @@ sub main {
   ###################
   # Start doing stuff
   -d $target or die "Output directory '$target' does not exist.";
-  mkdir_p($my_env{'XDG_CONFIG_HOME'});
-  mkdir_p($my_env{'XDG_CACHE_HOME'});
+  make_path($my_env{'XDG_CONFIG_HOME'});
+  make_path($my_env{'XDG_CACHE_HOME'});
 
   say STDERR "======== Special case ========";
   say STDERR "Set execute flag \$SCRIPTS in dotfiles directory... ";
-  system("/usr/bin/find", $source_scripts, "-exec", "/bin/chmod", "755", "{}", "+");
+  find({
+    wanted => sub {
+      my $path = $File::Find::name;
+      return if -d $path;
+      chmod 0755, $path;
+    },
+
+  }, $source_scripts);
+
 
   # Named directories
   say STDERR "Making named directories...";
@@ -182,8 +194,10 @@ sub main {
   if (-f $vim_plugin_manager_saveto) {
     $CONFIG{'verbose'} and say STDERR "✓ Already downloaded vim plugin manager";
   } else {
-    system("/usr/bin/curl", "--create-dirs", "-fLo",
-      $vim_plugin_manager_saveto, $vim_plugin_manager_dllink);
+    make_path(dirname($vim_plugin_manager_saveto));
+    open FH, ">", $vim_plugin_manager_saveto;
+    say FH get($vim_plugin_manager_dllink);
+    close FH;
     say STDERR "✓ Downloaded vim plugin manager";
   }
 
@@ -262,7 +276,7 @@ sub link_fromto_according_to_config {
             return ();
           }
         }
-        mkdir_or_die("$output/$reldir");
+        make_path("$output/$reldir");
       }
 
       my @list;
@@ -329,9 +343,11 @@ sub link_fromto_according_to_config {
 # Quotes on the delimiter disable variable expansions
 # See: https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_02
 sub source {
-  #`/usr/bin/env -i HOME="$HOME" /bin/sh -c '. $_[0];/bin/env'`;
-  my $exports = `/usr/bin/env -i HOME="$ENV{'HOME'}" /bin/sh -c '. $_[0]; /usr/bin/env'`
-    or die "Failed to source '$_[0]'";
+  my $exports = `/usr/bin/env -i \\
+      HOME=\Q$ENV{'HOME'}\E \\
+      PATH=\Q$ENV{'PATH'}\E \\
+    /bin/sh -c '. '\Q$_[0]\E'; /usr/bin/env'`
+      or die "Failed to source '$_[0]'";
 
   my $row = 0;
   my %my_env;
@@ -346,22 +362,6 @@ sub source {
   return %my_env;
 }
 
-sub mkdir_or_die {
-  $_[0] =~ /([\s\S]+)/ or die "Cannot mkdir an empty string";
-  if (! -d $1 ) {
-    die "'$1' exists as a file" if -e $1;
-    mkdir($1) or die "Cannot make directory '$1'. Permissions error?";
-  }
-}
-
-
-sub mkdir_p {
-  my $path = "";
-  for my $part (split m!/!, $_[0]) {
-    $path .= "$part/";
-    mkdir_or_die($path);
-  }
-}
 
 sub custom_symlink {
   #$_[0] =~ /([\s\S]+)/;
@@ -370,8 +370,8 @@ sub custom_symlink {
   my $rel_part = defined $_[2] ? $_[2] : die 'Empty arg: 2';
 
   my $act = $CONFIG{'level'};
-  if (($act == $FORCE) or ($act == $CAUTIOUS && -l $into)) {
-    system("/bin/rm", "-f", $into) and die "Could not remove '$into'";
+kk  if (($act == $FORCE && -e $into) or ($act == $CAUTIOUS && -l $into)) {
+    unlink $into or die "Could not remove '$into'";
   }
 
   if (-e $into) {
@@ -379,11 +379,11 @@ sub custom_symlink {
       if $CONFIG{'verbose'};
   } else {
     if (-l $from) {
-      system("/bin/cp", "-P", $from, $into)
+      system("cp", "-P", $from, $into)
         and die "Could not copy '$from'->'$into'";
       say STDERR "✓ SUCCESS: Copied '$rel_part'";
     } else {
-      system("/bin/ln", "-s", $from, $into)
+      system("ln", "-s", $from, $into)
         and die "Could not symlink '$from'->'$into'";
       say STDERR "✓ SUCCESS: Linked '$rel_part'";
     }
