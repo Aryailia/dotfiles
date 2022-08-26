@@ -26,7 +26,6 @@ use warnings;
 use File::Basename 'dirname';
 use File::Find 'find';
 use File::Path 'make_path';
-use LWP::Simple 'get';
 use Cwd 'realpath';
 
 my $LINKER_CONFIG = '.linkerconfig';
@@ -194,10 +193,8 @@ sub main {
   if (-f $vim_plugin_manager_saveto) {
     $CONFIG{'verbose'} and say STDERR "✓ Already downloaded vim plugin manager";
   } else {
-    make_path(dirname($vim_plugin_manager_saveto));
-    open FH, ">", $vim_plugin_manager_saveto;
-    say FH get($vim_plugin_manager_dllink);
-    close FH;
+    system("/usr/bin/curl", "--create-dirs", "-fLo",
+      $vim_plugin_manager_saveto, $vim_plugin_manager_dllink);
     say STDERR "✓ Downloaded vim plugin manager";
   }
 
