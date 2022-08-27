@@ -1,0 +1,3 @@
+#!/bin/sh
+. "$HOME/.bashrc"
+exec pipewire 2>&1

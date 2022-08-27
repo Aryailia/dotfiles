@@ -2,37 +2,43 @@
 # Defaults to runs when after you login via display manager (login screen)
 # Also manually sourced from '.xinitrc'
 
-# Test if config files are readable then load settings
+. "$HOME/.profile"  # NixOS runs graphical display managers from root
+
 [ -r "$HOME/.Xresources" ] && xrdb "$HOME/.Xresources"
 #[ -r "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xdefaults"
-#[ -r "$HOME/.Xmodmap" ]  && xmodmap "$HOME/.Xmodmap" # swap RCtrl and CapsLock
 
-## Launch dbus for fcitx and perhaps pulse audio
-## Not sure why this is -n and not -z
-## TODO: Check on fresh install
-#[ -n "$DBUS_SESSION_BUS_ADDRESS" ] && \
-#  dbus-launch --sh-syntax --exit-with-session
+# Launch dbus for fcitx and perhaps pulse audio
 # https://fcitx-im.org/wiki/Configure_(Other)#Use_Slim_.28.7E.2F.xinitrc.29.2Fstartx
-#[ -n "$DBUS_SESSION_BUS_ADDRESS" ] && \
-#  eval 'dbus-launch --sh-syntax --exit-with-session'
-dbus-launch --sh-syntax --exit-with-session >/dev/null
+# https://nixos.wiki/wiki/Using_X_without_a_Display_Manager
+[ -z "${DBUS_SESSION_BUS_ADDRESS}" ] \
+  && eval $( dbus-launch --sh-syntax --exit-with-session >/dev/null )
 
 # Export fcitx variables before running graphical programs
-export XMODIFIERS="@im=fcitx"
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export SDL_IM_MODULE=fcitx
-killall fcitx; fcitx  # Restart fcitx
+if command -v fcitx5 2>&1 >/dev/null; then
+  export    XMODIFIERS="@im=fcitx5"
+  export GTK_IM_MODULE=fcitx5
+  export  QT_IM_MODULE=fcitx5
+  export SDL_IM_MODULE=fcitx5
+  killall fcitx5; fcitx5  # Restart fcitx5
+elif command -v fcitx 2>&1 >/dev/null; then
+  export    XMODIFIERS="@im=fcitx"
+  export GTK_IM_MODULE=fcitx
+  export  QT_IM_MODULE=fcitx
+  export SDL_IM_MODULE=fcitx
+  killall fcitx; fcitx  # Restart fcitx
+fi
+#xmodmap "${XDG_CONFIG_HOME}/rc/.Xmodmap"  # Swap CapsLock and ControlR
+
 
 # Startup up stuff
-#exec --no-startup-id compton --xrender-sync-fence --logpath /tmp/compton.log &
+# Ideally, I want pipewire and wireplumber to be run on tty startup, not
+# Xorg startup
 xbacklight -set 40&            # Screen brightness
 x.sh set-wallpaper&            # Desktop Wallpaper
 xcompmgr -c&                   # Window Transparency
 dunst&                         # Notifications
-pipewire&                      # Sound
-mpd&                           # For music playing
+pipewire&                      # Cannot figure out user sv for running this
+#wireplumber&                  # Session manager for pipewire
+#mpd&                           # For music playing
 #sxhkd&                         # For hotkeys
 
-## Swap CapsLock and ControlR
-#xmodmap "${XDG_CONFIG/HOME}/rc/xmodmap"&

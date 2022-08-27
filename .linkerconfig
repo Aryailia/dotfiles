@@ -7,6 +7,7 @@
 directory:.config/scripts
 directory:.config/vim/after
 directory:.config/snippets
+shellrun:.config/autostart/sv/runsvdir.sh
 
 ###
 # Perl regexp with m/.../x flag but no newlines

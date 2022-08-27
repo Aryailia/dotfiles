@@ -14,6 +14,8 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
 #XDG_RUNTIME_DIR set in .bashrc
 
+export SVDIR="$XDG_CONFIG_HOME/autostart/sv-user"
+
 ################################################################################
 # $HOME directory cleanup, https://superuser.com/questions/874901/
 

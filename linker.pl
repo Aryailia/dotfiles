@@ -102,9 +102,11 @@ my @OPTIONS = sort { $a->[$LONG] cmp $b->[$LONG] } (
 
 #TODO: test on termux
 
-#$ENV{'PATH'} = '/bin';  # For -T taint
-my $HOME = $ENV{'HOME'};
+# We only take two things from %ENV. This is for `perl -T` workflow
+$ENV{'HOME'} =~ /^(.*)$/ or die 'Invalid $HOME'; my $HOME = $1;
+$ENV{'PATH'} =~ /^(.*)$/ or die 'Invalid $PATH'; my $PATH = $1;
 -d $HOME or die "\$HOME does not exist. \$HOME provided: '$HOME'";
+%ENV = ();
 
 my $STANDARD = 0;
 my $CAUTIOUS = 1;
@@ -147,28 +149,28 @@ sub main {
   ############################
   # Constants (customise here)
   my $profile = "$dotfiles/.profile";
-  my %my_env = source("$profile");
+  source($profile);
 
   my $rel_linker_config = "./$LINKER_CONFIG"; # Edit this at $LINKER_CONFIG
-  my $dotenv = $my_env{'DOTENVIRONMENT'};
+  my $dotenv = $ENV{'DOTENVIRONMENT'};
   my $rel_scripts = ".config/scripts";
   my $make_shortcuts = "$dotfiles/$rel_scripts/named-dirs.sh";
-  my $vim_plugin_manager_saveto="$my_env{'XDG_CONFIG_HOME'}/vim/autoload/plug.vim";
+  my $vim_plugin_manager_saveto="$ENV{'XDG_CONFIG_HOME'}/vim/autoload/plug.vim";
   my $vim_plugin_manager_dllink="https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim";
 
   my $source_scripts = "$dotfiles/$rel_scripts";
   my $target_scripts = "$target/$rel_scripts";
-  $my_env{'SCRIPTS'} eq "$target_scripts" or die
+  $ENV{'SCRIPTS'} eq "$target_scripts" or die
     "Update \$rel_scripts in '$0' to match \$SCRIPTS defined in '$profile'. \
-    '$target_scripts' != '$my_env{'SCRIPTS'}'";
+    '$target_scripts' != '$ENV{'SCRIPTS'}'";
 
 
 
   ###################
   # Start doing stuff
   -d $target or die "Output directory '$target' does not exist.";
-  make_path($my_env{'XDG_CONFIG_HOME'});
-  make_path($my_env{'XDG_CACHE_HOME'});
+  make_path($ENV{'XDG_CONFIG_HOME'});
+  make_path($ENV{'XDG_CACHE_HOME'});
 
   say STDERR "======== Special case ========";
   say STDERR "Set execute flag \$SCRIPTS in dotfiles directory... ";
@@ -185,7 +187,7 @@ sub main {
   # Named directories
   say STDERR "Making named directories...";
   if (-x "${make_shortcuts}") {
-    `/usr/bin/env PATH="$my_env{'PATH'}" /bin/sh "$make_shortcuts"`;
+    `/usr/bin/env PATH="$ENV{'PATH'}" /bin/sh "$make_shortcuts"`;
   } else {
     say STDERR "! Shortcuts script '$make_shortcuts' not found/executable"
   }
@@ -223,14 +225,13 @@ sub link_fromto_according_to_config {
     <$CFG>;
   };
 
-  my @ignore;
-  my @directory;
+  my (@ignore, @execute, @directory);
   my $row = 0;
   pos($document) = 0;
   while ($document =~ m{
       \G\s*\n
       | \G \# .* \n
-      | \G (ignore|directory):(.*)\n
+      | \G (ignore|directory|shellrun):(.*)\n
       | (.*)\n
     }xcg
   ) {
@@ -241,16 +242,18 @@ sub link_fromto_according_to_config {
     } elsif (defined $1) {
       if ($1 eq 'ignore') {
         push @ignore, $2;
+
       } elsif ($1 eq 'directory') {
         my $path = "$source/$2";
-        die "Config error\n     $row | directory:$2\n'$path' does not exist"
-          if not -e $path;
-        die "Config error\n     $row | directory:$2\n'$path' is a file"
-          if not -d $path;
-
+        die "Config error\n     $row | directory:$2\n'$path' does not exist" if not -e $path;
+        die "Config error\n     $row | directory:$2\n'$path' is a file"      if not -d $path;
         push @directory, $2;
+
+      } elsif ($1 eq 'shellrun') {
+        push @execute, $2;
+
       } else {
-        die 'DEV: invalid case';
+        die "DEV: invalid case\n$row: $2";
       }
     }
   }
@@ -258,6 +261,7 @@ sub link_fromto_according_to_config {
   ###
   # Apply rules and create the symlinks
   my $count = 0;
+  my @to_execute_paths;
   find({
     preprocess => sub {
       my $dir = $File::Find::name;
@@ -281,9 +285,20 @@ sub link_fromto_according_to_config {
         next if $name eq '.' || $name eq '..';
 
         my $relpath =  substr("$dir/$name", length($source) + 1);
+
+        # Handle 'ignore'
         for my $pattern (@ignore) {
           if ($relpath =~ m/$pattern/x) {
             say STDERR "Ignoring: '$relpath'" if $CONFIG{'verbose'};
+            next outer;
+          }
+        }
+
+        # Handle 'shellrun:'
+        # Like ignore, but different command
+        for my $pattern (@execute) {
+          if ($relpath =~ m/$pattern/x) {
+            push @to_execute_paths, $relpath;
             next outer;
           }
         }
@@ -320,13 +335,27 @@ sub link_fromto_according_to_config {
   }, $source);
 
   ###
-  # Link directories
+  # handle 'shellrun:'
+  say STDERR '';
+  say STDERR 'Executing "shellrun:"...';
+  for my $relpath (@to_execute_paths) {
+    if (system("/bin/sh \Q$relpath\E")) {
+      say STDERR "! FAILED: $relpath";
+    } else {
+      say STDERR "✓ Executed: $relpath";
+      $count += 1;
+    }
+  }
+
+  ###
+  # handle 'directory:'
   say STDERR '';
   say STDERR 'Processing directories...';
   for my $tolink_dir (@directory) {
     custom_symlink("$source/$tolink_dir", "$output/$tolink_dir", $tolink_dir);
     $count += 1;
   }
+  say STDERR '';
   say STDERR "$count nodes processed";
 }
 
@@ -341,22 +370,20 @@ sub link_fromto_according_to_config {
 # See: https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_02
 sub source {
   my $exports = `/usr/bin/env -i \\
-      HOME=\Q$ENV{'HOME'}\E \\
-      PATH=\Q$ENV{'PATH'}\E \\
+      HOME=\Q$HOME\E \\
+      PATH=\Q$PATH\E \\
     /bin/sh -c '. '\Q$_[0]\E'; /usr/bin/env'`
       or die "Failed to source '$_[0]'";
 
   my $row = 0;
-  my %my_env;
   for my $line (split /\n/, $exports) {
     if ($line =~ /^([A-Za-z_][0-9A-Za-z_]*)=(.*)$/) {
-      $my_env{$1} = $2;
+      $ENV{$1} = $2;
     } else {
       die "This script does not support\n    $row |$line\nin '$_[0]'";
     }
     $row += 1;
   }
-  return %my_env;
 }
 
 
