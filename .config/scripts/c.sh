@@ -15,6 +15,11 @@ main() {
       elif [ -d "${HOME}/me/Downloads" ]; then p "${HOME}/me/Documents"
       else                                     p "${HOME}/Documents"
       fi
+    ;; music)
+      if   [ -d "/sdcard/Music" ]; then    p '/sdcard/Music'
+      elif [ -d "${HOME}/me/Music" ]; then p "${HOME}/me/Music"
+      else                                 p "${HOME}/Music"
+      fi
     ;; dl|downloads)
       if   [ -d "/sdcard/Download" ]; then     p '/sdcard/Download'
       elif [ -d "${HOME}/me/Downloads" ]; then p "${HOME}/me/Downloads"
