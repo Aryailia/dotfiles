@@ -34,28 +34,27 @@ rrc() {
     source "${HOME}/.bashrc"
     source "${HOME}/.profile"
   fi
-  source "${XDG_CONFIG_HOME}/envrc"
-  source "${XDG_CONFIG_HOME}/aliasrc"
+  source "${XDG_CONFIG_HOME}/rc/aliasrc"
+  source "${DOTENVIRONMENT}/post-bashrc.sh" # Mostly for server-specifc configs
 }
 
-# Android Termux: Bash never ran as login shell, thus '.profile' never sourced
+# Android Termux: Bash never run as login shell, thus '.profile' never sourced
 [ -z "${XDG_CONFIG_HOME}" ] && source "${HOME}/.profile"
-rrc 'Avoid infinite loop'
-. "${DOTENVIRONMENT}/post-bashrc.sh" # Mostly for server-specifc configs
 
+# More history syncing hackery (bash saves history once session closes)
+# TODO: Test history lines don't change with this (!51 to execute 51 command)
+# TODO: See https://unix.stackexchange.com/questions/1288/
+# TODO: BUG: when ${PWD} contains a newline (colors entire line)
+#
 # Use `cat` instead of a function so we do not pollute namespace
 # https://stackoverflow.com/questions/24839271 for using \001 and \002
 # They stop bash from restricting the width (typing after PS1 runs to see)
 PROMPT_COMMAND="$(<<EOF cat -
   errorcode="\$?"
-  # More history syncing hackery (bash saves history once session closes)
-  # TODO: Test history lines don't change with this (!51 to execute 51 command)
-  # TODO: See https://unix.stackexchange.com/questions/1288/
-  # TODO: BUG: when ${PWD} contains a newline (colors entire line)
   history -a  # Append command immediately to history
   #history -c  # Clear current history for session
   #history -r  # Read history back into memory (get history from active bash's)
-  PS1="\$( "${XDG_CONFIG_HOME}/prompt.sh" \
+  PS1="\$( "${XDG_CONFIG_HOME}/rc/prompt.sh" \
     "\$errorcode" "\$SECONDS" "\$!" "\\001" "\\002"
   )"
   SECONDS="0"
@@ -70,11 +69,12 @@ cd_of() {
   fi
 }
 
-if test -z "${XDG_RUNTIME_DIR}"; then
+if [ -z "${XDG_RUNTIME_DIR}" ]; then
   export XDG_RUNTIME_DIR="/tmp/${UID}-runtime-dir"
-  if ! test -d "${XDG_RUNTIME_DIR}"; then
+  if [ ! -d "${XDG_RUNTIME_DIR}" ]; then
     mkdir "${XDG_RUNTIME_DIR}"
     chmod 0700 "${XDG_RUNTIME_DIR}"
   fi
 fi
 
+rrc 'Avoid infinite loop'

@@ -81,31 +81,35 @@ status() {
     amixer get Master | sed -n '/[0-9]*%/ {
       s/.*\[\([0-9]*%\)].*\[/\1 /; s/on]//; s/off]//; p
     }'
-    printf %s "${delimiter}"
 
-    printf 'M:'
+    printf %s "${delimiter}M:"
     printf %s "$( xbacklight -get | sed 's/\..*//' )"
-    printf %s "${delimiter}"
 
     #awk '/^\s*w/{ print "" int($3 * 100 / 70) "%" }' /proc/net/wireless
 
-    # TODO: look into hotspot
-    #nmcli dev wifi  | awk '/\s*\*/{ printf("%s %s", $2, $8)}'
-    nmcli -f active,ssid,signal dev wifi | awk '
-      /^yes/{ printf("%s", $2 "" $3 "%"); pot = 1; }
+    printf %s "${delimiter}"
+    # @TODO: look into hotspot
+    {
+      nmcli -t -f active,ssid,signal device wifi
+      nmcli -t -f active,name        connection show
+    } | awk -v FS=':' '
+      /^yes/ {
+        if ($3) { printf "%s", $2 "" $3 "%"; }
+        else    { printf "%s", $2; }
+        pot = 1;
+      }
       END{ if (!pot) printf("%s", "Disconnected"); }
     '
-    sed 's/down//;s/up//' /sys/class/net/e*/operstate
-    printf %s "${delimiter}"
+    #sed 's/down//;s/up//' /sys/class/net/e*/operstate
 
-    printf %s "B:"
+    printf %s "${delimiter}B:"
     for x in $( cat /sys/class/power_supply/BAT?/capacity ); do
       case "$x" in
-        9[0-9]|100)  printf %s "$x " ;;
-        [78][0-9])   printf %s "$x " ;;
-        [56][0-9])   printf %s "$x " ;;
-        [34][0-9])   printf %s "$x " ;;
-        *)           printf %s "$x " ;;
+        [89][0-9]|100)  printf %s "$x " ;;
+        [67][0-9])      printf %s "$x " ;;
+        [45][0-9])      printf %s "$x " ;;
+        [23][0-9])      printf %s "$x " ;;
+        *)              printf %s "$x " ;;
       esac
       case "$x" in
         8[5-9]|9[0-4])
@@ -120,7 +124,6 @@ status() {
     printf %s "${delimiter}"
 
     date '+%Y-%b-%d (%a) %H:%M'
-    #date '+%Y-%b-%d (%a) %H:%M:%S'
   } | tr -d '\n'
 }
 

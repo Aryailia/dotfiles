@@ -15,6 +15,7 @@ alias   bms='browser.sh menu search'
 alias   btl='browser.sh terminal link'
 alias   btb='browser.sh terminal bookmarks'
 alias   bts='browser.sh terminal search'
+alias   btm='btm --celsius --tree --color nord-light'
 alias  cgph='cd_of sh -c '\''
   a="$( git rev-parse --show-toplevel; printf a )" || exit "$?"; a="${a%?a}"
   printf %s "${a}"

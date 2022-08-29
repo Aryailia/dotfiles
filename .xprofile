@@ -1,8 +1,9 @@
-#!/usr/bin/env sh
+#!/bin/sh
 # Defaults to runs when after you login via display manager (login screen)
 # Also manually sourced from '.xinitrc'
 
-. "$HOME/.profile"  # NixOS runs graphical display managers from root
+# NixOS runs startx and graphical DMs from a different shell environment
+. "$HOME/.profile"
 
 [ -r "$HOME/.Xresources" ] && xrdb "$HOME/.Xresources"
 #[ -r "$HOME/.Xresources" ] && xrdb -merge "$HOME/.Xdefaults"
@@ -38,7 +39,7 @@ x.sh set-wallpaper&            # Desktop Wallpaper
 xcompmgr -c&                   # Window Transparency
 dunst&                         # Notifications
 pipewire&                      # Cannot figure out user sv for running this
-#wireplumber&                  # Session manager for pipewire
+#wireplumber&                   # Session manager for pipewire
 #mpd&                           # For music playing
 #sxhkd&                         # For hotkeys
 

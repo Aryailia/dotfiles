@@ -9,12 +9,28 @@
 # `ion` does not support 2> or &1
 
 # The defaults, but set them explicitly
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_CACHE_HOME="$HOME/.cache"
-#XDG_RUNTIME_DIR set in .bashrc
+export XDG_CACHE_HOME="$HOME/.cache"        # analogous to /etc
+export XDG_CONFIG_HOME="$HOME/.config"      # analogous to /var/cache
+export XDG_DATA_HOME="$HOME/.local/share"   # analogous to /usr/share
+export XDG_STATE_HOME="$HOME/.local/state"  # analogous to /var/lib
+#XDG_RUNTIME_DIR set in .xprofile
 
 export SVDIR="$XDG_CONFIG_HOME/autostart/sv-user"
+
+command -v 'lynx'            >/dev/null 2>&1 && export  BROWSER_CLI='lynx'
+command -v 'st'              >/dev/null 2>&1 && export     TERMINAL='st'
+command -v 'kitty'           >/dev/null 2>&1 && export     TERMINAL='kitty'
+command -v 'alacritty'       >/dev/null 2>&1 && export     TERMINAL='alacritty'
+command -v 'xst'             >/dev/null 2>&1 && export     TERMINAL='xst'
+command -v 'vim'             >/dev/null 2>&1 && export       EDITOR='vim'
+command -v 'nvim'            >/dev/null 2>&1 && export       EDITOR='nvim'
+command -v 'termux-open-url' >/dev/null 2>&1 && export      BROWSER='termux-open-url'
+command -v 'surf'            >/dev/null 2>&1 && export      BROWSER='surf'
+command -v 'firefox'         >/dev/null 2>&1 && export      BROWSER='firefox'
+command -v 'zathura'         >/dev/null 2>&1 && export       READER='zathura'
+#command -v 'st'              >/dev/null 2>&1 && export OPT_TERMNAME='-t'
+#command -v 'alacritty'       >/dev/null 2>&1 && export OPT_TERMNAME='-t'
+
 
 ################################################################################
 # $HOME directory cleanup, https://superuser.com/questions/874901/
