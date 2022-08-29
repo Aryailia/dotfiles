@@ -176,7 +176,7 @@ display_shortcuts()  {
         printf '%s%s%s\0' "${1}" "${separator}" "${2}"
         shift 2  # Should be a guarenteed 2
       done; } \
-      | fzf --read0 --no-multi --select-1 --nth='1' --delimiter="${separator}"
+      | fzf --no-sort --read0 --no-multi --nth='1' --delimiter="${separator}"
     )" || exit "$?"
     choice="${choice%%${separator}*}"  # Safe if ${separator} glob-safe
 
