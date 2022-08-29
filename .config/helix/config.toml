@@ -1,0 +1,7 @@
+theme = "onelight"
+
+[editor]
+mouse = true
+
+[editor.lsp]
+display-messages = true
