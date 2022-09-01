@@ -7,6 +7,9 @@
 
 #export GPG_TTY="$( tty )"
 
+
+stty -ixon  # Disable CTRL-s and CTRL-q, the pause and continue
+
 # History modification, https://sanctum.geek.nz/arabesque/better-bash-history
 #HISTFILESIZE=10000             # Commands to save to disk (default 500)
 #HISTSIZE="${HISTFILESIZE}"     # Portion of which to load into memory
@@ -68,6 +71,15 @@ cd_of() {
     cd "${temp}" && ls --color=auto --group-directories-first -hA
   fi
 }
+
+dir="${SCRIPTS}"
+for f in "${dir}"/* "${dir}"/.[!.]* "${dir}"/..?*; do
+  if [ -f "${f}" ] && grep -qF 'COMP_LINE' "${f}"; then
+    complete -C "${f}" "${f##*/}"
+    notify.sh "${f}"
+  fi
+done
+
 
 if [ -z "${XDG_RUNTIME_DIR}" ]; then
   export XDG_RUNTIME_DIR="/tmp/${UID}-runtime-dir"
