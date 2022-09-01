@@ -30,8 +30,9 @@ magenta="${escapeopen}\\033[45m${escapeclose}"
 #local green2yellow=$'\[\033[32;43m\]'
 #local yellow2black=$'\[\033[33;40m\]'
 
+# Box drawing characters
 bout() { printf %b "$@"; }
-bout "${RESET}${whitetext}${black}|"
+bout "${RESET}┬${whitetext}${black}"
 
 ###
 # Depth of process call tree, useful for knowing if we are in subshells
@@ -109,8 +110,7 @@ fi
     && kill -0 "${background}" >/dev/null 2>&1 \
   && bout "${white}${blacktext} PID&:${background} "
 
-bout "${white}${NL}${black}'- "
-#bout "${RESET} "  # Six-em-space U+2006, makes searching for prompts simplier
+bout "${RESET}${NL}└─"
 bout "${RESET}"
-printf ' '  # Six-per-em space, marker to easily search history
+printf ' '  # Six-per-em space U+2006, marker to easily search history
 # Use `Ctrl + V;  u2006` to enter this in vim
