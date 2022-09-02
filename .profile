@@ -39,6 +39,7 @@ command -v 'zathura'         >/dev/null 2>&1 && export       READER='zathura'
 export npm_config_userconfig="$XDG_CONFIG_HOME/rc/npmrc"
 export npm_config_cache="$XDG_DATA_HOME/npm"
 export npm_config_prefix="$HOME/.local" # No XDG var for ~/.local
+#export BUN_INSTALL='$HOME/.local/bin'
 export NODE_REPL_HISTORY=''
 export NODE_PATH="$npm_config_prefix/lib/node_modules"
 export CARGO_HOME="$HOME/.local/lib/cargo"   # For source files
@@ -108,8 +109,9 @@ uname -o | grep -q 'MSYS' &&  export TMPDIR="$HOME/AppData/Local/Temp"  # Win
 #printf %s "$PATH" | xargs -n1 -d: -IZ test --e '/.Z/st' && export TEMRINAL=st
 
 # Less/manpages colors, 'fish' uses `sed` to read these
-export PAGER='less'  # for perldoc
-export LESS=-R
+export       BAT_THEME='OneHalfLight'
+export           PAGER='less'  # for perldoc
+export            LESS=-R
 export LESS_TERMCAP_mb="$( printf '%b' '[1;31m' )"
 export LESS_TERMCAP_md="$( printf '%b' '[1;36m' )"
 export LESS_TERMCAP_me="$( printf '%b' '[0m' )"
