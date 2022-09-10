@@ -21,11 +21,10 @@ show_help() {
 }
 
 tetra() {
-  project_path="${HOME}/projects/personal-project"
-  #[ ! -x "${project_path}/target/debug/tetra-cli" ] \
-    #&& cargo build --manifest-path "${project_path}/Cargo.toml"
-  #"${project_path}/target/debug/tetra-cli" parse "$1"
-  cargo run --manifest-path "${project_path}/Cargo.toml" parse "${1}"
+  #tetra-cli "$@"
+  p="$( command -v tetra-cli )" || exit "$?"
+  p="$( realpath "${p}"; printf a )" || exit "$?"; p="${p%?a}"
+  run_from_project_root "${p}" "Cargo.toml" cargo run "$@"
 }
 
 ENUM_DEFAULT=0
@@ -52,7 +51,7 @@ main() {
 
   eval "set -- ${args}"
 
-  #run: sh %
+  #run: sh % --test
   LINT='false'
   BUILD='false'
   RUN='false'
@@ -96,20 +95,22 @@ main() {
 
 
   "${BUILD}" && case "${ext}"
-    in java)    run_from_project_home "${file}" "make.sh" "build" || exit "$?"
+    in go)      run_from_root "${file}" "main.go" go build
+    ;; java)    run_from_root "${file}" "make.sh" ./make.sh build || exit "$?"
     ;; mjs|js)  node "${file}"
     ;; pl)      perl -T "${file}"
-    ;; py)      run_relative_to_project_home "${file}" "requirements.txt" "${file}" python
+    ;; py)      run_from_root "${file}" "venv" process_python "${fpr_target}"
     ;; rs)      print_do cargo build || exit "$?"
     # TODO: Make this use argv instead of dealing with string escaping
     ;; sass)    sassc "${file}" >"${target_dir}/${stem}.css"
     ;; sh)      sh "${file}"
+    ;; ts)      bun build "${file}"
 
     ;; adoc|ad|asc)
       process_adoc "${file}" "${target_dir}/${stem}"
     ;; rmd)
       [ "${file}" != "/tmp/${stem}.rmd" ] || die FATAL 1 "Cannot build temp files"
-      tetra "${file}" >"/tmp/${stem}.rmd"
+      tetra parse "${file}" >"/tmp/${stem}.rmd"
       Rscript -e "rmarkdown::render('/tmp/tetra.rmd', output_file='${target_dir}/${stem}')"
     ;; md)      rustdoc "${file}" --output "${target_dir}"
     ;; tex)     tectonic "${file}" --print --outdir "${target_dir}" "$@"
@@ -122,11 +123,14 @@ main() {
 
   new_target="${target_dir}/${stem}"
   "${RUN}" && case "${ext}"
-    in java)    run_from_project_home "${file}" "make.sh" "run" || exit "$?"
+    in go)      run_from_root "${file}" "main.go" go run .
+    ;; java)    run_from_root "${file}" "make.sh" "run" || exit "$?"
     ;; mjs|js)  npm run "${file}"
     ;; pl)      perl "${file}"
-    ;; py)      run_relative_to_project_home "${file}" "requirements.txt" "${file}" python
+    ;; py)      run_from_root "${file}" "venv" process_python test.py
+                run_from_root "${file}" "venv" process_python "${fpr_target}"
     ;; rs)      print_do cargo run
+    ;; ts)      bun run "${file}"
     ;; sh)      print_do sh "${file}"
 
     ;; md|rmd|latex|tex)
@@ -184,44 +188,31 @@ process_latex() {
   printf %s\\n '' | "${cmd}" --output-directory="${dir}" "$1"
 }
 
+################################################################################
+process_python() {
+  # Assume we are running from project root and always want virtual environments
+  . venv/bin/activate || { printf %s\n "Error sourcing venv" >&2; exit 1; }
+  python "$@"
+}
 
-
-
+################################################################################
 print_do() {
   printf %s\\n "$*" >&2
   "$@"
 }
 
-cd_project_dir() {
-  cdpd_start_dir="$( dirname "${1}"; printf a )"
-  cdpd_start_dir="${cdpd_start_dir%?a}"
-  cdpd_find_file="${2}"
-  cdpd_make="${3}"
-
-  setv_find_project_base "${cdpd_start_dir}" "${cdpd_find_file}" "${cdpd_make}" \
-    || die FATAL "$?" "Cannot find project dir for '${cdpd_make}', searching for '${cdpd_find_file}'"
-  cdpd_project_dir="${fpb_dir}"
-  cdpd_make="${fpb_target}"  # Same file as ${3}, just relative to project_home
-  cdpd_make="${cdpd_make#"${cdpd_project_dir}/"}"
-
-  cd "${cdpd_project_dir}" || die FATAL 1 "Cannot cd to project dir '${cdpd_project_dir}'"
+run_from_root() {
+  # $1: start path
+  # $2: marker filename
+  # $@: command to execute
+  find_project_root_store_in_vars "${1}" "${2}" ""
+  shift 2
+  cd "${fpr_dir}" || die FATAL 1 "Could not change to project root '${fpr_dir}'"
+  printf %s\\n "Running \`$*\` from '${fpr_dir}' ..." >&2
+  "$@"
 }
 
-run_relative_to_project_home() (
-  cd_project_dir "${1}" "${2}" "${3}"
-  shift 3
-  printf %s\\n "Running \`./${cdpd_make} $*\`  from '${cdpd_project_dir}' ..." >&2
-  "$@" "./${cdpd_make}"
-)
-
-run_from_project_home() (
-  cd_project_dir "${1}" "${2}" "${3}"
-  shift 2
-  printf %s\\n "Running \`./${cdpd_find_file} $*\`  from '${cdpd_project_dir}' ..." >&2
-  "./${cdpd_find_file}" "$@"
-)
-
-
+################################################################################
 ut() { # unit test
   if [ "${1}" = "${2}" ]
     then printf %s\\n "pass ${3}" >&2
@@ -230,15 +221,21 @@ ut() { # unit test
 }
 unit_testing() {
   t="/a/./b/c/../../"; ut "/a" "$( canonicalise "${t}" )" 1
+
   ( cd /usr/bin && {
       t="../../../../../../../"
       ut "/" "$( canonicalise "${t}" )" 2
     }
   )
+
+  ( dotfiles="$( run_from_project_root "$0" "linker.pl" pwd; printf a )" \
+      || { printf %s\\n "Could not find linker.pl" >&2; exit 1; }
+    dotfiles="${dotfiles%?a}"
+    ut "${HOME}/dotfiles" "${dotfiles}" 3
+  )
 }
 
-
-
+################################################################################
 
 # Helpers
 # With only posix sh (so no 'realpath'), turn ${1} into a canonical path
@@ -286,20 +283,28 @@ canonicalise() {
 
 # Check each directory, starting from ${1}, recursively moving up into its
 # parents until the file ${2} is found
-setv_find_project_base() {
-  fpb_dir="${1}"
+find_project_root_store_in_vars() {
+  # $1: start path
+  # $2: is the filename or directory name that exists in the project root dir
+  #     and signals we have reached the project dir
+  # $3: a path from the current dir that we are prepending directories to until
+  #     we reach the project dir, resulting in a path to the same target but
+  #     relative to the project dir
+  fpr_dir="$( dirname "${1}"; printf a )"; fpr_dir="${fpr_dir%?a}"
   [ "${2#*/}" != "${2}" ] && die DEV 1 "Not a path, just a filename."
-  fpb_target="${3}"
+  fpr_target="${3}"
 
   # `printf a` to protect against shellscript's newline trimming
-  fpb_dir="$( canonicalise "${fpb_dir}"; printf a )"; fpb_dir="${fpb_dir%a}"
-  while [ -n "${fpb_dir}" ]; do
-    if [ -e "${fpb_dir}/${2}" ]; then
+  fpr_dir="$( canonicalise "${fpr_dir}"; printf a )"; fpr_dir="${fpr_dir%a}"
+  while [ -n "${fpr_dir}" ]; do
+    if [ -e "${fpr_dir}/${2}" ]; then
       return 0
     else
-      [ "${fpb_dir}" != "${fpb_dir##*/}" ] || die DEV 1 "Path is not aboslute"
-      fpb_target="${fpb_dir##*/}/${fpb_target}"
-      fpb_dir="${fpb_dir%/*}"
+      [ "${fpr_dir}" != "${fpr_dir##*/}" ] \
+        || die FATAL 1 "Could not find project marked by '${2}'"
+        # We reached `${fpr_dir} = ""` so die
+      fpr_target="${fpr_dir##*/}/${fpr_target}"
+      fpr_dir="${fpr_dir%/*}"
     fi
   done
   return 1
@@ -316,5 +321,4 @@ require() {
   return 1
 }
 
-
-<&1 main "$@"
+<&0 main "$@"
