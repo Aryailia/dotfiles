@@ -48,22 +48,20 @@ main() {
     if [ "${_HOSTS}" != "${_HOSTS#*"${NL}${cmd}${NL}"}" ]; then
       connect_to_addr_host "${cmd}" "$@"
     else
-      connect_to_addr_host "${cmd}" "$@"
       private_key="$( list_private_keys | fzf )" || exit "$?"
-      ssh -i "${private_key}" "$@" "${1}"
+      ssh -i "${private_key}" "${cmd}" "$@"
     fi
   esac
 }
 
 connect_to_addr_host() {
   line="$( <"${ADDR}" grep -F "${1}," )"
-  <<EOF IFS=, read -r _ _nick host port user private_key
-    ,${line}
+  <<EOF IFS=, read -r _nick host port user private_key
+${line}
 EOF
   [ -f "${SSH_DIR}/${private_key}" ] \
     || die FATAL 1 "Private key '${private_key}' for '${1}' does not exist"
-  ssh -i "${private_key}" ""
-  echo "${user}@${host}" "-p" "${port}"
+  ssh -i "${private_key}" "${user}@${host}" "$@"
 }
 
 list_private_keys() {
