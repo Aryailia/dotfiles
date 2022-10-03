@@ -43,8 +43,6 @@ alias    dw='sdcv --data-dir $STARDICT_DATA_DIR/wy'
 alias    dz='sdcv --data-dir $STARDICT_DATA_DIR/zh'
 alias   dza='sdcv --data-dir $STARDICT_DATA_DIR/zha'
 
-#alias     e='emacs-sandbox.sh --user-dir "$EMACSINIT" -P -O'
-#alias     e='emacs-sandbox.sh --user-dir ~/.config/emacs2 -P -O'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='browser.sh edit search'
 alias    es='browser.sh edit search'
@@ -67,6 +65,7 @@ alias   grc='sh -c '\''  # Revision count
   git rev-list --count "${branch}"
 '\'' _'
 alias    gs='git status'
+alias  gssh='git remote set-url origin "$( git remote get-url origin | sed "s|https://github.com/|git@github.com:|" )"'
 #alias  gcb='sh -c "
 #  git checkout -b \"$1\"
 #  git submodule foreach '\''git checkout -b \"$1\"'\''
@@ -78,7 +77,6 @@ alias   lal='exa --color=auto --group-directories-first  --sort=modified -rhal'
 alias    ll='exa --color=auto --group-directories-first  --sort=modified -rhl'
 alias   lla='exa --color=auto --group-directories-first  -ha'
 alias  llal='exa --color=auto --group-directories-first  -hal'
-#alias    ls='\ls --color=auto'
 # With `sed` can use escapes like "\n" in filenames
 alias   mkf='sh -c '\''for x in "$@"; do
   [ "$1" != "${1%%*|*}" ] && { echo "Do not use \"|\" in file name"; exit 1; };
@@ -118,7 +116,6 @@ alias  nixr='sudo nixos-rebuild switch'
 alias  nixs='nix --extra-experimental-features "nix-command flakes" search nixpkgs'
 alias    pm='package-manager.sh'
 alias     r='trash'
-alias   rhk='pkill -USR1 sxhkd; i3-msg reload'  # `sxhkd` updates on usr1 signal
 alias  rgpg='gpgconf --kill gpg-agent; gpg-connect-agent relodagent /bye'
 #alias  rrc=''  # In individual rc files, reminder to not re-alias this
 alias    rp='pass show refresh'
@@ -128,11 +125,17 @@ alias    oe='handle.sh e --'
 alias    og='handle.sh g --'
 alias    op='handle.sh v --'
 alias    ot='handle.sh t --'
-alias     t='tmux.sh'
-alias     w='weather.sh'
+alias    tf='terraform'
 alias     v='$EDITOR'
 
+#alias     e='emacs-sandbox.sh --user-dir "$EMACSINIT" -P -O'
+#alias     e='emacs-sandbox.sh --user-dir ~/.config/emacs2 -P -O'
+#alias   rhk='pkill -USR1 sxhkd; i3-msg reload'  # `sxhkd` updates on usr1 signal
+#alias     t='tmux.sh'
+#alias     w='weather.sh'
+
 # Enable aliases in sudo commands
+alias  nohup='nohup '
 alias   sudo='sudo '
 alias setsid='setsid '
 
