@@ -123,7 +123,7 @@ main() {
 
   new_target="${target_dir}/${stem}"
   "${RUN}" && case "${ext}"
-    in go)      run_from_root "${file}" "main.go" go run .
+    in go)      run_from_root "${file}" "main.go" go run main.go
     ;; java)    run_from_root "${file}" "make.sh" "run" || exit "$?"
     ;; mjs|js)  npm run "${file}"
     ;; pl)      perl "${file}"

@@ -1,7 +1,8 @@
-theme = "onelight"
+theme = "catppuccin_latte"
 
 [editor]
 mouse = true
+true-color = true
 
 [editor.lsp]
 display-messages = true
