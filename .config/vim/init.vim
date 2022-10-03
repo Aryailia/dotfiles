@@ -52,6 +52,7 @@ set incsearch   " Search highlights only next result as you type
 
 " The all-important default indent settings; filetypes to tweak
 set expandtab      " Use spaces instead of tabs, use C-v to enter tabs
+set tabstop=2      "
 set shiftwidth=2   " Indent with two spaces
 
 if v:version >= 800
@@ -179,6 +180,8 @@ augroup CustomBarbaric
   autocmd!
   autocmd InsertEnter * if executable('fcitx-remote') | call system('fcitx-remote -o') | endif
   autocmd InsertLeave * if executable('fcitx-remote') | call system('fcitx-remote -c') | endif
+  autocmd InsertEnter * if executable('fcitx5-remote') | call system('fcitx5-remote -o') | endif
+  autocmd InsertLeave * if executable('fcitx5-remote') | call system('fcitx5-remote -c') | endif
   " This always prints some ANSI escape codes, not sure how to fix it
   " Deactivate on VimEnter
   "autocmd VimEnter    * if executable('fcitx-remote') | call system('fcitx-remote -c') | endif
@@ -250,18 +253,23 @@ function! Make(is_run_in_split, build_type, temp) abort
   endif
 endfunction
 
+function! ShellRun(cmdline) abort
+  execute('AsyncRun ' . a:cmdline)
+endfunction
+
 " For calling when there are arguments by CustomisableMake()
-function! MakeWithArguments(cmdline) abort
+function! SplitRunShell(cmdline) abort
   write
   execute('vertical T ' . a:cmdline)
 endfunction
+
 
 " Run the comment as a shell command
 function! ShellMake(regexp) abort
   " 'getpid' is just a no-op
   call RunCmdlineOverload(a:regexp
   \, function('getpid')
-  \, function('MakeWithArguments')
+  \, function('SplitRunShell')
   \)
 endfunction
 
@@ -269,7 +277,7 @@ endfunction
 function! CustomisableMake(regexp, build_type, temp) abort
   call RunCmdlineOverload(a:regexp
   \, function('Make', [1, a:build_type, a:temp])
-  \, function('MakeWithArguments')
+  \, function('SplitRunShell')
   \)
 endfunction
 
@@ -372,13 +380,13 @@ nnoremap <unique> <Leader>rn :LspRename<CR>
 " e for error
 nnoremap <unique> yoe :call ToggleVimLsp()<CR>
 
-nnoremap <unique> gr :LspReferences<CR>
-nnoremap <unique> gt :LspTypeDefinition<CR>
-nnoremap <unique> gi :LspImplementation<CR>
-nnoremap <unique> gd :LspDefinition<CR>
-nnoremap <unique> [g :LspPreviousDiagnostic<CR>
-nnoremap <unique> ]g :LspNextDiagnostic<CR>
-nnoremap <unique> K  :LspHover<CR>
+"nnoremap <unique> gr :LspReferences<CR>
+"nnoremap <unique> gt :LspTypeDefinition<CR>
+"nnoremap <unique> gi :LspImplementation<CR>
+"nnoremap <unique> gd :LspDefinition<CR>
+"nnoremap <unique> [g :LspPreviousDiagnostic<CR>
+"nnoremap <unique> ]g :LspNextDiagnostic<CR>
+"nnoremap <unique> K  :LspHover<CR>
 
 
 " ==============================================================================

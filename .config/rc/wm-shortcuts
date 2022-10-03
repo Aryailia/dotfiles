@@ -88,13 +88,12 @@
 
 # Fcitx
 # You can find these names at "$XDG_CONFIG_HOME/fcitx/profile"
-|super u ; super q ; super {{q, w, e}}| notify.sh {{"en","en-pinyin","XSampa"}}; fcitx-remote -s {{\
-  fcitx-keyboard-us-alt-intl-unicode,\
-  fcitx-keyboard-cn-altgr-pinyin,\
-  ipa-x-sampa}}
-|super u ; super w ; super {{q, w, e}}| notify.sh {{"jp-mozc","jp-anthy","jp-kkc"}}; fcitx-remote -s {{mozc, anthy, kkc}}
-|super u ; super e ; super {{q, w, e}}| notify.sh {{"zh-zhengma","zh","zh-wubi"}}; fcitx-remote -s {{zhengma-large, pinyin, wbpy}}
-|super u ; super r ; super {{q, w, e}}| notify.sh {{"ca-jyutping","rime","zh-chewing"}}; fcitx-remote -s {{jyutping, rime, chewing}}
+|super u ; super q ; super {{q, w, e}}| notify.sh {{"en","en-pinyin","XSampa"}}; \
+  fcitx5-remote -s {{keyboard-us-alt-intl-unicode      ,keyboard-cn-altgr-pinyin      ,ipa-x-sampa}};\
+  fcitx-remote -s  {{fcitx-keyboard-us-alt-intl-unicode,fcitx-keyboard-cn-altgr-pinyin,ipa-x-sampa}}
+|super u ; super w ; super {{q, w, e}}| notify.sh {{"jp-mozc","jp-anthy","jp-kkc"  }}; fcitx5-remote -s {{mozc         ,anthy ,kkc}};         fcitx-remote -s {{mozc         ,anthy ,kkc}}
+|super u ; super e ; super {{q, w, e}}| notify.sh {{"array30","zh"      ,"tw"      }}; fcitx5-remote -s {{array30-large,pinyin,chewing}};     fcitx-remote -s {{array30-large,pinyin,chewing}}
+|super u ; super r ; super {{q, w, e}}| notify.sh {{"zhengma","rime"    ,"jyutping"}}; fcitx5-remote -s {{zhengma-large,rime  ,jyutping-ca}}; fcitx-remote -s {{zhengma-large,rime  ,jyutping-ca}}
 |super u ; super t ; super q| notify.sh "kr"; fcitx-remote -s hangul
 
 |super shift a| fcitx-remote -o
