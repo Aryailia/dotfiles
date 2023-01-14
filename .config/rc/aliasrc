@@ -125,6 +125,7 @@ alias    oe='handle.sh e --'
 alias    og='handle.sh g --'
 alias    op='handle.sh v --'
 alias    ot='handle.sh t --'
+alias    tm='arecord -vvv -f dat /dev/null' # Multiple mics?
 alias    tf='terraform'
 alias     v='$EDITOR'
 
