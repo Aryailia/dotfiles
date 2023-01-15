@@ -14,7 +14,7 @@ function! s:Build() abort
 endfunction
 
 function! s:Lint() abort
-  RustFmt
+  LspDocumentFormatSync
   vertical T cargo clippy
 endfunction
 

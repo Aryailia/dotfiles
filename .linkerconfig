@@ -20,7 +20,8 @@ ignore: \A       \.git_template \z #Folder
 ignore:          .*\.swp        \z
 ignore: (?:\A|/) .stfolder      \z #Folder
 ignore: (?:\A|/) .stversions    \z #Folder
-ignore: (?:\A|/) README.md      \z
+ignore: (?:\A|/) \w*.md         \z
+ignore: (?:\A|/) \w*.adoc       \z
 
 # Directory-specific
 ignore: \A       linker\.pl     \z
