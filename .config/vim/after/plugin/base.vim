@@ -74,8 +74,6 @@ endif
 "if ! has("gui_running") |  set guicursor= | endif
 
 
-
-
 " ==============================================================================
 " Completion Menu
 " ==============================================================================
@@ -94,6 +92,26 @@ set completeopt=menu,menuone,preview,noinsert,noselect
 
 
 " ==============================================================================
+" Emac-inspired movement
+" ==============================================================================
+inoremap <C-A> <Home>
+inoremap <C-E> <End>
+
+"" Default
+"inoremap          <M-b> <C-Left>
+inoremap <unique> <M-f> <C-Right>
+inoremap          <C-U> <C-o>d0
+inoremap          <C-K> <C-o>d$
+inoremap <unique> <C-Y> <Esc>Pa
+
+" C-x C-t in Emacs
+inoremap <unique> <C-l> <C-o>:move +1<CR>
+inoremap <unique> <C-h> <C-o>:move -2<CR>
+vnoremap <unique> <C-l> :move '>+1<CR>gv
+vnoremap <unique> <C-h> :move '<-2<CR>gv
+
+
+" ==============================================================================
 " General Bindings
 " ==============================================================================
 
@@ -101,7 +119,6 @@ set completeopt=menu,menuone,preview,noinsert,noselect
 nnoremap <unique> <F1> <Nul>
 " Disable Ex mode (can still use gQ)
 nnoremap <unique> Q    <Nul>
-
 
 
 
@@ -135,6 +152,12 @@ nnoremap <unique> <C-s>     :write<CR>
 inoremap          <C-s>     <C-o>:write<CR>
 nnoremap <unique> <C-q>     :quit<CR>
 inoremap <unique> <C-q>     <C-o>:quit<CR>
+
+
+ 
+" ==============================================================================
+" Vim Barbaric
+" ==============================================================================
 
 " Set IME to the decativated version (i.e. english keyboard) for normal mode
 " IMEs by convention have two states: active and deactivated.

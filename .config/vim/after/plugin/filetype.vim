@@ -15,13 +15,7 @@ vnoremap <unique> <silent> <Leader>og
   \ y:call system("handle.sh gui --file " . @")<CR>
 nnoremap <unique> <silent> <Leader>og
   \ :call system("handle.sh gui --file " . ExpandCFileWithSuffix())<CR>
-nnoremap <unique> <Leader>;l :call ListUrls()<CR>
-
-" Visual-mode select the next URI if valid URL or if path to existing file
-nmap <unique> <C-l>     <Plug>SelectNextURI
-imap <unique> <C-l>     <C-o><Plug>SelectNextURI
-vmap <unique> <C-l>     <Esc><Plug>SelectNextURI
-
+nnoremap <unique> gl :call ListUrls()<CR>
 
 
 " Blank *.tex files default to 'plain' (affects which ftplugin gets used)
