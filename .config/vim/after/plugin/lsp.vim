@@ -1,3 +1,5 @@
+" Integrate 'prabirshrestha/vim-lsp'
+
 " ga: go annotation
 nnoremap <unique> <buffer> ga <plug>(lsp-definition)
 nnoremap <unique> <buffer> ge <plug>(lsp-document-diagnostics)

@@ -1,9 +1,12 @@
 " This is to facilitate all the programming languages FileType customisations
 
+" Integrate 'build.sh' and 'kassio/neoterm' into workflow
+
 noremap <unique> <silent> <Leader>1 :call b:BuildBackground()<CR>
 noremap <unique> <silent> <Leader>2 :call b:Build()<CR>
 noremap <unique> <silent> <Leader>3 :call b:Run()<CR>
-noremap <unique> <silent> <Leader>4 <C-w><C-w>G<C-w><C-w>
+" vim and nvim differ for 'kassio/neoterm' (enter on terminal vs insert mode)
+noremap <unique> <silent> <Leader>4 <C-w><C-w><C-\><C-n>G<C-w><C-w>
 noremap <unique> <silent> <Leader>5 :vertical Tclose!<CR>
 noremap <unique> <silent> <Leader>l :call b:Lint()<CR>
 

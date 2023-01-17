@@ -1,3 +1,5 @@
+" Unfortunately there is no good tree-sitter integration as of yet for vim
+
 if has('nvim-0.8')
   lua <<EOF
 require'nvim-treesitter.configs'.setup {
