@@ -45,6 +45,14 @@ if executable('rustup')
   \})
 endif
 
+if executable('terraform-lsp')
+  au User lsp_setup call lsp#register_server({
+  \  'name': 'terraform-lsp',
+  \  'cmd': {server_info->['terraform-lsp']},
+  \  'allowlist': ['terraform'],
+  \})
+endif
+
 if executable('deno')
   au User lsp_setup call lsp#register_server({
   \  'name': 'deno',
