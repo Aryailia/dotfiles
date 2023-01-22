@@ -68,6 +68,7 @@ export GTK2_RC_FILES="$XDG_CONFIG_HOME/gtkrc-2.0"
 export LESSHISTFILE='/dev/null'
 export INPUTRC="$XDG_CONFIG_HOME/rc/inputrc"
 export ZDOTDIR="$HOME/.config/zsh"
+export WINEPREFIX="$HOME/.local/wine"
 
 ################################################################################
 export STARDICT_DATA_DIR="$XDG_DATA_HOME/stardict" # looks in ./dic
@@ -87,6 +88,8 @@ export HISTIGNORE='ls:bg:fg:history'  # Do not log these commands
 export SCRIPTS="$XDG_CONFIG_HOME/scripts"
 printf %s\\n ":$PATH:" | grep -q ":$SCRIPTS:" \
   || export PATH="$PATH:$SCRIPTS"
+printf %s\\n ":$PATH:" | grep -q ":$HOME/containers:" \
+  || export PATH="$PATH:$HOME/containers"
 printf %s\\n ":$PATH:" | grep -q ":$HOME/.local/bin:" \
   || export PATH="$PATH:$HOME/.local/bin"
 printf %s\\n ":$PATH:" | grep -q ":$CARGO_HOME/bin:" \

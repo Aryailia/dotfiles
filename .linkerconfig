@@ -7,6 +7,7 @@
 directory:.config/scripts
 directory:.config/vim/after
 directory:.config/snippets
+directory:containers
 shellrun:.config/autostart/sv/runsvdir.sh
 
 ###
@@ -24,7 +25,8 @@ ignore: (?:\A|/) \w*.md         \z
 ignore: (?:\A|/) \w*.adoc       \z
 
 # Directory-specific
-ignore: \A       linker\.pl     \z
-ignore: \A       share          \z #Folder
-ignore: \A       install        \z #Folder
-ignore: \A       LICENSE        \z
+ignore: \A       linker\.pl         \z
+ignore: \A       share              \z #Folder
+ignore: \A       install            \z #Folder
+ignore: \A       LICENSE            \z
+ignore: \A       .config/vim/unsued \z
