@@ -28,12 +28,18 @@ require'nvim-treesitter.configs'.setup {
     "markdown",
     "nix",
     "scss",
-    -- "sql",
-    "terraform",
+    -- "sql",      # requires more installation steps
+    "terraform", -- tfvars doesn't work for me
 
     "toml",
     "yaml",
     "json",
+
+    -- Wishlist
+    ---- https://github.com/nvim-treesitter/nvim-treesitter/issues/2282
+    -- "d2",       # on the nvim-treesitter wishlist
+    -- "graphviz", # not on the nvim-treesitter wishlist
+    -- "gotmpl",   # pending inclusion
   },
 
   -- Install parsers synchronously (only applied to `ensure_installed`)
