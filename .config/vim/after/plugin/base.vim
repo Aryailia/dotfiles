@@ -30,23 +30,6 @@ if v:version >= 800
   set foldmethod=indent   " I dislike automatic collapsing
   set nofoldenable        " Expand all collapsed sections
 endif
-set bg=light          " Readable on light background
-
-" Linting stuff
-set colorcolumn=81  " Archaic 80-character width, keep to before the line
-highlight! ColorColumn ctermfg=red ctermbg=yellow guibg=cyan
-highlight! HighlightedWhitespace ctermbg=Grey guibg=Grey
-call matchadd('HighlightedWhitespace', '\t')
-call matchadd('HighlightedWhitespace', '\s\+$')
-call matchadd('HighlightedWhitespace', '　\+$')
-highlight! Visual cterm=NONE ctermbg=LightYellow ctermfg=NONE
-
-" For transparent background
-highlight! Normal      ctermbg=NONE guibg=NONE
-highlight! NonText     ctermbg=NONE guibg=NONE
-highlight! NormalFloat ctermbg=NONE guibg=NONE
-
-highlight! Error ctermfg=231 ctermbg=red guibg=red
 
 
 set nrformats-=octal  " Leading 0s are not recognised as octals
@@ -89,6 +72,43 @@ inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
 " Avoid completing with only one item. Causes problems when deleting
 set completeopt=menu,menuone,preview,noinsert,noselect
 
+" ==============================================================================
+" Colours and Highlights
+" ==============================================================================
+
+set bg=light                                       " Light mode
+highlight! Error ctermfg=231 ctermbg=red guibg=red " Better for light mode
+
+" For transparent background
+highlight! Normal      ctermbg=NONE guibg=NONE
+highlight! NonText     ctermbg=NONE guibg=NONE
+highlight! NormalFloat ctermbg=NONE guibg=NONE
+
+" Linting stuff
+" I like the 80-character because it's nice for reasoning about line-wrap,
+" it is a reasonable amount of text for projectors (low resolution), and it
+" works nicely for opening multiple GUI windows and splits.
+set colorcolumn=81  " Archaic 80-character width, keep to before the line
+highlight! ColorColumn ctermfg=red ctermbg=yellow guibg=yellow
+highlight! HighlightedWhitespace ctermbg=Grey guibg=Grey
+call matchadd('HighlightedWhitespace', '\t')
+call matchadd('HighlightedWhitespace', '\s\+$')
+call matchadd('HighlightedWhitespace', '　\+$')
+highlight! Visual cterm=NONE ctermbg=LightYellow ctermfg=NONE
+
+" Not linking to a vim highlight group (e.g. group 'Todo' only appears in
+" comments) because nvim-treesitter disables vim syntax highlighting when
+" it is active (with the appropriate config in nvim-treesitter).
+highlight! Admonition ctermbg=yellow guibg=yellow
+call matchadd('Admonition', '@TODO\|\<TODO')
+call matchadd('Admonition', '@FIXME\|\<FIXME')
+call matchadd('Admonition', '@VOLATILE\|\<VOLATILE')   " To mark implicit dependencies
+call matchadd('Admonition', '@UNSAFE\|\<UNSAFE')       " From Rust
+call matchadd('Admonition', '@NOTE\|\<NOTE')           " From AsciiDoctor
+call matchadd('Admonition', '@IMPORTANT\|\<IMPORTANT') " From AsciiDoctor
+call matchadd('Admonition', '@TIP\|\<TIP')             " From AsciiDoctor
+call matchadd('Admonition', '@CAUTION\|\<CAUTION')     " From AsciiDoctor
+call matchadd('Admonition', '@WARNING\|\<WARNING')     " From AsciiDoctor
 
 
 " ==============================================================================
