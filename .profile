@@ -51,6 +51,9 @@ export R_HISTFILE="/dev/null"
 export GEM_HOME="$HOME/.local/lib/gem"
 export GEM_PATH="$GEM_HOME"
 export GEM_SPEC_CACHE="$XDG_CACHE_HOME/lib/gem"
+#export TERRAFORM_CLI_CONFIG_FILE="$XDG_CONFIG_HOME/rc/terraform.tfrc"
+export ANSIBLE_HOME="/dev/null"
+export TF_PLUGIN_CACHE_DIR="$XDG_DATA_HOME/terraform"
 
 # Important
 export GNUPGHOME="$HOME/.local/gnupg"
