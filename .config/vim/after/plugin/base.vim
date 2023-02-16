@@ -120,9 +120,9 @@ inoremap <C-E> <End>
 "" Default
 "inoremap          <M-b> <C-Left>
 inoremap <unique> <M-f> <C-Right>
-inoremap          <C-U> <C-o>d0
-inoremap          <C-K> <C-o>d$
-inoremap <unique> <C-Y> <Esc>Pa
+inoremap          <C-u> <C-o>d0
+inoremap          <C-k> <C-o>d$
+inoremap <unique> <C-y> <Esc>Pa
 
 " C-x C-t in Emacs
 inoremap <unique> <C-l> <C-o>:move +1<CR>
@@ -130,6 +130,8 @@ inoremap <unique> <C-h> <C-o>:move -2<CR>
 vnoremap <unique> <C-l> :move '>+1<CR>gv
 vnoremap <unique> <C-h> :move '<-2<CR>gv
 
+nnoremap <unique> <C-x><C-e> :.!sh -<CR>
+inoremap <unique> <C-x><C-e> <C-o>:.!sh -<CR>
 
 " ==============================================================================
 " General Bindings
