@@ -1,17 +1,17 @@
 " Integrate 'prabirshrestha/vim-lsp'
 
 " ga: go annotation
-nnoremap <unique> <buffer> ga <plug>(lsp-definition)
-nnoremap <unique> <buffer> ge <plug>(lsp-document-diagnostics)
-nnoremap <unique> <buffer> gr <plug>(lsp-references)
-nnoremap <unique> <buffer> gt <plug>(lsp-type-definition)
-nnoremap <unique> <buffer> gi <plug>(lsp-implementation)
-nnoremap <unique> <buffer> gs <plug>(lsp-document-symbol-search)
-nnoremap <unique> <buffer> gS <plug>(lsp-workspace-symbol-search)
-nnoremap <unique> <buffer> [g <plug>(lsp-previous-diagnostic)
-nnoremap <unique> <buffer> ]g <plug>(lsp-next-diagnostic)
-nnoremap <unique> <buffer> g? <plug>(lsp-hover)
-nnoremap <unique> <buffer> <leader>rn <plug>(lsp-rename)
+nnoremap <unique> ga <plug>(lsp-definition)
+nnoremap <unique> ge <plug>(lsp-document-diagnostics)
+nnoremap <unique> gr <plug>(lsp-references)
+nnoremap <unique> gt <plug>(lsp-type-definition)
+nnoremap <unique> gi <plug>(lsp-implementation)
+nnoremap <unique> gs <plug>(lsp-document-symbol-search)
+nnoremap <unique> gS <plug>(lsp-workspace-symbol-search)
+nnoremap <unique> [g <plug>(lsp-previous-diagnostic)
+nnoremap <unique> ]g <plug>(lsp-next-diagnostic)
+nnoremap <unique> g? <plug>(lsp-hover)
+nnoremap <unique> <leader>rn <plug>(lsp-rename)
 "nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
 "nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
 

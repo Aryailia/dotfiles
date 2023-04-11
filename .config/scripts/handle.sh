@@ -105,7 +105,7 @@ main() {
     d_do die FATAL "${CODE_NOPREVIEW}" "Cannot 'download' local paths"
     HANDLE_TYPE='extension' handle_extension "${2}"
     HANDLE_TYPE='mime' local_handle_mime "${2}"
-    HANDLE_TYPE='fallback' handle_fallback "${2}"
+    HANDLE_TYPE='fallback' local_handle_fallback "${2}"
     die FATAL "${CODE_NOPREVIEW}" "No program found"
   else
     e_do die FATAL "${CODE_NOPREVIEW}" "Cannot 'edit' hypertext links"

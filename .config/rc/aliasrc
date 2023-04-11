@@ -43,6 +43,7 @@ alias    dw='sdcv --data-dir $STARDICT_DATA_DIR/wy'
 alias    dz='sdcv --data-dir $STARDICT_DATA_DIR/zh'
 alias   dza='sdcv --data-dir $STARDICT_DATA_DIR/zha'
 
+alias   env='printf %s\\n "use /usr/bin/env. Protect env secrets"'
 alias    eb='browser.sh edit bookmarks'
 alias    ee='browser.sh edit search'
 alias    es='browser.sh edit search'
@@ -73,6 +74,7 @@ alias  gssh='git remote set-url origin "$( git remote get-url origin | sed "s|ht
 #  git submodule foreach '\''git checkout -b \"$1\"'\''
 #" _'
 #alias    gu='git submodule update --remote --merge'
+alias    gw='git worktree'
 alias     l='exa --color=auto --group-directories-first  -h'
 alias    la='exa --color=auto --group-directories-first  --sort=modified -rha'
 alias   lal='exa --color=auto --group-directories-first  --sort=modified -rhal'
@@ -129,6 +131,7 @@ alias    op='handle.sh v --'
 alias    ot='handle.sh t --'
 alias    tm='arecord -vvv -f dat /dev/null' # Multiple mics?
 alias    tf='terraform'
+alias    tg='terragrunt'
 alias     v='$EDITOR'
 
 #alias     e='emacs-sandbox.sh --user-dir "$EMACSINIT" -P -O'
