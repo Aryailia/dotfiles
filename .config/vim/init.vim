@@ -66,8 +66,7 @@ mapclear | mapclear! | mapclear <buffer> | mapclear! <buffer>
 if filereadable(g:vimdotdir . '/autoload/plug.vim')
   call plug#begin(g:vimdotdir . '/package')
     Plug 'tpope/vim-surround'              " Adding quotes
-    Plug 'kassio/neoterm'                  " Terminal for vim and neovim
-    Plug 'skywind3000/asyncrun.vim'        " Run scripts in the background async
+    "Plug 'skywind3000/asyncrun.vim'        " Run scripts in the background async
     Plug 'ap/vim-css-color'                " Color hex colour values
 
     Plug 'habamax/vim-asciidoctor'         " Stock adoc syntax highlight is slow

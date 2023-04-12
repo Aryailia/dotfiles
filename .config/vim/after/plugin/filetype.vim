@@ -2,13 +2,12 @@
 
 " Integrate 'build.sh' and 'kassio/neoterm' into workflow
 
-noremap <unique> <silent> <Leader>1 :call b:BuildBackground()<CR>
-noremap <unique> <silent> <Leader>2 :call b:Build()<CR>
-noremap <unique> <silent> <Leader>3 :call b:Run()<CR>
-" vim and nvim differ for 'kassio/neoterm' (enter on terminal vs insert mode)
-noremap <unique> <silent> <Leader>4 <C-w><C-w><C-\><C-n>G<C-w><C-w>
-noremap <unique> <silent> <Leader>5 :vertical Tclose!<CR>
-noremap <unique> <silent> <Leader>l :call b:Lint()<CR>
+noremap <unique> <silent> <Leader>1 :execute('silent ![ -n ${TMUX}" ] && tmux new-window -b build.sh background --temp ' . shellescape(expand('%')))<CR>
+noremap <unique> <silent> <Leader>2 :execute('silent !tmux-alt-pane.sh send-keys "build.sh build --temp "' . shellescape(expand('%')) . " Enter")<CR>
+noremap <unique> <silent> <Leader>3 :execute('silent !tmux-editor-run.sh ' . &filetype . ' ' . shellescape(expand('%')) )<CR>
+noremap <unique> <silent> <Leader>4 :execute('silent !tmux-alt-pane.sh send-keys "build.sh run --temp "' . shellescape(expand('%')) . " Enter")<CR>
+noremap <unique> <silent> <Leader>5 :execute("silent !tmux-alt-pane.sh kill-pane")<CR>
+noremap <unique> <silent> <Leader>l :execute('silent !tmux-alt-pane.sh send-keys "build.sh lint "' . shellescape(expand('%')) . " Enter")<CR>
 
 vnoremap <unique> <silent> <Leader>ot y:call system(
   \"$TERMINAL -e handle.sh terminal --file " . @")<CR>
@@ -37,77 +36,6 @@ let g:tex_flavor = 'latex'  " See :h filetype-overrule
 " ==============================================================================
 " Compilation
 " ==============================================================================
-" b:Build(), b:Run(), b:Lint() are defined in filetype for customisation
-" These functions are used in the ftplugin .vim files
-
-" Detects the line specified by {s:regexp}, and
-" runs the command the follows (allows regexp capture groups)
-"
-" Replaces '%' with the path to file
-" Use '%%' to get literal '%'
-function! RunCmdlineOverload(regexp, notfound, found) abort
-  let l:overload = searchpos(a:regexp, 'nw')
-  if l:overload[0] == 0
-    call a:notfound()
-  else
-    " the '@' substitutions are just to map '%' and '%%' properly
-    let l:path = substitute(expand('%'), '\m%', '@B', '')
-    " By convention, all these custom runners will be only on one line
-    let l:cmd = matchlist(getline(l:overload[0]), a:regexp)[1]
-    let l:cmd = substitute(l:cmd, '\m@', '@A', 'g')
-    let l:cmd = substitute(l:cmd, '\m%%', '@B', 'g')
-    let l:cmd = substitute(l:cmd, '\m%', l:path, 'g')
-    let l:cmd = substitute(l:cmd, '\m@B', '%', 'g')
-    let l:cmd = substitute(l:cmd, '\m@A', '@', 'g')
-    call a:found(l:cmd)
-  endif
-endfunction
-
-" Probably to what you want to set b:BuildBackground() and b:Build()
-function! Make(is_run_in_split, build_type, temp) abort
-  write
-  let l:path = ' ' . shellescape(expand('%'))
-  if a:is_run_in_split
-    execute('vertical T build.sh ' . a:build_type . ' ' . a:temp . l:path)
-  else
-    " NOTE: .tex files need this to not be `AsyncRun setsid build.sh`
-    execute('AsyncRun build.sh  ' . a:build_type . ' ' . a:temp . l:path)
-  endif
-endfunction
-
-function! ShellRun(cmdline) abort
-  execute('AsyncRun ' . a:cmdline)
-endfunction
-
-" For calling when there are arguments by CustomisableMake()
-function! SplitRunShell(cmdline) abort
-  write
-  execute('vertical T ' . a:cmdline)
-endfunction
-
-
-" Run the comment as a shell command
-function! ShellMake(regexp) abort
-  " 'getpid' is just a no-op
-  call RunCmdlineOverload(a:regexp
-  \, function('getpid')
-  \, function('SplitRunShell')
-  \)
-endfunction
-
-" Probably to what you want to set b:Run()
-function! CustomisableMake(regexp, build_type, temp) abort
-  call RunCmdlineOverload(a:regexp
-  \, function('Make', [1, a:build_type, a:temp])
-  \, function('SplitRunShell')
-  \)
-endfunction
-
-" Probably to what you want to set b:Lint()
-function! Lint() abort
-  vertical T build.sh lint %
-endfunction
-
 " Use the LocationList to display
 " Not sure how I want to approach highlighting
 " TODO: uriscan.sh on 'coolstuff.md' has some problems

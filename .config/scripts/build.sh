@@ -86,6 +86,7 @@ main() {
                 | sed "/Invalid field 'publisher' for entrytype 'article'/d"
 
     ;; sh)    shellcheck "${file}"
+    ;; rs)    cargo clippy
     ;; yml)   require "yq-go" && yq-go '.' "${file}"
               require "yq"    && yq    '.' "${file}"
     ;; json)  jq '.' "${file}"
@@ -133,11 +134,11 @@ main() {
     ;; ts)      bun run "${file}"
     ;; sh)      print_do sh "${file}"
 
+    ;; html)    setsid falkon --private-browsing --no-extensions --new-window "${file}"
     ;; md|rmd|latex|tex)
-      if [ -f "${new_target}.pdf" ]; then
-        handle.sh gui "${new_target}.pdf"
-      else
-        setsid falkon "${new_target}.html"
+      if [ -f "${new_target}.pdf" ]
+        then handle.sh gui "${new_target}.pdf"
+        else setsid falkon "${new_target}.html"
       fi
     ;; *)  printf %s\\n "Unsupported filetype for running file '${file}'" >&2
   esac
