@@ -2,11 +2,11 @@
 
 " Integrate 'build.sh' and 'kassio/neoterm' into workflow
 
-noremap <unique> <silent> <Leader>1 :execute('silent ![ -n ${TMUX}" ] && tmux new-window -b build.sh background --temp ' . shellescape(expand('%')))<CR>
-noremap <unique> <silent> <Leader>2 :execute('silent !tmux-alt-pane.sh send-keys "build.sh build --temp "' . shellescape(expand('%')) . " Enter")<CR>
-noremap <unique> <silent> <Leader>3 :execute('silent !tmux-editor-run.sh ' . &filetype . ' ' . shellescape(expand('%')) )<CR>
-noremap <unique> <silent> <Leader>4 :execute('silent !tmux-alt-pane.sh send-keys "build.sh run --temp "' . shellescape(expand('%')) . " Enter")<CR>
-noremap <unique> <silent> <Leader>5 :execute("silent !tmux-alt-pane.sh kill-pane")<CR>
+noremap <unique> <silent> <Leader>q :execute('silent ![ -n "${TMUX}" ] && tmux new-window -d build.sh background --temp ' . shellescape(expand('%')))<CR>
+noremap <unique> <silent> <Leader>w :execute('silent !tmux-alt-pane.sh send-keys "build.sh build --temp "' . shellescape(expand('%')) . " Enter")<CR>
+noremap <unique> <silent> <Leader>e :execute('silent !tmux-editor-run.sh ' . &filetype . ' ' . shellescape(expand('%')) )<CR>
+noremap <unique> <silent> <Leader>r :execute('silent !tmux-alt-pane.sh send-keys "build.sh run --temp "' . shellescape(expand('%')) . " Enter")<CR>
+noremap <unique> <silent> <Leader>t :execute("silent !tmux-alt-pane.sh kill-pane")<CR>
 noremap <unique> <silent> <Leader>l :execute('silent !tmux-alt-pane.sh send-keys "build.sh lint "' . shellescape(expand('%')) . " Enter")<CR>
 
 vnoremap <unique> <silent> <Leader>ot y:call system(
@@ -36,6 +36,9 @@ let g:tex_flavor = 'latex'  " See :h filetype-overrule
 " ==============================================================================
 " Compilation
 " ==============================================================================
+function CustomisableMake() abort
+endfunction
+
 " Use the LocationList to display
 " Not sure how I want to approach highlighting
 " TODO: uriscan.sh on 'coolstuff.md' has some problems

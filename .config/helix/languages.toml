@@ -1,0 +1,17 @@
+#[[language]]
+#name = "R"
+#scope = "source.r"
+#
+
+[[language]]
+name = "hcl"
+scope = "source.hcl"
+language-server = { command = "terraform-lsp" }
+
+[[language]]
+name = "rust"
+scope = "source.rs"
+
+[language.language-server]
+command = "rustup"
+args = ["run", "nightly", "rust-analyzer"]

@@ -6,3 +6,16 @@ true-color = true
 
 [editor.lsp]
 display-messages = true
+
+[keys.normal]
+esc = "collapse_selection"
+"$" = "extend_to_line_end"
+0 = "extend_to_line_start"
+
+[keys.normal."\\"]
+q = ":sh [ -n \"${TMUX}\" ] && tmux new-window -d build.sh background --temp \"$HX_PATH\""
+w = ":sh tmux-alt-pane.sh send-keys \"build.sh build --temp \" \"$HX_PATH\" Enter"
+e = ":sh tmux-alt-pane.sh send-keys \"tmux-editor-run.sh \" \"$HX_EXT\" ' ' \"$HX_PATH\" Enter"
+r = ":sh tmux-alt-pane.sh send-keys \"build.sh run --temp \" \"$HX_PATH\" Enter"
+t = ":sh tmux-alt-pane.sh kill-pane"
+

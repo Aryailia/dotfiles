@@ -75,6 +75,7 @@ alias  gssh='git remote set-url origin "$( git remote get-url origin | sed "s|ht
 #" _'
 #alias    gu='git submodule update --remote --merge'
 alias    gw='git worktree'
+alias     h='sh -c '\''HX_EXT="${1##*.}" HX_PATH="${1}" exec hx "${1}"'\'' _'
 alias     l='exa --color=auto --group-directories-first  -h'
 alias    la='exa --color=auto --group-directories-first  --sort=modified -rha'
 alias   lal='exa --color=auto --group-directories-first  --sort=modified -rhal'
