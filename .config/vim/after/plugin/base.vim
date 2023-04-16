@@ -169,11 +169,8 @@ vnoremap <unique> > >gv
 vnoremap <unique> < <gv
 
 " Saving, C-s conflicts with vim-unimparied
-nnoremap <unique> <leader>s :write<CR>
-nnoremap <unique> <C-s>     :write<CR>
-inoremap          <C-s>     <C-o>:write<CR>
-nnoremap <unique> <C-q>     :quit<CR>
-inoremap <unique> <C-q>     <C-o>:quit<CR>
+nnoremap <unique> <Space>s :write<CR>
+nnoremap <unique> <Space>q :quit<CR>
 
 
  

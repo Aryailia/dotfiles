@@ -85,8 +85,9 @@ main() {
               biber --tool --validate-datamodel "${TMPDIR}/${name}" \
                 | sed "/Invalid field 'publisher' for entrytype 'article'/d"
 
-    ;; sh)    shellcheck "${file}"
+    ;; py)    ruff check "${file}"
     ;; rs)    cargo clippy
+    ;; sh)    shellcheck "${file}"
     ;; yml)   require "yq-go" && yq-go '.' "${file}"
               require "yq"    && yq    '.' "${file}"
     ;; json)  jq '.' "${file}"
