@@ -70,9 +70,9 @@ if filereadable(g:vimdotdir . '/autoload/plug.vim')
     Plug 'ap/vim-css-color'                " Color hex colour values
 
     Plug 'habamax/vim-asciidoctor'         " Stock adoc syntax highlight is slow
-    Plug 'nvim-treesitter/nvim-treesitter' " Syntax parser, highlight, and LSP
-    Plug 'nvim-treesitter/playground'      " For viewing the tree-sitter AST
-    Plug 'prabirshrestha/vim-lsp'          " Language-Server Protocol client
+    Plug 'hashivim/vim-terraform'          " Terraform
+    Plug 'puremourning/vimspector'         " DAP (Debug Adaptor Protocol)
+    "Plug 'prabirshrestha/vim-lsp'          " Language-Server Protocol client
   call plug#end()
 endif
 

@@ -85,6 +85,7 @@ main() {
               biber --tool --validate-datamodel "${TMPDIR}/${name}" \
                 | sed "/Invalid field 'publisher' for entrytype 'article'/d"
 
+    ;; go)    revive "${file}"
     ;; py)    ruff check "${file}"
     ;; rs)    cargo clippy
     ;; sh)    shellcheck "${file}"
@@ -125,7 +126,7 @@ main() {
 
   new_target="${target_dir}/${stem}"
   "${RUN}" && case "${ext}"
-    in go)      run_from_root "${file}" "main.go" go run main.go
+    in go)      run_from_root "${file}" "main.go" go run *.go
     ;; java)    run_from_root "${file}" "make.sh" "run" || exit "$?"
     ;; mjs|js)  npm run "${file}"
     ;; pl)      perl "${file}"

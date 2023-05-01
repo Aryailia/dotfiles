@@ -27,7 +27,7 @@ $( {
 
   printf %s\\n 'py,^ *#run:,'
   printf %s\\n 'python,^ *#run:,'
-  printf %s\\n 'go,^ *#run:,'
+  printf %s\\n 'go,^ *\/\/run:,'
   printf %s\\n 'rs,^ *\/\/run:,'
   printf %s\\n 'rust,^ *\/\/run:,'
   printf %s\\n 'java,^ *\/\/run:,'

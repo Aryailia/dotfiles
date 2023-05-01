@@ -15,6 +15,9 @@ export XDG_DATA_HOME="$HOME/.local/share"   # analogous to /usr/share
 export XDG_STATE_HOME="$HOME/.local/state"  # analogous to /var/lib
 #XDG_RUNTIME_DIR set in .xprofile
 
+# reference https://docs.rs/dirs/latest/dirs/index.html
+export XDG_DOWNLOAD_DIR="$HOME/Downloads/queue"
+
 export SVDIR="$XDG_CONFIG_HOME/autostart/sv-user"
 
 command -v 'lynx'            >/dev/null 2>&1 && export  BROWSER_CLI='lynx'

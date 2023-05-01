@@ -167,8 +167,6 @@ nnoremap <unique> <Leader>sgb :setlocal spell spelllang=en_GB,cjk<CR>
 " Select the same selection again after doing an indent
 vnoremap <unique> > >gv
 vnoremap <unique> < <gv
-
-" Saving, C-s conflicts with vim-unimparied
 nnoremap <unique> <Space>s :write<CR>
 nnoremap <unique> <Space>q :quit<CR>
 
