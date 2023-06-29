@@ -55,13 +55,14 @@ main() {
 }
 
 connect_to_addr_host() {
-  line="$( <"${ADDR}" grep -F "${1}," )"
+  nick="${1}"; shift 1
+  line="$( <"${ADDR}" grep -F "${nick}," )"
   <<EOF IFS=, read -r _nick host port user private_key
 ${line}
 EOF
   [ -f "${SSH_DIR}/${private_key}" ] \
-    || die FATAL 1 "Private key '${private_key}' for '${1}' does not exist"
-  ssh -i "${private_key}" "${user}@${host}" "$@"
+    || die FATAL 1 "Private key '${private_key}' for '${nick}' does not exist"
+  ssh -i "${SSH_DIR}/${private_key}" "${user}@${host}" "$@"
 }
 
 list_private_keys() {
