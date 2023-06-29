@@ -5,7 +5,7 @@ use-grammars = { only = [
   "latex", "lua", "make", "markdown", "markdown.inline", "mermaid", "msbuild",
   "nim", "nix", "org", "passwd", "perl", "php", "python", "r", "rmarkdown",
   "ruby", "rust", "scala", "scheme", "scss", "sql", "tfvars", "toml",
-  "typescript", "tsx", "vim", "xml", "yaml"
+  "typescript", "tsx", "vim", "xml", "yaml", "zig"
 ] }
 
 [[language]]

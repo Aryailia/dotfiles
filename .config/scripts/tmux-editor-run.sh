@@ -35,6 +35,7 @@ $( {
   printf %s\\n 'ts,^ *\/\/run:,'
   printf %s\\n 'javascript,^ *\/\/run:,'
   printf %s\\n 'typescript,^ *\/\/run:,'
+  printf %s\\n 'zig,^ *\/\/run:,'
 
   printf %s\\n 'sass,^ *\/\/run:,'
   printf %s\\n 'scss,^ *\/\/run:,'
@@ -45,6 +46,8 @@ $( {
 } | awk -v FS="," "/^${filetype},/ { print \$0; exit 0; }"
 )
 EOF
+
+# @TODO @BUG: if language not found, it opens two tmux windows
 
 # There's no good reason to use % as a special keyword
 # Only using it because vim uses it to expand to the filename

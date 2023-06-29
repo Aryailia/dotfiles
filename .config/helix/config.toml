@@ -6,7 +6,7 @@ auto-pairs   = false
 bufferline   = "multiple"
 cursor-shape = { insert = "bar" } # Visual indication we are in insert mode
 color-modes  = true
-line-number  = "relative"
+line-number  = "absolute"
 rulers       = [81]
 soft-wrap    = { enable = true } # I want all text displayed
 true-color   = true
@@ -38,13 +38,22 @@ a     = [":sh fcitx-remote -o", ":sh fcitx5-remote -o", "collapse_selection", "a
 "}"   = ["extend_to_line_bounds", "goto_next_paragraph"]
 C-r   = "redo"
 D     = ["extend_to_line_end", "delete_selection"]
+g     = { j = "move_visual_line_down", k = "move_visual_line_up" }
+j     = "move_line_down"
+k     = "move_line_up"
 x     = "delete_selection"
 ","   = "extend_line_below" # To replace x
 
 [keys.select]
-"x"   = "delete_selection"
+"$"   = "extend_to_line_end"
+0     = "extend_to_line_start"
+"_"   = "goto_first_nonwhitespace"
+o     = "flip_selections"
+g     = { j = "extend_visual_line_down", k = "extend_visual_line_up" }
+j     = "extend_line_down"
+k     = "extend_line_up"
+x     = "delete_selection"
 ","   = "extend_line_below"
-"o"   = "flip_selections"
 esc   = ["collapse_selection", "keep_primary_selection", "normal_mode"]
 
 ### Multilingual support (Vim-barbaric): Swap to english for normal mode

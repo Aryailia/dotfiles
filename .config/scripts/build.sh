@@ -108,6 +108,8 @@ main() {
     ;; sass)    sassc "${file}" >"${target_dir}/${stem}.css"
     ;; sh)      sh "${file}"
     ;; ts)      bun build "${file}"
+    ;; zig)     zig build
+    #;; zig)     run_from_root "${file}" "penzai.nimble" nimble build
 
     ;; adoc|ad|asc)
       process_adoc "${file}" "${target_dir}/${stem}"
@@ -135,6 +137,7 @@ main() {
     ;; rs)      print_do cargo run
     ;; ts)      bun run "${file}"
     ;; sh)      print_do sh "${file}"
+    ;; zig)     zig run main.zig
 
     ;; html)    setsid falkon --private-browsing --no-extensions --new-window "${file}"
     ;; md|rmd|latex|tex)
