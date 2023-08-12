@@ -32,7 +32,7 @@ if ! "${is_supported}"; then
   printf %s\\n "Need git < 2.10 does not support core.sshCommand" >&2
   printf %s\\n "You will have to configure it by host in the SSH config file" >&2
   exit 1
-}
+fi
 git rev-parse --is-inside-work-tree >/dev/null || exit "$?"
 
 private_key="$( list_private_keys | fzf )" || exit "$?"

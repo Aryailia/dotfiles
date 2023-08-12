@@ -19,7 +19,8 @@ set previewer ~/.config/lf/preview.sh
 set filesep "\n/./"  # Make pathnames unique (www.etalabs.net/sh_tricks.html)
 set ifs "\n"        # Sets ${IFS} for shell commands
 set scrolloff 10    # Scroll offset, leave space at top/bottom of screen
-set hidden on
+set hidden      off
+set hiddenfiles on
 set icons on
 
 ################################################################################
@@ -153,6 +154,7 @@ map T ${{
 
 # Bindings
 map <esc> :clear;unselect;reload
+map E $vim "$f"
 map r prompt-rename
 map t delete
 # Prepend '/.' since ${filesep} acts like a join

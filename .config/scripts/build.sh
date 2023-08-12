@@ -88,6 +88,7 @@ main() {
     ;; go)    revive "${file}"
     ;; py)    ruff check "${file}"
     ;; rs)    cargo clippy
+    ;; zig)   zig fmt "${file}"; zig ast-check "${file}"
     ;; sh)    shellcheck "${file}"
     ;; yml)   require "yq-go" && yq-go '.' "${file}"
               require "yq"    && yq    '.' "${file}"
@@ -137,7 +138,7 @@ main() {
     ;; rs)      print_do cargo run
     ;; ts)      bun run "${file}"
     ;; sh)      print_do sh "${file}"
-    ;; zig)     zig run main.zig
+    ;; zig)     zig build run
 
     ;; html)    setsid falkon --private-browsing --no-extensions --new-window "${file}"
     ;; md|rmd|latex|tex)

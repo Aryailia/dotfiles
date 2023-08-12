@@ -1,11 +1,11 @@
 # Control which grammars are fetched and built
 use-grammars = { only = [
   "awk", "bash", "bibtex", "c", "c-sharp", "css", "diff", "java", "javascript", 
-  "jsdoc", "json", "jsx", "julia", "git-rebase", "go", "gotmpl", "hcl", "html",
-  "latex", "lua", "make", "markdown", "markdown.inline", "mermaid", "msbuild",
-  "nim", "nix", "org", "passwd", "perl", "php", "python", "r", "rmarkdown",
-  "ruby", "rust", "scala", "scheme", "scss", "sql", "tfvars", "toml",
-  "typescript", "tsx", "vim", "xml", "yaml", "zig"
+  "jsdoc", "json", "jsonnet", "jsx", "julia", "git-rebase", "go", "gotmpl",
+  "hcl", "html", "latex", "lua", "make", "markdown", "markdown.inline",
+  "msbuild", "nickel", "nim", "nix", "org", "passwd", "perl", "php", "python",
+  "r", "rmarkdown", "ruby", "rust", "scheme", "scss", "sql", "tfvars",
+  "toml", "typescript", "tsx", "vim", "xml", "yaml", "zig"
 ] }
 
 [[language]]
