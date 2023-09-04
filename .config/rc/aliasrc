@@ -114,6 +114,7 @@ alias  mntn='sh -c '\''
   sudo mount -t ntfs -o "uid=$( id -u),gid=$( id -g ),rw,auto,user,fmask=0133,dmask=0000" "/dev/$1" -- "$2";
 '\'' _'
 alias  nixc='sudo $EDITOR /etc/nixos/configuration.nix'
+alias  nixd='sudo nix-env -p /nix/var/nix/profiles/system --delete-generations 30d'
 alias  nixl='nix-store -q --references /run/current-system/sw \
   | sed "s/^[^-]*-//"'
 alias  nixr='sudo nixos-rebuild switch'
