@@ -5,7 +5,7 @@ perl_init() {
 
 use v5.28;                     # in perluniintro, latest bug fix for unicode
 use feature 'unicode_strings'; # enable perl functions to use Unicode
-use Encode 'decode_ut8';       # so we do not need -CA flag in perl
+use Encode  'decode_utf8';     # so we do not need -CA flag in perl
 use utf8;                      # source code in utf8
 use strict 'subs';             # only allows declared functions
 use warnings;
@@ -30,9 +30,9 @@ my %cmds = (
 );
 
 sub help {
-  print(<<'EOF  ');
+  print(<<'  EOF');
 SYNOPSIS
-  $0
+  \$0
 
 DESCRIPTION
   Functions much like a Makefile
@@ -40,9 +40,9 @@ DESCRIPTION
 SUBCOMMANDS
   EOF
 
-  my $len = max(map { length $_ } keys %cmds);
-  for my $key (keys %cmds) {
-    printf "  %-${len}s    %s\n", $key, $cmds{$key}[0];
+  my \$len = max(map { length \$_ } keys %cmds);
+  for my \$key (keys %cmds) {
+    printf "  %-\${len}s    %s\n", \$key, \$cmds{\$key}[0];
   }
   exit 1;
 }

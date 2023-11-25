@@ -75,12 +75,12 @@ alias  gssh='git remote set-url origin "$( git remote get-url origin | sed "s|ht
 #" _'
 #alias    gu='git submodule update --remote --merge'
 alias    gw='git worktree'
-alias     l='exa --color=auto --group-directories-first  -h'
-alias    la='exa --color=auto --group-directories-first  --sort=modified -rha'
-alias   lal='exa --color=auto --group-directories-first  --sort=modified -rhal'
-alias    ll='exa --color=auto --group-directories-first  --sort=modified -rhl'
-alias   lla='exa --color=auto --group-directories-first  -ha'
-alias  llal='exa --color=auto --group-directories-first  -hal'
+alias     l='eza --color=auto --group-directories-first  -h'
+alias    la='eza --color=auto --group-directories-first  --sort=modified -rha'
+alias   lal='eza --color=auto --group-directories-first  --sort=modified -rhal'
+alias    ll='eza --color=auto --group-directories-first  --sort=modified -rhl'
+alias   lla='eza --color=auto --group-directories-first  -ha'
+alias  llal='eza --color=auto --group-directories-first  -hal'
 # With `sed` can use escapes like "\n" in filenames
 alias   mkf='sh -c '\''for x in "$@"; do
   [ "$1" != "${1%%*|*}" ] && { echo "Do not use \"|\" in file name"; exit 1; };

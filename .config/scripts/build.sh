@@ -20,13 +20,6 @@ show_help() {
   exit 1
 }
 
-tetra() {
-  #tetra-cli "$@"
-  p="$( command -v tetra-cli )" || exit "$?"
-  p="$( realpath "${p}"; printf a )" || exit "$?"; p="${p%?a}"
-  run_from_project_root "${p}" "Cargo.toml" cargo run "$@"
-}
-
 ENUM_DEFAULT=0
 ENUM_TEMP=1
 
@@ -89,10 +82,17 @@ main() {
     ;; py)    ruff check "${file}"
     ;; rs)    cargo clippy
     ;; zig)   zig fmt "${file}"; zig ast-check "${file}"
+
     ;; sh)    shellcheck "${file}"
+
+    ;; tf)    terraform validate
+    ;; cue)   cue eval "${file}"
+    ;; json)  jq '.' "${file}"
+    ;; ncl)   nickel typecheck "${file}"
+    ;; nix)   nix-instantiate --eval --strict
     ;; yml)   require "yq-go" && yq-go '.' "${file}"
               require "yq"    && yq    '.' "${file}"
-    ;; json)  jq '.' "${file}"
+    ;; libsonnet|jsonnet)  jsonnet "${file}"
     ;; *)  printf %s\\n "Unsupported filetype for linting file '${file}'" >&2
   esac
 
@@ -108,15 +108,19 @@ main() {
     # TODO: Make this use argv instead of dealing with string escaping
     ;; sass)    sassc "${file}" >"${target_dir}/${stem}.css"
     ;; sh)      sh "${file}"
+    ;; ps1)     pwsh "${file}"
     ;; ts)      bun build "${file}"
     ;; zig)     zig build
     #;; zig)     run_from_root "${file}" "penzai.nimble" nimble build
+
+    ;; nix)     nix-instantiate --eval --strict
+    ;; ncl)     nickel eval "${file}"
 
     ;; adoc|ad|asc)
       process_adoc "${file}" "${target_dir}/${stem}"
     ;; rmd)
       [ "${file}" != "/tmp/${stem}.rmd" ] || die FATAL 1 "Cannot build temp files"
-      tetra parse "${file}" >"/tmp/${stem}.rmd"
+      tetra file "${file}" >"/tmp/${stem}.rmd"
       Rscript -e "rmarkdown::render('/tmp/tetra.rmd', output_file='${target_dir}/${stem}')"
     ;; md)      rustdoc "${file}" --output "${target_dir}"
     ;; tex)     tectonic "${file}" --print --outdir "${target_dir}" "$@"
@@ -133,6 +137,7 @@ main() {
     ;; java)    run_from_root "${file}" "make.sh" "run" || exit "$?"
     ;; mjs|js)  npm run "${file}"
     ;; pl)      perl "${file}"
+    ;; ps1)     pwsh "${file}"
     ;; py)      run_from_root "${file}" "venv" process_python test.py
                 run_from_root "${file}" "venv" process_python "${fpr_target}"
     ;; rs)      print_do cargo run
@@ -141,7 +146,7 @@ main() {
     ;; zig)     zig build run
 
     ;; html)    setsid falkon --private-browsing --no-extensions --new-window "${file}"
-    ;; md|rmd|latex|tex)
+    ;; md|rmd|adoc|latex|tex)
       if [ -f "${new_target}.pdf" ]
         then handle.sh gui "${new_target}.pdf"
         else setsid falkon "${new_target}.html"
@@ -166,7 +171,12 @@ process_adoc() {
 
   # '-a webfonts!' disables <link> to fonts.googleapis.com
   #tetra "${1}" | asciidoctor - --backend html5 --destination-dir "${2%/*}" \
-  tetra "${1}" | asciidoctor - --backend html5 \
+  {
+    if require tetra
+      then tetra file "${file}"
+      else cat "${1}"
+    fi
+  } | asciidoctor - --backend html5 \
     ${bibtex} \
     --attribute source-highlighter='pygments' \
     --attribute 'webfonts!' \

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # This is mostly for use with ${fs} and ${fx} of `lf`
 # and for use by my own ./batch-rename.sh

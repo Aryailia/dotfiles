@@ -19,9 +19,8 @@ set previewer ~/.config/lf/preview.sh
 set filesep "\n/./"  # Make pathnames unique (www.etalabs.net/sh_tricks.html)
 set ifs "\n"        # Sets ${IFS} for shell commands
 set scrolloff 10    # Scroll offset, leave space at top/bottom of screen
-set hidden      off
-set hiddenfiles on
-set icons on
+set hidden      true
+set icons       true
 
 ################################################################################
 # Overwite default commands

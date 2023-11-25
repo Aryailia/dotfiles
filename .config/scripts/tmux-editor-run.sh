@@ -18,12 +18,11 @@ esac
 
 <<EOF IFS=, read -r _ regexp1 regexp2
 $( {
-  printf %s\\n 'sh,^ *#run:,'
   printf %s\\n 'awk,^ *#run:,'
-  printf %s\\n 'pl,^ *#run:,'
   printf %s\\n 'perl,^ *#run:,'
-
-  printf %s\\n 'dockerfile,^ *#run:,'
+  printf %s\\n 'pl,^ *#run:,'
+  printf %s\\n 'ps1,^ *#run:,'
+  printf %s\\n 'sh,^ *#run:,'
 
   printf %s\\n 'py,^ *#run:,'
   printf %s\\n 'python,^ *#run:,'
@@ -37,9 +36,13 @@ $( {
   printf %s\\n 'typescript,^ *\/\/run:,'
   printf %s\\n 'zig,^ *\/\/run:,'
 
+  printf %s\\n 'cue,^ *\/\/run:,'
+  printf %s\\n 'dockerfile,^ *#run:,'
+  printf %s\\n 'ncl,^ *#run:,'
+
+  printf %s\\n 'html,^ *<!--run:,-->.*$'
   printf %s\\n 'sass,^ *\/\/run:,'
   printf %s\\n 'scss,^ *\/\/run:,'
-  printf %s\\n 'html,^ *<!--run:,-->.*$'
   printf %s\\n 'rmd,^ *<!--run:,-->.*$'
   printf %s\\n 'md,^ *<!--run:,-->.*$'
   printf %s\\n 'tex,^ *%run:,'
