@@ -138,3 +138,5 @@ printf %s\\n "$0" | grep -q '^-bash$' \
 #  && which loadkeys >/dev/null \
 #  && sudo loadkeys "$XDG_CONFIG_HOME/rc/remap-caps-rctrl.map"
 
+
+test -e "$HOME/.nix-profile/etc/profile.d/nix.sh" && . "$HOME/.nix-profile/etc/profile.d/nix.sh"

@@ -1,6 +1,6 @@
 # Control which grammars are fetched and built
 use-grammars = { only = [
-  "awk", "bash", "bibtex", "c", "c-sharp", "css", "diff", "java", "javascript", 
+  "awk", "bash", "bibtex", "c", "c-sharp", "css", "diff", "java", "javascript",
   "jsdoc", "json", "jsonnet", "jsx", "julia", "git-rebase", "go", "gotmpl",
   "hcl", "html", "latex", "lua", "make", "markdown", "markdown.inline",
   "msbuild", "nickel", "nim", "nix", "org", "passwd", "perl", "php", "python",
@@ -8,83 +8,116 @@ use-grammars = { only = [
   "toml", "typescript", "tsx", "vim", "xml", "yaml", "zig"
 ] }
 
-[[language]]
-name            = "nix"
-scope           = "source.nix"
-language-server = { command = "rnix-lsp" }
+[language-server.rnix-lsp]
+command = "rnix-lsp"
+[language-server.rust-analyzer]
+command = "rustup"
+args    = ["run", "nightly", "rust-analyzer"]
+[language-server.terraform-lsp]
+command = "terraform-lsp"
+[language-server.marksman]
+command = "marksman"
+[language-server.texlab]
+command = "texlab"
+[language-server.deno]
+command = "deno"
+args    = ["lsp"]
 
+################################################################################
+# Programming languages
 [[language]]
-name            = "rust"
-scope           = "source.rs"
-language-server = { command = "rustup", args = ["run", "nightly", "rust-analyzer"] }
+name             = "rust"
+scope            = "source.rs"
+language-servers = [{ name = "rust-analyzer" }]
 #debugger        = { name = "probe", transport = "stdio", command = "lldb", args = [] }
 
 [[language]]
-name            = "hcl"
-scope           = "source.hcl"
-language-server = { command = "terraform-lsp" }
+name             = "vim"
+injection-regex  = "vim"
+scope            = "source.vim"
+file-types       = ["vim", "vimrc"]
+roots            = []
+comment-token    = "#"
+indent           = { tab-width = 2, unit = "  " }
+[[grammar]]
+name             = "vim"
+source           = { git = "https://github.com/vigoux/tree-sitter-viml", rev = "e39a7bbcfdcfc7900629962b785c7e14503ae590"}
+#source           = { git = "https://github.com/nvim-treesitter/nvim-treesitter", rev = "21f2fb188e4e5bb81fd0ff467c5e96dad858becb" }
 
 [[language]]
-name            = "tfvars"
-scope           = "source.tfvars"
-language-server = { command = "terraform-lsp" }
-
-[[language]]
-name            = "tfvars"
-scope           = "source.tfvars"
-
-[[language]]
-name            = "vim"
-injection-regex = "vim"
-scope           = "source.vim"
-file-types      = ["vim", "vimrc"]
+name            = "powershell"
+scope           = "source.ps1"
+file-types      = ["ps1"]
 roots           = []
 comment-token   = "#"
 indent          = { tab-width = 2, unit = "  " }
 [[grammar]]
-name            = "vim"
-source          = { git = "https://github.com/vigoux/tree-sitter-viml", rev = "e39a7bbcfdcfc7900629962b785c7e14503ae590"}
-#source          = { git = "https://github.com/nvim-treesitter/nvim-treesitter", rev = "21f2fb188e4e5bb81fd0ff467c5e96dad858becb" }
-
+name            = "powershell"
+source          = { git = "https://github.com/PowerShell/tree-sitter-PowerShell", rev = "1ac090522cb339a6fd9d3ac915da01cb263d69e1"}
 
 
 [[language]]
-name            = "markdown"
-scope           = "source.md"
-language-server = { command = "marksman" }
+name             = "javascript"
+shebangs         = ["deno", "node"]
+roots            = ["deno.json", "package.json", "tsconfig.json"]
+#config           = { enable = true, lint = true, unstable = true }
+language-servers = [{ name = "deno" }]
+language-id      = "javascript"
 
 [[language]]
-name            = "latex"
-scope           = "source.tex"
-language-server = { command = "texlab" }
-
-
-
-# See helix wiki for deno lsp
-[[language]]
-name            = "javascript"
-shebangs        = ["deno", "node"]
-roots           = ["deno.json", "package.json", "tsconfig.json"]
-config          = { enable = true, lint = true, unstable = true }
-language-server = { command = "deno", args = ["lsp"], language-id = "javascript" }
+name             = "jsx"
+shebangs         = ["deno", "node"]
+roots            = ["deno.json", "package.json", "tsconfig.json"]
+#config           = { enable = true, lint = true, unstable = true }
+language-servers = [{ name = "deno" }]
+language-id      = "javascriptreact"
 
 [[language]]
-name            = "jsx"
-shebangs        = ["deno", "node"]
-roots           = ["deno.json", "package.json", "tsconfig.json"]
-config          = { enable = true, lint = true, unstable = true }
-language-server = { command = "deno", args = ["lsp"], language-id = "javascriptreact" }
+name             = "typescript"
+shebangs         = ["deno", "node"]
+roots            = ["deno.json", "package.json", "tsconfig.json"]
+#config           = { enable = true, lint = true, unstable = true }
+language-servers = [{ name = "deno" }]
+language-id      = "typescript"
 
 [[language]]
-name            = "typescript"
-shebangs        = ["deno", "node"]
-roots           = ["deno.json", "package.json", "tsconfig.json"]
-config          = { enable = true, lint = true, unstable = true }
-language-server = { command = "deno", args = ["lsp"], language-id = "typescript" }
+name             = "tsx"
+shebangs         = ["deno", "node"]
+roots            = ["deno.json", "package.json", "tsconfig.json"]
+#config           = { enable = true, lint = true, unstable = true }
+language-servers = [{ name = "deno" }]
+language-id      = "typescriptreact"
+
+################################################################################
+# Config languages
+[[language]]
+name             = "nix"
+scope            = "source.nix"
+language-servers = [{ name = "rnix-lsp" }]
+indent           = { tab-width = 2, unit = "  " }
 
 [[language]]
-name            = "tsx"
-shebangs        = ["deno", "node"]
-roots           = ["deno.json", "package.json", "tsconfig.json"]
-config          = { enable = true, lint = true, unstable = true }
-language-server = { command = "deno", args = ["lsp"], language-id = "typescriptreact" }
+name             = "nickel"
+scope            = "source.ncl"
+
+[[language]]
+name             = "hcl"
+scope            = "source.hcl"
+language-servers = [{ name = "terraform-lsp" }]
+
+[[language]]
+name             = "tfvars"
+scope            = "source.tfvars"
+language-servers = [{ name = "terraform-lsp" }]
+
+################################################################################
+# Literate programming
+[[language]]
+name             = "markdown"
+scope            = "source.md"
+language-servers = [{ name = "marksman" }]
+
+[[language]]
+name             = "latex"
+scope            = "source.tex"
+language-servers = [{ name = "lexlab" }]

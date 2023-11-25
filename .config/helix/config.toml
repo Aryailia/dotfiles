@@ -27,7 +27,7 @@ nbsp  = "all"
 ################################################################################
 [keys.normal]
 esc   = ["collapse_selection", "keep_primary_selection"]
-space = { q = ":quit", w = ":write", c = ":config-reload", y = ":pipe-to clipboard.sh -w" }
+space = { q = ":quit", w = ":write", c = ":config-reload" }
 
 ### Multilingual support (Vim-barbaric): Swap to english for normal mode
 # Fctix's model is your IME has two modes: active and deactived
@@ -78,8 +78,6 @@ tab   = ":insert-output tmux-window-output-to-buffer.sh snippets.sh \"$HX_EXT\""
 #p     = ["find_prev_char", "<"]
 #n     = ["find_prev_char", "<"]
 
-# Clipboard and build integration
-v     = "paste_clipboard_before"
 [keys.normal."\\"]
 # We will have run \q twice for auto format, all commands are run async it seems
 q     = [":write", ":sh [ -n \"${TMUX}\" ] && tmux new-window -d build.sh background --temp \"$HX_PATH\""]
@@ -89,5 +87,3 @@ e     = [":write", ":sh tmux-alt-pane.sh send-keys -X cancel", ":sh tmux-editor-
 r     = ":sh tmux-alt-pane.sh send-keys -X cancel"
 t     = ":sh tmux-alt-pane.sh kill-pane"
 l     = [":write", ":sh tmux-alt-pane.sh send-keys \"build.sh lint \" \"$HX_PATH\" ENTER", ":reload"]
-c     = ":pipe-to clipboard.sh -w"
-v     = "paste_clipboard_before"
