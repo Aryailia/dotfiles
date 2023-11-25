@@ -68,6 +68,7 @@ esc   = ["collapse_selection", "keep_primary_selection", "normal_mode"]
 ### Multilingual support (Vim-barbaric): Swap to english for normal mode
 [keys.insert]
 esc   = [":sh fcitx-remote -c", ":sh fcitx5-remote -c", "normal_mode"]
+C-v   = { tab = [":insert-output printf \\\\t", "append_mode"] }
 
 # Snippets
 [keys.insert.tab.s]
@@ -82,7 +83,7 @@ tab   = ":insert-output tmux-window-output-to-buffer.sh snippets.sh \"$HX_EXT\""
 # We will have run \q twice for auto format, all commands are run async it seems
 q     = [":write", ":sh [ -n \"${TMUX}\" ] && tmux new-window -d build.sh background --temp \"$HX_PATH\""]
 # We sleep because helix seems to run these async, thus creating two tmux panes
-w     = [":write", ":sh tmux-alt-pane.sh send-keys -X cancel", ":sh sleep 0.03; tmux-alt-pane.sh send-keys \"build.sh build --temp \" \"$HX_PATH\" Enter"]
+w     = [":write", ":sh tmux-alt-pane.sh send-keys -X cancel", ":sh sleep 0.3; tmux-alt-pane.sh send-keys \"build.sh build --temp \" \"$HX_PATH\" Enter"]
 e     = [":write", ":sh tmux-alt-pane.sh send-keys -X cancel", ":sh tmux-editor-run.sh \"$HX_EXT\" \"$HX_PATH\""]
 r     = ":sh tmux-alt-pane.sh send-keys -X cancel"
 t     = ":sh tmux-alt-pane.sh kill-pane"

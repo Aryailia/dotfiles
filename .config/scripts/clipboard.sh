@@ -8,7 +8,7 @@ NAME="$( basename "$0"; printf a )"; NAME="${NAME%?a}"
 show_help() {
   <<EOF cat - >&2
 SYNOPSIS
-  [<STDIN] ${NAME} <option> [<input1> [<input2> [ ... ]]]
+  [<STDIN] ${NAME} <option>
 
 DESCRIPTION
   Wrapper for the clipboard across different environments
@@ -51,7 +51,7 @@ main() {
   # Flags
   CMD=""
   CLIPBOARD_CHOICE=''
-  VERBOSE='false'
+  DRY_RUN='false'
 
   # Options processing
   args=''; literal='false'
@@ -61,7 +61,7 @@ main() {
       ;; -h|--help)  show_help; exit 0
       ;; -r|--read)       CMD="read"
       ;; -w|--write)      CMD="writ"
-      ;; -v|--verbose)    VERBOSE="true"
+      ;; -d|--dry-run)    DRY_RUN="true"
       ;; -x|--clipboard)
         if [ "$#" -gt 1 ]; then
           CLIPBOARD_CHOICE="${2}"; shift 1
@@ -89,14 +89,20 @@ main() {
       choice="${CLIPBOARD_CHOICE}"
     fi
 
-    [ "${CLIPBOARDS#*"${NL}${choice}${NL}"}" != "${CLIPBOARDS}" ] \
-      || die FATAL 1 "'${choice}' is an unsupported clipboard."
-    case "${CMD}"
-      in "read")  "${choice}_read"
-      ;; "writ")  read_stdin_if_no_parameters "$@" | "${choice}_writ"
+    if "${DRY_RUN}"; then
+      printf %s\\n "${choice}"
+      exit 1
+    else
+      [ "${CLIPBOARDS#*"${NL}${choice}${NL}"}" != "${CLIPBOARDS}" ] \
+        || die FATAL 1 "'${choice}' is an unsupported clipboard."
+      case "${CMD}"
+        in read)  "${choice}_read"
+        ;; writ)  "${choice}_writ"
                   notify.sh "📋"
-      ;; *)       die DEV 1 "Should only be read or writ"
-    esac
+                  exit 0
+        ;; *)     die DEV 1 "Should only be read or writ"
+      esac
+    fi
   else
     die FATAL 1 "Specify either --write or --read"
   fi
@@ -129,28 +135,13 @@ xclip_writ() { <&0 xclip -in -selection clipboard; }
 
 CLIPBOARDS="${CLIPBOARDS}termux${NL}"
 termux_need() { require "termux-clipboard-get"; }
-termux_read() { <&0 termux-clipboard-get; }
+termux_read() { termux-clipboard-get; }
 termux_writ() { <&0 termux-clipboard-set; }
 
-CLIPBOARDS="${CLIPBOARDS}tmux${NL}"
-tmux_need() { [ -n "${TMUX}" ]; }
-tmux_read() { tmux show-buffer -b clipboard; }
-tmux_writ() { <&0 tmux load-buffer -b clipboard -; }
-
-
-
-# Like GNU utils, ignore STDIN if parameter-specified input given
-read_stdin_if_no_parameters() {
-  if [ "$#" = 0 ]; then
-    <&0 cat -
-  elif [ "$#" = 1 ]; then
-    printf %s "${1}"
-  else
-    printf %s "${1}"
-    shift 1
-    printf \\n%s "$@"
-  fi
-}
+#CLIPBOARDS="${CLIPBOARDS}tmux${NL}"
+#tmux_need() { [ -n "${TMUX}" ]; }
+#tmux_read() { ! "${DRY_RUN}" && tmux show-buffer -b clipboard; }
+#tmux_writ() { ! "${DRY_RUN}" && <&0 tmux load-buffer -b clipboard -; }
 
 # Helpers
 outln() { printf %s\\n "$@"; }
