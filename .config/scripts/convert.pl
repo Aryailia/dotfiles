@@ -38,7 +38,7 @@ sub help {
 my ($local_rates, %abrv);
 
 # run: perl % local 250 jp to us
-# run: perl % tz
+# run: perl % tz us
 sub main {
   my $arg = join(" ", @ARGV);
   # help: Celsius (C), Fahrenheit (F), Kelvin (K)
@@ -67,11 +67,18 @@ sub main {
   # help: timezone (e.g. `$0 tz Malaysia`)
   } elsif ($arg =~ /^tz|timezone/i) {
     $ENV{'DOTENVIRONMENT'} =~ /(\/.+)/ or die '$DOTENVIRONMENT undefined';
-    #my $file = "$1/countries+cities.json";
-    my $file = "$1/countries+states.json";
-    my $choice = qx(jq -r 'map(.name) | join("\n")' $file | fzf) or exit $?;
+    #my $file = "$1/data/countries+cities.json";
+    my $file = "$1/data/countries+states.json";
+    my $choice = $ARGV[1] ne ""
+      ? $ARGV[1]
+      : qx(jq -r 'map(.name) | join("\n")' \Q$file\E | fzf) or exit $?;
     chomp $choice;
-    say qx(jq 'map(select(.name == "$choice"))[0].timezones' $file);
+    my $value =  qx(jq 'map(select(.name == "\Q$choice\E"))[0].timezones' $file);
+    chomp $value;
+    $value eq "null"
+      ? die "No entry named '$choice' found"
+      : say $value;
+
     #open(FILE, "<$file") or die "Could not find '$file'";
     #my $database = JSON->new->utf8->decode(join '', <FILE>);
     #close FILE;

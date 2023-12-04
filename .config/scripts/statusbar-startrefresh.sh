@@ -95,8 +95,9 @@ status() {
     } | awk -v FS=':' '
       /^yes/ {
         if ($3) { printf "%s", $2 "" $3 "%"; }
-        else    { printf "%s", $2; }
+        else    { printf "%s", $2 "🔌"; }
         pot = 1;
+        exit 1;
       }
       END{ if (!pot) printf("%s", "Disconnected"); }
     '

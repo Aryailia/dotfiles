@@ -10,7 +10,7 @@ set date_format="%y-%b-%d %k:%M"  # abbreviated month, 24-hour:minute
 set index_format="%2C %Z %D %-25.25A %-15.15F %s (%-4.4c)"  # %X will lag imap servers
                                                             # %-25 pads, .25 truncates
 set sort = 'reverse-date'
-#set smtp_authenticators = 'gssapi:login'
+set smtp_authenticators = 'gssapi:login'
 #set query_command = "abook --mutt-query '%s'"
 set rfc2047_parameters = yes
 set sleep_time = 0             # Pause 0 seconds for informational messages

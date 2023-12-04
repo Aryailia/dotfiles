@@ -56,13 +56,25 @@ main() {
 
 connect_to_addr_host() {
   nick="${1}"; shift 1
-  line="$( <"${ADDR}" grep -F "${nick}," )"
+  line="$( <"${ADDR}" grep "^${nick}," )"
   <<EOF IFS=, read -r _nick host port user private_key
 ${line}
 EOF
-  [ -f "${SSH_DIR}/${private_key}" ] \
-    || die FATAL 1 "Private key '${private_key}' for '${nick}' does not exist"
-  ssh -i "${SSH_DIR}/${private_key}" "${user}@${host}" "$@"
+  if [ "${private_key}" = "pass" ]; then
+    ssh -o "ServerAliveInterval 30" "${user}@${host}"
+#    password="$( pass show "ssh/${_nick}" )"
+#    <<EOF exec expect -
+#spawn ssh ${user}@${host}
+#expect "Password"
+#send "${password}\\r"
+#interact
+#
+#EOF
+  else
+    [ -f "${SSH_DIR}/${private_key}" ] \
+      || die FATAL 1 "Private key '${private_key}' for '${nick}' does not exist"
+    ssh -i "${SSH_DIR}/${private_key}" "${user}@${host}" "$@"
+  fi
 }
 
 list_private_keys() {
