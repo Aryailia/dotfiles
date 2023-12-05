@@ -19,6 +19,7 @@ export XDG_STATE_HOME="$HOME/.local/state"  # analogous to /var/lib
 export XDG_DOWNLOAD_DIR="$HOME/Downloads/queue"
 
 export SVDIR="$XDG_CONFIG_HOME/autostart/sv-user"
+export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
 
 command -v 'lynx'            >/dev/null 2>&1 && export  BROWSER_CLI='lynx'
 command -v 'st'              >/dev/null 2>&1 && export     TERMINAL='st'

@@ -39,6 +39,7 @@ $( {
   printf %s\\n 'cue,^ *\/\/run:,'
   printf %s\\n 'dockerfile,^ *#run:,'
   printf %s\\n 'ncl,^ *#run:,'
+  printf %s\\n 'nix,^ *#run:,'
 
   printf %s\\n 'html,^ *<!--run:,-->.*$'
   printf %s\\n 'sass,^ *\/\/run:,'

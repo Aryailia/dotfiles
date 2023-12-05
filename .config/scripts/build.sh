@@ -89,7 +89,7 @@ main() {
     ;; cue)   cue eval "${file}"
     ;; json)  jq '.' "${file}"
     ;; ncl)   nickel typecheck "${file}"
-    ;; nix)   nix-instantiate --eval --strict
+    ;; nix)   nix-instantiate --eval --strict "${file}"
     ;; yml)   require "yq-go" && yq-go '.' "${file}"
               require "yq"    && yq    '.' "${file}"
     ;; libsonnet|jsonnet)  jsonnet "${file}"
@@ -144,6 +144,8 @@ main() {
     ;; ts)      bun run "${file}"
     ;; sh)      print_do sh "${file}"
     ;; zig)     zig build run
+
+    ;; ncl)     nickel export "${file}"
 
     ;; html)    setsid falkon --private-browsing --no-extensions --new-window "${file}"
     ;; md|rmd|adoc|latex|tex)

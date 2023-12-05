@@ -73,12 +73,12 @@ cd_of() {
 }
 
 dir="${SCRIPTS}"
-for f in "${dir}"/* "${dir}"/.[!.]* "${dir}"/..?*; do
-  if [ -f "${f}" ] && grep -qF 'COMP_LINE' "${f}"; then
-    complete -C "${f}" "${f##*/}"
-    notify.sh "${f}"
-  fi
-done
+#for f in "${dir}"/* "${dir}"/.[!.]* "${dir}"/..?*; do
+#  if [ -f "${f}" ] && grep -qF 'COMP_LINE' "${f}"; then
+#    complete -C "${f}" "${f##*/}"
+#    notify.sh "${f}"
+#  fi
+#done
 
 
 if [ -z "${XDG_RUNTIME_DIR}" ]; then
